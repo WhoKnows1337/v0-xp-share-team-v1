@@ -13,6 +13,7 @@ import { ProfileProvider } from "@/contexts/profile-context"
 import { BenutzerProfil } from "@/components/profil/benutzer-profil"
 import { findUserByUsername } from "@/lib/user-utils"
 import { toast } from "@/components/ui/use-toast"
+import { EinblickeTrends } from "./einblicke-trends"
 
 type DashboardTab =
   | "home"
@@ -22,6 +23,7 @@ type DashboardTab =
   | "aktivitäten"
   | "entdecken"
   | "profil"
+  | "insights-trends"
 
 interface DashboardProps {
   initialTab?: DashboardTab
@@ -101,6 +103,7 @@ function DashboardContent({ initialTab = "home", username }: DashboardProps) {
             ) : (
               <>
                 {activeTab === "home" && <DashboardHome />}
+                {activeTab === "insights-trends" && <EinblickeTrends />}
                 {activeTab === "übersicht" && <DashboardOverview />}
                 {activeTab === "meine-erlebnisse" && <MeineErlebnisse />}
                 {activeTab === "geteilte-erlebnisse" && <GeteilteErlebnisse />}

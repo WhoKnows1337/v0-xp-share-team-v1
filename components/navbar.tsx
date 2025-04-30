@@ -18,11 +18,11 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Benachrichtigungen } from "@/components/nachrichten/benachrichtigungen"
 import { NachrichtenButton } from "@/components/nachrichten/nachrichten-button"
 import { openErlebnisWizard } from "@/components/erlebnis-wizard-modal"
-import { Search, Menu, Plus, Compass } from "lucide-react"
+import { Search, Menu, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getCurrentUser } from "@/lib/mock-users"
 import { getTotalUnreadMessages } from "@/lib/mock-messages"
-import { mockUsers } from "@/lib/mock-users" // Import mockUsers
+import { mockUsers } from "@/lib/mock-users"
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -60,8 +60,6 @@ export function Navbar() {
     openErlebnisWizard()
   }
 
-  const navItems = [{ name: "Entdecken", href: "/entdecken", icon: Compass }]
-
   // Auf der Startseite nicht anzeigen
   if (pathname === "/") {
     return null
@@ -74,10 +72,11 @@ export function Navbar() {
         isScrolled ? "bg-background/80 backdrop-blur-md shadow-sm" : "bg-background",
       )}
     >
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <div className="flex items-center">
+      <div className="container mx-auto flex h-16 items-center px-4">
+        {/* Linke Seite - Logo und Mobile Menu */}
+        <div className="flex items-center mr-4">
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-            <SheetTrigger asChild className="md:hidden">
+            <SheetTrigger asChild className="md:hidden mr-2">
               <Button variant="ghost" size="icon">
                 <Menu className="h-6 w-6" />
                 <span className="sr-only">Menü öffnen</span>
@@ -85,61 +84,46 @@ export function Navbar() {
             </SheetTrigger>
             <SheetContent side="left" className="w-[300px] sm:w-[400px]">
               <nav className="flex flex-col gap-4 mt-8">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={cn(
-                      "flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent",
-                      pathname === item.href && "bg-accent",
-                    )}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <item.icon className="h-5 w-5" />
-                    <span>{item.name}</span>
-                    {item.badge && item.badge > 0 && (
-                      <span className="ml-auto bg-primary text-primary-foreground text-xs rounded-full px-2 py-0.5">
-                        {item.badge > 9 ? "9+" : item.badge}
-                      </span>
-                    )}
-                  </Link>
-                ))}
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <span>Dashboard</span>
+                </Link>
+                <Link
+                  href="/insights"
+                  className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <span>Insights & Trends</span>
+                </Link>
+                <Link
+                  href="/entdecken"
+                  className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <span>Entdecken</span>
+                </Link>
               </nav>
             </SheetContent>
           </Sheet>
 
-          <Link href="/dashboard" className="flex items-center gap-2 mr-8">
+          <Link href="/dashboard" className="flex items-center gap-2">
             <span className="font-bold text-xl">XP-Share</span>
           </Link>
-
-          <nav className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-sm font-medium",
-                  pathname === item.href && "bg-accent",
-                )}
-              >
-                <item.icon className="h-4 w-4" />
-                <span>{item.name}</span>
-                {item.badge && item.badge > 0 && (
-                  <span className="bg-primary text-primary-foreground text-xs rounded-full px-2 py-0.5">
-                    {item.badge > 9 ? "9+" : item.badge}
-                  </span>
-                )}
-              </Link>
-            ))}
-          </nav>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="hidden md:block relative w-64">
-            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input placeholder="Suchen..." className="pl-8" />
+        {/* Mitte - Suchleiste */}
+        <div className="flex-1 flex justify-center px-4">
+          <div className="relative w-full max-w-2xl">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input placeholder="Suchen..." className="pl-10 w-full" aria-label="Suche in XP-Share" />
           </div>
+        </div>
 
+        {/* Rechte Seite - Aktionsbuttons */}
+        <div className="flex items-center gap-2 ml-4">
           <Button
             variant="outline"
             size="sm"
@@ -150,9 +134,14 @@ export function Navbar() {
             <span>Erlebnis teilen</span>
           </Button>
 
-          <Button variant="outline" size="icon" className="md:hidden" onClick={handleNewExperience}>
+          <Button
+            variant="outline"
+            size="icon"
+            className="md:hidden"
+            onClick={handleNewExperience}
+            aria-label="Erlebnis teilen"
+          >
             <Plus className="h-5 w-5" />
-            <span className="sr-only">Erlebnis teilen</span>
           </Button>
 
           <Benachrichtigungen />
@@ -161,7 +150,12 @@ export function Navbar() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full"
+                aria-label="Benutzerprofil und Einstellungen"
+              >
                 <Avatar className="h-8 w-8">
                   <AvatarImage
                     src={mockUsers.find((u) => u.username === currentUsername)?.avatar || "/placeholder.svg"}

@@ -2,30 +2,33 @@
 import { cn } from "@/lib/utils"
 import {
   Home,
-  BarChart2,
-  FileText,
   Share2,
   Activity,
   Compass,
   User,
+  TrendingUp,
+  LogOut,
+  BarChart2,
+  FileText,
   MessageSquare,
   Hash,
   Settings,
-  LogOut,
 } from "lucide-react"
 import { getCurrentUser } from "@/lib/mock-users"
 import { getTotalUnreadMessages } from "@/lib/mock-messages"
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 
 interface DashboardSidebarProps {
   activeTab: string
-  onTabChange: (tab: any) => void
+  onTabChange: (tab: string) => void
   className?: string
 }
 
 export function DashboardSidebar({ activeTab, onTabChange, className }: DashboardSidebarProps) {
   const [unreadMessages, setUnreadMessages] = useState(0)
   const currentUser = getCurrentUser()
+  const router = useRouter()
 
   useEffect(() => {
     // Aktualisiere den Zähler für ungelesene Nachrichten
@@ -43,50 +46,75 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
 
   const navItems = [
     {
+      id: "home",
       name: "Dashboard",
       icon: Home,
       tab: "home",
+      action: () => onTabChange("home"),
     },
     {
+      id: "insights-trends",
+      name: "Insights & Trends",
+      icon: TrendingUp,
+      tab: "insights-trends",
+      action: () => router.push("/insights"),
+    },
+    {
+      id: "overview",
       name: "Übersicht",
       icon: BarChart2,
       tab: "übersicht",
+      action: () => onTabChange("übersicht"),
     },
     {
+      id: "my-experiences",
       name: "Meine Erlebnisse",
       icon: FileText,
       tab: "meine-erlebnisse",
+      action: () => onTabChange("meine-erlebnisse"),
     },
     {
+      id: "shared-experiences",
       name: "Geteilte Erlebnisse",
       icon: Share2,
       tab: "geteilte-erlebnisse",
+      action: () => onTabChange("geteilte-erlebnisse"),
     },
     {
+      id: "activities",
       name: "Aktivitäten",
       icon: Activity,
       tab: "aktivitäten",
+      action: () => onTabChange("aktivitäten"),
     },
     {
+      id: "discover",
       name: "Entdecken",
       icon: Compass,
       tab: "entdecken",
+      action: () => onTabChange("entdecken"),
     },
     {
+      id: "messages",
       name: "Nachrichten",
       icon: MessageSquare,
       tab: "nachrichten",
       badge: unreadMessages,
+      action: () => onTabChange("nachrichten"),
     },
     {
+      id: "channels",
       name: "Channels",
       icon: Hash,
       tab: "channels",
+      action: () => onTabChange("channels"),
     },
     {
+      id: "profile",
       name: "Profil",
       icon: User,
       tab: "profil",
+      action: () => onTabChange("profil"),
     },
   ]
 
@@ -98,15 +126,16 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
           <div className="space-y-1">
             {navItems.map((item) => (
               <button
-                key={item.tab}
-                onClick={() => onTabChange(item.tab)}
+                key={item.id}
+                onClick={item.action}
                 className={cn(
                   "w-full flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
                   activeTab === item.tab ? "bg-accent" : "transparent",
                 )}
+                aria-current={activeTab === item.tab ? "page" : undefined}
               >
                 <span className="flex items-center">
-                  <item.icon className="mr-2 h-4 w-4" />
+                  <item.icon className="mr-2 h-4 w-4" aria-hidden="true" />
                   {item.name}
                 </span>
                 {item.badge && item.badge > 0 && (
@@ -122,12 +151,18 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
 
       <div className="mt-auto p-4">
         <div className="space-y-1">
-          <button className="w-full flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground">
-            <Settings className="mr-2 h-4 w-4" />
+          <button
+            className="w-full flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+            aria-label="Einstellungen öffnen"
+          >
+            <Settings className="mr-2 h-4 w-4" aria-hidden="true" />
             Einstellungen
           </button>
-          <button className="w-full flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground">
-            <LogOut className="mr-2 h-4 w-4" />
+          <button
+            className="w-full flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+            aria-label="Abmelden"
+          >
+            <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
             Abmelden
           </button>
         </div>
