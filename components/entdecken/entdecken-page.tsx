@@ -1,7 +1,7 @@
 "use client"
 
-import { EntdeckenPageUpdated } from "./entdecken-page-updated"
+import { EntdeckenPageRedesigned } from "./entdecken-page-redesigned"
 
 export function EntdeckenPage() {
-  return <EntdeckenPageUpdated />
+  return <EntdeckenPageRedesigned />
 }
