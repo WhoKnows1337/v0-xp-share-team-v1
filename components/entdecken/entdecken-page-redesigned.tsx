@@ -186,7 +186,11 @@ export function EntdeckenPageRedesigned() {
   }
 
   const handleNewExperience = () => {
-    openErlebnisWizard()
+    console.log("Entdecken-Seite: Öffne ErlebnisWizard")
+    // Füge einen kleinen Timeout hinzu, um sicherzustellen, dass der Event-Handler registriert wurde
+    setTimeout(() => {
+      openErlebnisWizard()
+    }, 0)
   }
 
   const handleLoadMore = () => {
@@ -266,7 +270,7 @@ export function EntdeckenPageRedesigned() {
             onClick={handleNewExperience}
           >
             <Plus className="mr-2 h-4 w-4" />
-            Neues Erlebnis
+            Erlebnis teilen
           </Button>
         </div>
 

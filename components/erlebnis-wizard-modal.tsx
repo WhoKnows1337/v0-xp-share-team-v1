@@ -14,8 +14,12 @@ export function addWizardOpenListener(listener: () => void) {
   }
 }
 
+// Verbessere die Logging-Ausgaben für bessere Fehlerdiagnose
 export function openErlebnisWizard() {
-  console.log("openErlebnisWizard wurde aufgerufen, Listener:", wizardEventListeners.length)
+  console.log("openErlebnisWizard wurde aufgerufen, aktive Listener:", wizardEventListeners.length)
+  if (wizardEventListeners.length === 0) {
+    console.warn("Keine aktiven Listener für den ErlebnisWizard gefunden!")
+  }
   wizardEventListeners.forEach((listener) => listener())
 }
 
@@ -24,16 +28,21 @@ export function ErlebnisWizardModal() {
 
   useEffect(() => {
     // Registriere einen Listener für das Öffnen des Wizards
+    console.log("ErlebnisWizardModal: Registriere Listener")
     const removeListener = addWizardOpenListener(() => {
-      console.log("Wizard wird geöffnet")
+      console.log("ErlebnisWizard wird geöffnet")
       setIsOpen(true)
     })
 
     // Cleanup beim Unmount
-    return removeListener
+    return () => {
+      console.log("ErlebnisWizardModal: Entferne Listener")
+      removeListener()
+    }
   }, [])
 
   const handleComplete = () => {
+    console.log("ErlebnisWizard: Abgeschlossen")
     setIsOpen(false)
   }
 

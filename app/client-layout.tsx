@@ -8,6 +8,7 @@ import { XPAssistantProvider } from "@/components/xp-assistant-provider"
 import { ThemeProvider } from "@/components/theme-provider"
 import { useEffect } from "react"
 import { initMockData } from "@/lib/mock-init"
+import { ErlebnisWizardModal } from "@/components/erlebnis-wizard-modal"
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   // Initialisiere Mock-Daten beim ersten Laden
@@ -23,6 +24,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             <Navbar />
             <div className="flex-1">{children}</div>
           </div>
+          <ErlebnisWizardModal />
         </XPAssistantProvider>
       </SidebarProvider>
     </ThemeProvider>

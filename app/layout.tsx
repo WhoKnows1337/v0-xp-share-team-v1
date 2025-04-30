@@ -1,33 +1,33 @@
 import type React from "react"
+import "./globals.css"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
-import "./globals.css"
-import "@/lib/mock-init" // Initialize mocks
+import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/toaster"
+import { XPAssistantProvider } from "@/components/xp-assistant-provider"
+import { SidebarProvider } from "@/contexts/sidebar-context"
 import ClientLayout from "./client-layout"
 
-// Optimiere die Schriftart-Einbindung
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap", // Verwende 'swap' für bessere Benutzererfahrung während des Ladens
-  preload: true, // Explizit preload aktivieren
-  fallback: ["system-ui", "sans-serif"], // Fallback-Schriftarten
-})
+const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "XP Share - Teile deine außergewöhnlichen Erlebnisse",
-  description: "Eine Plattform zum Teilen und Entdecken von außergewöhnlichen Erlebnissen und Erfahrungen.",
+  title: "XP-Share",
+  description: "Teile und entdecke außergewöhnliche Erfahrungen",
     generator: 'v0.dev'
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="de" suppressHydrationWarning>
       <body className={inter.className}>
-        <ClientLayout>{children}</ClientLayout>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+          <SidebarProvider>
+            <XPAssistantProvider>
+              <ClientLayout>{children}</ClientLayout>
+              <Toaster />
+            </XPAssistantProvider>
+          </SidebarProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

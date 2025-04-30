@@ -5,7 +5,7 @@ import { openErlebnisWizard } from "../erlebnis-wizard-modal"
 
 export function CallToAction() {
   const handleNewExperience = () => {
-    console.log("CTA: Öffne ErlebnisWizard")
+    console.log("Startseite CTA: Öffne ErlebnisWizard")
     openErlebnisWizard()
   }
 

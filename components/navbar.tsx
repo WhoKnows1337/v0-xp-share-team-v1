@@ -59,7 +59,10 @@ export function Navbar() {
 
   const handleNewExperience = () => {
     console.log("Navbar: Öffne ErlebnisWizard")
-    openErlebnisWizard()
+    // Füge einen kleinen Timeout hinzu, um sicherzustellen, dass der Event-Handler registriert wurde
+    setTimeout(() => {
+      openErlebnisWizard()
+    }, 0)
   }
 
   const handleToggleSidebar = () => {

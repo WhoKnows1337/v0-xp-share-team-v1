@@ -64,10 +64,10 @@ const initialData: ErlebnisData = {
 }
 
 interface ErlebnisWizardProps {
-  onClose?: () => void
+  onComplete?: () => void
 }
 
-export function ErlebnisWizard({ onClose }: ErlebnisWizardProps) {
+export function ErlebnisWizard({ onComplete }: ErlebnisWizardProps) {
   // Verwende normalen useState für bessere Kontrolle
   const [data, setData] = useState<ErlebnisData>(initialData)
   const [schritt, setSchritt] = useState<number>(0)
@@ -254,9 +254,10 @@ export function ErlebnisWizard({ onClose }: ErlebnisWizardProps) {
     setData(initialData)
     setSchritt(0)
 
-    // Schließe das Modal, wenn ein onClose-Handler übergeben wurde
-    if (onClose) {
-      onClose()
+    // Schließe das Modal, wenn ein onComplete-Handler übergeben wurde
+    if (onComplete) {
+      console.log("ErlebnisWizard: Rufe onComplete-Handler auf")
+      onComplete()
     }
   }
 
