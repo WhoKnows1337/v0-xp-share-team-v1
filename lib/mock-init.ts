@@ -1,7 +1,7 @@
 import { initializeMockData } from "./mock-data-utils"
 
 // Initialize all mock data
-export function initializeMocks() {
+export function initMockData() {
   // Initialize and validate mock data
   initializeMockData()
 
@@ -12,6 +12,4 @@ export function initializeMocks() {
   return true
 }
 
-// Auto-initialize when imported
-const initialized = initializeMocks()
-export default initialized
+export default initMockData

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { Calendar, MapPin, Eye, Heart, MessageSquare, MoreHorizontal } from "lucide-react"
@@ -10,12 +10,87 @@ import { Button } from "@/components/ui/button"
 import { UserLink } from "@/components/user-link"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
+// Mock-Daten für geteilte Erlebnisse
+const mockGeteilteErlebnisse = [
+  {
+    id: "ge1",
+    titel: "Meditation am Bergsee",
+    kurzfassung: "Eine tiefgreifende Meditationserfahrung mit Blick auf einen kristallklaren Bergsee.",
+    kategorie: { name: "Meditation", farbe: "#4f46e5" },
+    tags: ["Natur", "Stille", "Bewusstsein", "Frieden"],
+    datum: "15.04.2023",
+    ort: { name: "Königssee, Bayern" },
+    medien: [{ url: "/serene-meditation-garden.png" }],
+    autor: {
+      name: "Meditationsmeister",
+      username: "meditationsmeister",
+      avatar: "/serene-spirit.png",
+      verifiziert: true,
+    },
+    statistik: {
+      ansichten: 245,
+      likes: 78,
+      kommentare: 12,
+    },
+    liked: false,
+  },
+  {
+    id: "ge2",
+    titel: "Unerwartete Begegnung im Wald",
+    kurzfassung: "Während einer Wanderung hatte ich eine seltsame Begegnung, die mich zum Nachdenken brachte.",
+    kategorie: { name: "Synchronizität", farbe: "#0ea5e9" },
+    tags: ["Wald", "Begegnung", "Zufall", "Bedeutung"],
+    datum: "03.05.2023",
+    ort: { name: "Schwarzwald" },
+    medien: [{ url: "/ethereal-forest-glow.png" }],
+    autor: {
+      name: "Waldläufer",
+      username: "waldlaeufer",
+      avatar: "/forest-explorer.png",
+      verifiziert: false,
+    },
+    statistik: {
+      ansichten: 189,
+      likes: 42,
+      kommentare: 8,
+    },
+    liked: true,
+  },
+  {
+    id: "ge3",
+    titel: "Luzider Traum: Flug über die Stadt",
+    kurzfassung: "In diesem luziden Traum konnte ich fliegen und die Stadt aus der Vogelperspektive betrachten.",
+    kategorie: { name: "Träume", farbe: "#8b5cf6" },
+    tags: ["Luzider Traum", "Fliegen", "Stadt", "Kontrolle"],
+    datum: "22.05.2023",
+    ort: null,
+    medien: [{ url: "/celestial-contemplation.png" }],
+    autor: {
+      name: "Traumreisende",
+      username: "traumreisende",
+      avatar: "/dream-traveler.png",
+      verifiziert: true,
+    },
+    statistik: {
+      ansichten: 312,
+      likes: 95,
+      kommentare: 21,
+    },
+    liked: false,
+  },
+]
+
 interface GeteilteErlebnisseProps {
-  erlebnisse: any[]
+  erlebnisse?: any[]
 }
 
-export function GeteilteErlebnisse({ erlebnisse }: GeteilteErlebnisseProps) {
-  const [items, setItems] = useState(erlebnisse)
+export function GeteilteErlebnisse({ erlebnisse = mockGeteilteErlebnisse }: GeteilteErlebnisseProps) {
+  const [items, setItems] = useState<any[]>([])
+
+  // Initialisiere items mit den übergebenen erlebnissen oder den Mock-Daten
+  useEffect(() => {
+    setItems(erlebnisse)
+  }, [erlebnisse])
 
   const handleLike = (id: string) => {
     setItems(
@@ -32,6 +107,15 @@ export function GeteilteErlebnisse({ erlebnisse }: GeteilteErlebnisseProps) {
         }
         return item
       }),
+    )
+  }
+
+  // Zeige eine Ladeanzeige, wenn keine Items vorhanden sind
+  if (items.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <p className="text-muted-foreground">Lade geteilte Erlebnisse...</p>
+      </div>
     )
   }
 

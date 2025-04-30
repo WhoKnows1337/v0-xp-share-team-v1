@@ -1,19 +1,6 @@
 "use client"
 import { cn } from "@/lib/utils"
-import {
-  Home,
-  Share2,
-  Activity,
-  Compass,
-  User,
-  TrendingUp,
-  LogOut,
-  BarChart2,
-  FileText,
-  MessageSquare,
-  Hash,
-  Settings,
-} from "lucide-react"
+import { Home, Activity, Compass, User, TrendingUp, LogOut, FileText, Hash, Settings } from "lucide-react"
 import { getCurrentUser } from "@/lib/mock-users"
 import { getTotalUnreadMessages } from "@/lib/mock-messages"
 import { useEffect, useState } from "react"
@@ -50,79 +37,79 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
       name: "Dashboard",
       icon: Home,
       tab: "home",
-      action: () => onTabChange("home"),
+      action: () => {
+        router.push("/dashboard")
+        onTabChange("home")
+      },
     },
     {
       id: "insights-trends",
       name: "Insights & Trends",
       icon: TrendingUp,
       tab: "insights-trends",
-      action: () => router.push("/insights"),
-    },
-    {
-      id: "overview",
-      name: "Übersicht",
-      icon: BarChart2,
-      tab: "übersicht",
-      action: () => onTabChange("übersicht"),
+      action: () => {
+        router.push("/insights")
+        onTabChange("insights-trends")
+      },
     },
     {
       id: "my-experiences",
       name: "Meine Erlebnisse",
       icon: FileText,
       tab: "meine-erlebnisse",
-      action: () => onTabChange("meine-erlebnisse"),
-    },
-    {
-      id: "shared-experiences",
-      name: "Geteilte Erlebnisse",
-      icon: Share2,
-      tab: "geteilte-erlebnisse",
-      action: () => onTabChange("geteilte-erlebnisse"),
+      action: () => {
+        router.push("/dashboard?tab=meine-erlebnisse")
+        onTabChange("meine-erlebnisse")
+      },
     },
     {
       id: "activities",
       name: "Aktivitäten",
       icon: Activity,
       tab: "aktivitäten",
-      action: () => onTabChange("aktivitäten"),
+      action: () => {
+        router.push("/dashboard?tab=aktivitäten")
+        onTabChange("aktivitäten")
+      },
     },
     {
       id: "discover",
       name: "Entdecken",
       icon: Compass,
       tab: "entdecken",
-      action: () => onTabChange("entdecken"),
-    },
-    {
-      id: "messages",
-      name: "Nachrichten",
-      icon: MessageSquare,
-      tab: "nachrichten",
-      badge: unreadMessages,
-      action: () => onTabChange("nachrichten"),
+      action: () => {
+        router.push("/entdecken")
+        onTabChange("entdecken")
+      },
     },
     {
       id: "channels",
       name: "Channels",
       icon: Hash,
       tab: "channels",
-      action: () => onTabChange("channels"),
+      action: () => {
+        router.push("/channels")
+        onTabChange("channels")
+      },
     },
     {
       id: "profile",
       name: "Profil",
       icon: User,
       tab: "profil",
-      action: () => onTabChange("profil"),
+      action: () => {
+        // Verwende den aktuellen Benutzernamen für die Profil-URL
+        const username = currentUser?.username || "mein-profil"
+        router.push(`/profil/${username}`)
+        onTabChange("profil")
+      },
     },
   ]
 
   return (
-    <div className={cn("h-full flex flex-col justify-between", className)}>
-      <div className="space-y-4 py-4">
-        <div className="px-3 py-2">
-          <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">Dashboard</h2>
+    <div className={cn("h-full flex flex-col justify-between overflow-hidden", className)}>
+      <div className="space-y-2 pt-2">
+        <div className="px-3 pt-1">
           <div className="space-y-1">
             {navItems.map((item) => (
               <button
@@ -154,6 +141,10 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
           <button
             className="w-full flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
             aria-label="Einstellungen öffnen"
+            onClick={() => {
+              // Öffne die Einstellungen als Dialog oder navigiere zur Einstellungsseite
+              console.log("Einstellungen öffnen")
+            }}
           >
             <Settings className="mr-2 h-4 w-4" aria-hidden="true" />
             Einstellungen
@@ -161,6 +152,11 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
           <button
             className="w-full flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
             aria-label="Abmelden"
+            onClick={() => {
+              // Abmelden-Logik hier
+              router.push("/")
+              console.log("Abmelden")
+            }}
           >
             <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
             Abmelden

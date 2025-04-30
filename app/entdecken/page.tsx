@@ -1,6 +1,10 @@
-import { Dashboard } from "@/components/dashboard/dashboard"
+import { EntdeckenPage } from "@/components/entdecken/entdecken-page"
+import { DashboardLayout } from "@/components/layouts/dashboard-layout"
 
-export default function EntdeckenPage() {
-  // Wir leiten zur Dashboard-Seite mit dem "entdecken"-Tab weiter
-  return <Dashboard initialTab="entdecken" />
+export default function EntdeckenRoute() {
+  return (
+    <DashboardLayout activeTab="entdecken">
+      <EntdeckenPage />
+    </DashboardLayout>
+  )
 }
