@@ -1,10 +1,5 @@
 "use client"
-
-import { Badge } from "@/components/ui/badge"
-import { Calendar, Clock, MapPin, Tag, User, Eye } from "lucide-react"
 import { format, isValid } from "date-fns"
-import { de } from "date-fns/locale"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface ErlebnisMetadatenProps {
   kategorie: string
@@ -84,97 +79,5 @@ export function ErlebnisMetadaten({
   // Formatierte Uhrzeit
   const formattedTime = formatTimeIfAvailable(validDate)
 
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        <Badge variant="outline" className="bg-primary/20 border-primary/30 text-white">
-          {kategorienMap[kategorie?.toLowerCase?.()] || kategorie}
-          {unterkategorie && (
-            <span className="ml-1">
-              {" • "}
-              {unterkategorie}
-            </span>
-          )}
-        </Badge>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-300">
-        {/* Kombinierte Datum/Zeit-Anzeige */}
-        {validDate && (
-          <div className="flex items-center">
-            <Calendar className="h-4 w-4 mr-1.5 text-gray-400" />
-            <span>
-              {(() => {
-                try {
-                  return format(validDate, "PPP", { locale: de })
-                } catch (e) {
-                  console.error("Error formatting date:", e)
-                  return "Datum unbekannt"
-                }
-              })()}
-            </span>
-            {formattedTime && (
-              <>
-                <Clock className="h-4 w-4 mx-1.5 text-gray-400" />
-                <span>{formattedTime} Uhr</span>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Ort-Anzeige */}
-        {ort && (
-          <div className="flex items-center">
-            <MapPin className="h-4 w-4 mr-1.5 text-gray-400" />
-            <span>{ort}</span>
-          </div>
-        )}
-
-        {/* Autor-Anzeige */}
-        <div
-          className="flex items-center cursor-pointer hover:text-white transition-colors"
-          onClick={onAutorClick}
-          role="button"
-          tabIndex={0}
-          aria-label={`Zum Profil von ${autor}`}
-        >
-          <User className="h-4 w-4 mr-1.5 text-gray-400" />
-          <span>{autor}</span>
-        </div>
-
-        {/* Aufrufe-Anzeige */}
-        <div className="flex items-center">
-          <Eye className="h-4 w-4 mr-1.5 text-gray-400" />
-          <span>{aufrufe} Aufrufe</span>
-        </div>
-      </div>
-
-      {/* Tags-Anzeige */}
-      {tags && tags.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2">
-          <Tag className="h-4 w-4 text-gray-400" />
-          <div className="flex flex-wrap gap-2">
-            {tags.map((tag) => (
-              <TooltipProvider key={tag}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Badge
-                      variant="secondary"
-                      className="bg-gray-800/60 hover:bg-gray-700/60 cursor-pointer transition-colors"
-                      onClick={() => onTagClick && onTagClick(tag)}
-                    >
-                      {tag}
-                    </Badge>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Ähnliche Erlebnisse mit diesem Tag anzeigen</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  )
+  return null
 }

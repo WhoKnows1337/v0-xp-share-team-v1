@@ -59,11 +59,9 @@ export function KIAnalyse({ erlebnis }: KIAnalyseProps) {
   ]
 
   return (
-    <div className="bg-gray-900 rounded-lg p-4 text-white">
+    <div className="bg-[#0a0d14] rounded-lg p-4 text-white">
       <div className="flex items-center mb-4">
-        <div className="bg-blue-500 rounded-full p-1 mr-2">
-          <Brain className="h-4 w-4 text-white" />
-        </div>
+        <Brain className="h-5 w-5 text-blue-400 mr-2" />
         <h3 className="text-lg font-semibold">KI-Analyse</h3>
       </div>
 
@@ -85,7 +83,7 @@ export function KIAnalyse({ erlebnis }: KIAnalyseProps) {
           </div>
           <div className="flex flex-wrap gap-1 mt-2">
             {tags.map((tag, index) => (
-              <Badge key={index} variant="outline" className="bg-gray-800 border-gray-700 text-xs">
+              <Badge key={index} variant="outline" className="bg-[#1a1f2c] border-[#2a3040] text-xs">
                 {tag}
               </Badge>
             ))}
@@ -95,9 +93,9 @@ export function KIAnalyse({ erlebnis }: KIAnalyseProps) {
 
       {/* Emotionale Signatur */}
       <div className="mb-6">
-        <div className="flex items-center mb-2">
+        <div className="flex items-center mb-3">
           <Activity className="h-4 w-4 mr-2 text-blue-400" />
-          <h4 className="text-sm text-gray-400">Emotionale Signatur</h4>
+          <h4 className="text-sm">Emotionale Signatur</h4>
         </div>
         <div className="space-y-3">
           {emotionen.map((emotion, index) => (
@@ -114,26 +112,26 @@ export function KIAnalyse({ erlebnis }: KIAnalyseProps) {
 
       {/* Bewusstseinszustand */}
       <div className="mb-6">
-        <div className="flex items-center mb-2">
+        <div className="flex items-center mb-3">
           <Lightbulb className="h-4 w-4 mr-2 text-blue-400" />
-          <h4 className="text-sm text-gray-400">Bewusstseinszustand</h4>
+          <h4 className="text-sm">Bewusstseinszustand</h4>
         </div>
-        <div className="bg-gray-800 rounded p-3">
+        <div className="bg-[#0f1320] rounded p-3">
           <div className="flex justify-between mb-2">
-            <span className="font-medium">{bewusstseinszustand.zustand}</span>
-            <span className="text-xs text-blue-300">
-              Transformationspotenzial: {bewusstseinszustand.transformationspotenzial}
-            </span>
+            <span className="font-medium">Erweitert</span>
+            <span className="text-xs text-blue-300">Transformationspotenzial: Hoch</span>
           </div>
-          <p className="text-xs text-gray-400">{bewusstseinszustand.beschreibung}</p>
+          <p className="text-xs text-gray-400">
+            Jenseits des normalen Wachbewusstseins, mit erhöhter Wahrnehmung und reduzierter Ich-Grenze
+          </p>
         </div>
       </div>
 
       {/* Erkannte Muster */}
       <div className="mb-6">
-        <div className="flex items-center mb-2">
+        <div className="flex items-center mb-3">
           <Layers className="h-4 w-4 mr-2 text-blue-400" />
-          <h4 className="text-sm text-gray-400">Erkannte Muster</h4>
+          <h4 className="text-sm">Erkannte Muster</h4>
         </div>
         <div className="space-y-3">
           {muster.map((m, index) => (
@@ -150,27 +148,27 @@ export function KIAnalyse({ erlebnis }: KIAnalyseProps) {
 
       {/* Ähnlichkeitscluster */}
       <div className="mb-6">
-        <div className="flex items-center mb-2">
+        <div className="flex items-center mb-3">
           <Users className="h-4 w-4 mr-2 text-blue-400" />
-          <h4 className="text-sm text-gray-400">Ähnlichkeitscluster</h4>
+          <h4 className="text-sm">Ähnlichkeitscluster</h4>
         </div>
-        <div className="bg-gray-800 rounded p-3">
-          <div className="flex justify-between mb-1">
-            <span className="text-sm">{ähnlichkeitscluster.name}</span>
-            <span className="text-xs bg-gray-700 px-2 py-0.5 rounded-full">
-              {ähnlichkeitscluster.anzahlErlebnisse} Erlebnisse
-            </span>
+        <div className="bg-[#0f1320] rounded p-3">
+          <div className="mb-1">
+            <span className="text-sm">Außerkörperliche Erfahrungen während Meditation</span>
           </div>
-          <div className="text-xs text-gray-400">Kollektive Resonanz: {ähnlichkeitscluster.resonanz}</div>
+          <div className="flex justify-between items-center">
+            <div className="text-xs text-gray-400">Kollektive Resonanz: Stark</div>
+            <span className="text-xs bg-[#1a1f2c] px-2 py-0.5 rounded-full text-amber-400">124 Erlebnisse</span>
+          </div>
         </div>
       </div>
 
       {/* Hauptthemen */}
       <div className="mb-6">
-        <h4 className="text-sm text-gray-400 mb-2">Hauptthemen</h4>
+        <h4 className="text-sm mb-3">Hauptthemen</h4>
         <div className="flex flex-wrap gap-2">
           {hauptthemen.map((thema, index) => (
-            <Badge key={index} className="bg-gray-800 hover:bg-gray-700">
+            <Badge key={index} className="bg-[#1a1f2c] hover:bg-[#2a3040] text-white">
               {thema}
             </Badge>
           ))}
@@ -179,10 +177,13 @@ export function KIAnalyse({ erlebnis }: KIAnalyseProps) {
 
       {/* Empfehlungen */}
       <div>
-        <h4 className="text-sm text-gray-400 mb-2">Empfehlungen</h4>
-        <ul className="text-xs text-gray-300 space-y-1 list-disc list-inside">
+        <h4 className="text-sm mb-3">Empfehlungen</h4>
+        <ul className="text-xs text-gray-300 space-y-2">
           {empfehlungen.map((empfehlung, index) => (
-            <li key={index}>{empfehlung}</li>
+            <li key={index} className="flex items-start">
+              <span className="text-blue-400 mr-2">•</span>
+              {empfehlung}
+            </li>
           ))}
         </ul>
       </div>
