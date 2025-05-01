@@ -2,31 +2,32 @@
 
 import type React from "react"
 
-import { SidebarProvider } from "@/contexts/sidebar-context"
+import { useState, useEffect } from "react"
 import { Navbar } from "@/components/navbar"
-import { XPAssistantProvider } from "@/components/xp-assistant-provider"
-import { ThemeProvider } from "@/components/theme-provider"
-import { useEffect } from "react"
-import { initMockData } from "@/lib/mock-init"
+import { SkipLink } from "@/components/ui/skip-link"
+import { XPAssistant } from "@/components/xp-assistant/xp-assistant"
 import { ErlebnisWizardModal } from "@/components/erlebnis-wizard-modal"
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
-  // Initialisiere Mock-Daten beim ersten Laden
+  const [mounted, setMounted] = useState(false)
+
   useEffect(() => {
-    initMockData()
+    setMounted(true)
   }, [])
 
+  if (!mounted) {
+    return null
+  }
+
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <SidebarProvider>
-        <XPAssistantProvider>
-          <div className="flex flex-col min-h-screen">
-            <Navbar />
-            <div className="flex-1">{children}</div>
-          </div>
-          <ErlebnisWizardModal />
-        </XPAssistantProvider>
-      </SidebarProvider>
-    </ThemeProvider>
+    <>
+      <SkipLink />
+      <Navbar />
+      <main id="main-content" className="min-h-screen">
+        <div className="container mx-auto px-4 py-6">{children}</div>
+      </main>
+      <XPAssistant />
+      <ErlebnisWizardModal />
+    </>
   )
 }

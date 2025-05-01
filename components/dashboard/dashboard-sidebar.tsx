@@ -1,6 +1,6 @@
 "use client"
 import { cn } from "@/lib/utils"
-import { Home, Activity, Compass, User, TrendingUp, LogOut, FileText, Hash, Settings } from "lucide-react"
+import { Home, Activity, Compass, User, TrendingUp, LogOut, FileText, Hash, Settings, Book } from "lucide-react"
 import { getCurrentUser } from "@/lib/mock-users"
 import { getTotalUnreadMessages } from "@/lib/mock-messages"
 import { useEffect, useState } from "react"
@@ -113,6 +113,16 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
       action: () => {
         router.push("/channels")
         onTabChange("channels")
+      },
+    },
+    {
+      id: "xp-book",
+      name: "XP Buch",
+      icon: Book,
+      tab: "xp-buch",
+      action: () => {
+        router.push("/xp-buch")
+        onTabChange("xp-buch")
       },
     },
     {

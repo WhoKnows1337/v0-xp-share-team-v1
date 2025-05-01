@@ -1,60 +1,127 @@
 "use client"
 
-import { useEffect, type ReactNode } from "react"
-import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar"
-import { SkipLink } from "@/components/ui/skip-link"
-import { useSidebar } from "@/contexts/sidebar-context"
+import type React from "react"
+
+import { useState, useEffect } from "react"
+import { usePathname } from "next/navigation"
+import Link from "next/link"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { useSidebar } from "@/contexts/sidebar-context"
+import { Menu, Home, BarChart2, Compass, MessageSquare, Book, Settings, Users } from "lucide-react"
 
 interface DashboardLayoutProps {
-  children: ReactNode
+  children: React.ReactNode
   activeTab?: string
-  onTabChange?: (tab: string) => void
 }
 
-export function DashboardLayout({ children, activeTab = "home", onTabChange = () => {} }: DashboardLayoutProps) {
+export function DashboardLayout({ children, activeTab }: DashboardLayoutProps) {
+  const pathname = usePathname()
+  const [isMobile, setIsMobile] = useState(false)
   const { sidebarVisible } = useSidebar()
 
-  // Debug-Ausgabe, um zu sehen, ob der Zustand sich ändert
   useEffect(() => {
-    console.log("Sidebar visible:", sidebarVisible)
-
-    // Stellen Sie sicher, dass die Sidebar beim Seitenwechsel sichtbar bleibt
-    const handleRouteChange = () => {
-      if (!sidebarVisible) {
-        onTabChange(activeTab)
-      }
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
     }
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
 
-    window.addEventListener("popstate", handleRouteChange)
-    return () => {
-      window.removeEventListener("popstate", handleRouteChange)
-    }
-  }, [sidebarVisible, activeTab, onTabChange])
+  const routes = [
+    {
+      href: "/dashboard",
+      label: "Dashboard",
+      icon: <Home className="h-5 w-5" />,
+      active: activeTab === "dashboard" || pathname === "/dashboard",
+    },
+    {
+      href: "/insights",
+      label: "Insights & Trends",
+      icon: <BarChart2 className="h-5 w-5" />,
+      active: activeTab === "insights" || pathname === "/insights",
+    },
+    {
+      href: "/entdecken",
+      label: "Entdecken",
+      icon: <Compass className="h-5 w-5" />,
+      active: activeTab === "entdecken" || pathname === "/entdecken",
+    },
+    {
+      href: "/nachrichten",
+      label: "Nachrichten",
+      icon: <MessageSquare className="h-5 w-5" />,
+      active: activeTab === "nachrichten" || pathname === "/nachrichten",
+    },
+    {
+      href: "/xp-buch",
+      label: "XP-Buch",
+      icon: <Book className="h-5 w-5" />,
+      active: activeTab === "xp-buch" || pathname === "/xp-buch",
+    },
+    {
+      href: "/community",
+      label: "Community",
+      icon: <Users className="h-5 w-5" />,
+      active: activeTab === "community" || pathname === "/community",
+    },
+    {
+      href: "/einstellungen",
+      label: "Einstellungen",
+      icon: <Settings className="h-5 w-5" />,
+      active: activeTab === "einstellungen" || pathname === "/einstellungen",
+    },
+  ]
+
+  const SidebarContent = () => (
+    <ScrollArea className="h-full py-6">
+      <div className="space-y-1 px-2">
+        {routes.map((route) => (
+          <Link key={route.href} href={route.href}>
+            <Button
+              variant={route.active ? "secondary" : "ghost"}
+              className={cn("w-full justify-start", route.active ? "bg-accent" : "")}
+            >
+              {route.icon}
+              <span className="ml-3">{route.label}</span>
+            </Button>
+          </Link>
+        ))}
+      </div>
+    </ScrollArea>
+  )
 
   return (
-    <>
-      <SkipLink href="#dashboard-content">Zum Dashboard-Inhalt springen</SkipLink>
-      <div className="flex min-h-[calc(100vh-4rem)] overflow-hidden">
-        {/* Sidebar mit verbesserter Transition */}
-        <aside
-          className={cn(
-            "fixed inset-y-16 left-0 z-30 bg-background border-r transition-all duration-300 ease-in-out",
-            sidebarVisible ? "w-64 translate-x-0" : "w-0 -translate-x-full opacity-0 pointer-events-none",
-          )}
-          aria-hidden={!sidebarVisible}
-        >
-          <DashboardSidebar activeTab={activeTab} onTabChange={onTabChange} className="h-full overflow-y-auto p-4" />
+    <div className="flex min-h-screen">
+      {/* Sidebar für Desktop */}
+      {!isMobile && sidebarVisible && (
+        <aside className="w-64 border-r bg-background hidden md:block">
+          <SidebarContent />
         </aside>
+      )}
 
-        {/* Hauptinhalt mit Transition */}
-        <main
-          id="dashboard-content"
-          className={cn("flex-1 transition-all duration-300 ease-in-out p-4", sidebarVisible ? "ml-64" : "ml-0")}
-        >
-          {children}
-        </main>
-      </div>
-    </>
+      {/* Mobile Sidebar */}
+      {isMobile && (
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="md:hidden absolute left-4 top-4 z-50">
+              <Menu className="h-6 w-6" />
+              <span className="sr-only">Menü öffnen</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-64 p-0">
+            <SidebarContent />
+          </SheetContent>
+        </Sheet>
+      )}
+
+      {/* Hauptinhalt */}
+      <main className={cn("flex-1", !sidebarVisible && "ml-0", sidebarVisible && !isMobile && "md:ml-0")}>
+        <div className="container mx-auto px-4 py-6">{children}</div>
+      </main>
+    </div>
   )
 }

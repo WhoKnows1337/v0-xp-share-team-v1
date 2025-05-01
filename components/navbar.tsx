@@ -37,6 +37,9 @@ export function Navbar() {
   const currentUsername = currentUser?.username || "demo-user"
   const { sidebarVisible, toggleSidebar } = useSidebar()
 
+  // Definiere showSidebarToggle basierend auf dem aktuellen Pfad
+  const showSidebarToggle = pathname?.includes("/dashboard") || pathname?.includes("/insights")
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10)
@@ -62,10 +65,8 @@ export function Navbar() {
 
   const handleNewExperience = () => {
     console.log("Navbar: Öffne ErlebnisWizard")
-    // Füge einen kleinen Timeout hinzu, um sicherzustellen, dass der Event-Handler registriert wurde
-    setTimeout(() => {
-      openErlebnisWizard()
-    }, 0)
+    // Direkt aufrufen ohne Timeout
+    openErlebnisWizard()
   }
 
   const handleToggleSidebar = () => {
@@ -91,13 +92,6 @@ export function Navbar() {
       }
     }
   }
-
-  // Auf der Startseite nicht anzeigen
-  if (pathname === "/") {
-    return null
-  }
-
-  const showSidebarToggle = pathname.includes("/dashboard") || pathname.includes("/insights")
 
   return (
     <header
@@ -154,6 +148,13 @@ export function Navbar() {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <span>Entdecken</span>
+                </Link>
+                <Link
+                  href="/xp-buch"
+                  className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <span>XP-Buch</span>
                 </Link>
               </nav>
             </SheetContent>
@@ -224,6 +225,9 @@ export function Navbar() {
               <DropdownMenuItem onClick={handleProfileClick}>Profil</DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/dashboard">Dashboard</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/xp-buch">XP-Buch</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/einstellungen">Einstellungen</Link>
