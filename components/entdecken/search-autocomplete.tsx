@@ -2,154 +2,237 @@
 
 import type React from "react"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useRef } from "react"
 import { Input } from "@/components/ui/input"
-import { Search, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Search } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "@/components/ui/command"
+
+interface SearchSuggestion {
+  type: "kategorie" | "tag" | "titel" | "ort" | "synonym"
+  value: string
+  originalValue?: string // Für Synonyme
+}
 
 interface SearchAutocompleteProps {
-  placeholder?: string
-  onSearch: (term: string) => void
-  suggestions?: string[]
-  className?: string
-  kategorien?: string[]
+  onSearch: (query: string) => void
+  initialValue?: string
+  kategorien?: Array<{ name: string; icon: string; farbe: string }>
   tags?: string[]
   orte?: string[]
+  titel?: string[]
+  className?: string
+  placeholder?: string
+}
+
+// Synonyme für häufige Suchbegriffe
+const synonymMap: Record<string, string[]> = {
+  alien: ["Außerirdische", "UFO", "Fremde Wesen"],
+  geist: ["Erscheinung", "Spuk", "Paranormale Begegnung"],
+  traum: ["Schlafvision", "Traumwelt", "Nachttraum"],
+  vision: ["Erscheinung", "Halluzination", "Spirituelle Erfahrung"],
+  engel: ["Himmlische Wesen", "Spirituelle Erscheinung", "Lichtgestalt"],
+  tod: ["Nahtoderfahrung", "Jenseits", "Lebensende"],
+  zufall: ["Synchronizität", "Fügung", "Schicksal"],
+  deja: ["Déjà-vu", "Erinnerung"],
+  meditation: ["Achtsamkeit", "Spirituelle Übung", "Bewusstseinserweiterung"],
 }
 
 export function SearchAutocomplete({
-  placeholder = "Suchen...",
   onSearch,
-  suggestions = [],
-  className = "",
+  initialValue = "",
   kategorien = [],
   tags = [],
   orte = [],
+  titel = [],
+  className = "",
+  placeholder = "Suche nach Erlebnissen...",
 }: SearchAutocompleteProps) {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [showSuggestions, setShowSuggestions] = useState(false)
-  const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([])
+  const [open, setOpen] = useState(false)
+  const [searchValue, setSearchValue] = useState(initialValue)
   const inputRef = useRef<HTMLInputElement>(null)
-  const suggestionsRef = useRef<HTMLDivElement>(null)
 
-  // Kombiniere alle Vorschläge
-  const allSuggestions = [...(suggestions || []), ...(kategorien || []), ...(tags || []), ...(orte || [])]
-
-  useEffect(() => {
-    // Filtere Vorschläge basierend auf dem Suchbegriff
-    if (searchTerm && allSuggestions && allSuggestions.length > 0) {
-      const filtered = allSuggestions.filter((suggestion) =>
-        suggestion.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
-      setFilteredSuggestions(filtered)
-    } else {
-      setFilteredSuggestions([])
+  // Generiere Suchvorschläge basierend auf der Eingabe
+  const generateSuggestions = (query: string): SearchSuggestion[] => {
+    if (!query || query.length < 2) {
+      return []
     }
-  }, [searchTerm])
 
-  useEffect(() => {
-    // Schließe Vorschläge, wenn außerhalb geklickt wird
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        inputRef.current &&
-        !inputRef.current.contains(event.target as Node) &&
-        suggestionsRef.current &&
-        !suggestionsRef.current.contains(event.target as Node)
-      ) {
-        setShowSuggestions(false)
+    const results: SearchSuggestion[] = []
+    const addedValues = new Set<string>() // Verhindert Duplikate
+    const lowercaseQuery = query.toLowerCase()
+
+    // Prüfe auf Synonyme
+    Object.entries(synonymMap).forEach(([key, synonyms]) => {
+      if (lowercaseQuery.includes(key) && !addedValues.has(key)) {
+        synonyms.forEach((synonym) => {
+          if (!addedValues.has(synonym)) {
+            results.push({ type: "synonym", value: synonym, originalValue: key })
+            addedValues.add(synonym)
+          }
+        })
       }
-    }
+    })
 
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [])
+    // Kategorien durchsuchen
+    kategorien.forEach((kategorie) => {
+      if (kategorie.name.toLowerCase().includes(lowercaseQuery) && !addedValues.has(kategorie.name)) {
+        results.push({ type: "kategorie", value: kategorie.name })
+        addedValues.add(kategorie.name)
+      }
+    })
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setSearchTerm(value)
-    setShowSuggestions(value.length > 0)
+    // Tags durchsuchen
+    tags.forEach((tag) => {
+      if (tag.toLowerCase().includes(lowercaseQuery) && !addedValues.has(tag)) {
+        results.push({ type: "tag", value: tag })
+        addedValues.add(tag)
+      }
+    })
+
+    // Orte durchsuchen
+    orte.forEach((ort) => {
+      if (ort.toLowerCase().includes(lowercaseQuery) && !addedValues.has(ort)) {
+        results.push({ type: "ort", value: ort })
+        addedValues.add(ort)
+      }
+    })
+
+    // Titel durchsuchen
+    titel.forEach((t) => {
+      if (t.toLowerCase().includes(lowercaseQuery) && !addedValues.has(t)) {
+        results.push({ type: "titel", value: t })
+        addedValues.add(t)
+      }
+    })
+
+    // Sortiere Ergebnisse: Synonyme zuerst, dann nach Relevanz (exakte Übereinstimmung zuerst)
+    results.sort((a, b) => {
+      // Synonyme haben höchste Priorität
+      if (a.type === "synonym" && b.type !== "synonym") return -1
+      if (a.type !== "synonym" && b.type === "synonym") return 1
+
+      // Dann nach Typ sortieren
+      const typeOrder = { kategorie: 0, tag: 1, ort: 2, titel: 3 }
+      if (typeOrder[a.type] !== typeOrder[b.type]) {
+        return typeOrder[a.type] - typeOrder[b.type]
+      }
+
+      // Dann nach exakter Übereinstimmung
+      const aExact = a.value.toLowerCase() === lowercaseQuery
+      const bExact = b.value.toLowerCase() === lowercaseQuery
+      if (aExact && !bExact) return -1
+      if (!aExact && bExact) return 1
+
+      // Dann nach Länge (kürzere zuerst)
+      return a.value.length - b.value.length
+    })
+
+    // Begrenze auf 10 Vorschläge
+    return results.slice(0, 10)
   }
 
+  // Vorschlag auswählen
+  const selectSuggestion = (suggestion: SearchSuggestion) => {
+    setSearchValue(suggestion.value)
+    onSearch(suggestion.value)
+    setOpen(false)
+    inputRef.current?.focus()
+  }
+
+  // Suche ausführen
   const handleSearch = () => {
-    onSearch(searchTerm)
-    setShowSuggestions(false)
+    onSearch(searchValue)
+    setOpen(false)
   }
 
+  // Tastatureingaben verarbeiten
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       handleSearch()
+    } else if (e.key === "Escape") {
+      setOpen(false)
     }
   }
 
-  const handleSuggestionClick = (suggestion: string) => {
-    setSearchTerm(suggestion)
-    onSearch(suggestion)
-    setShowSuggestions(false)
-  }
+  // Eingabeänderungen verarbeiten
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setSearchValue(value)
 
-  const handleClearSearch = () => {
-    setSearchTerm("")
-    onSearch("")
-    if (inputRef.current) {
-      inputRef.current.focus()
+    // Vorschläge nur anzeigen, wenn mindestens 2 Zeichen eingegeben wurden
+    if (value.length >= 2) {
+      const suggestions = generateSuggestions(value)
+      setOpen(suggestions.length > 0)
+    } else {
+      setOpen(false)
     }
   }
+
+  // Vorschläge für die aktuelle Eingabe
+  const suggestions = searchValue.length >= 2 ? generateSuggestions(searchValue) : []
 
   return (
-    <div className={`relative ${className}`}>
-      <div className="relative">
-        <Input
-          ref={inputRef}
-          type="text"
-          placeholder={placeholder}
-          value={searchTerm}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          onFocus={() => setShowSuggestions(searchTerm.length > 0)}
-          className="pr-16"
-        />
-        <div className="absolute inset-y-0 right-0 flex items-center">
-          {searchTerm && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={handleClearSearch}
-              aria-label="Suche löschen"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={handleSearch}
-            aria-label="Suchen"
-          >
-            <Search className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+    <div className={`relative ${className}`} ref={inputRef}>
+      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+      <Input
+        type="search"
+        placeholder={placeholder}
+        className="pl-10 pr-4"
+        value={searchValue}
+        onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
+        onBlur={() => setTimeout(() => setOpen(false), 200)}
+        onFocus={() => {
+          if (searchValue.length >= 2) {
+            const suggestions = generateSuggestions(searchValue)
+            setOpen(suggestions.length > 0)
+          }
+        }}
+      />
 
-      {showSuggestions && filteredSuggestions && filteredSuggestions.length > 0 && (
-        <div
-          ref={suggestionsRef}
-          className="absolute z-10 mt-1 w-full bg-background border rounded-md shadow-lg max-h-60 overflow-auto"
-        >
-          {filteredSuggestions.map((suggestion, index) => (
-            <div
-              key={index}
-              className="px-4 py-2 hover:bg-muted cursor-pointer"
-              onClick={() => handleSuggestionClick(suggestion)}
-            >
-              {suggestion}
-            </div>
-          ))}
+      {open && suggestions.length > 0 && (
+        <div className="absolute z-50 w-full mt-1 bg-background border rounded-md shadow-lg overflow-hidden">
+          <Command>
+            <CommandList>
+              <CommandEmpty>Keine Vorschläge gefunden</CommandEmpty>
+              <CommandGroup heading="Suchvorschläge">
+                {suggestions.map((suggestion, index) => (
+                  <CommandItem
+                    key={`${suggestion.type}-${index}`}
+                    onSelect={() => selectSuggestion(suggestion)}
+                    className="flex items-center gap-2 px-4 py-2 hover:bg-muted cursor-pointer"
+                  >
+                    {suggestion.type === "kategorie" && (
+                      <Badge className="bg-primary/10 text-primary hover:bg-primary/20">Kategorie</Badge>
+                    )}
+                    {suggestion.type === "tag" && (
+                      <Badge className="bg-secondary/20 text-secondary-foreground hover:bg-secondary/30">Tag</Badge>
+                    )}
+                    {suggestion.type === "ort" && (
+                      <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800">
+                        Ort
+                      </Badge>
+                    )}
+                    {suggestion.type === "titel" && (
+                      <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-800">
+                        Titel
+                      </Badge>
+                    )}
+                    {suggestion.type === "synonym" && (
+                      <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800">
+                        Meintest du
+                      </Badge>
+                    )}
+                    <span className="flex-1">{suggestion.value}</span>
+                    {suggestion.originalValue && (
+                      <span className="text-xs text-muted-foreground">für "{suggestion.originalValue}"</span>
+                    )}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
         </div>
       )}
     </div>

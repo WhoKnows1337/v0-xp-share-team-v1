@@ -254,9 +254,7 @@ export function EntdeckenPageRedesigned() {
 
   // Filtere Ortsvorschläge basierend auf der Eingabe
   const filteredOrtsSuggestions =
-    ortInput && ortInput.length > 0
-      ? ortsSuggestions.filter((ort) => ort.toLowerCase().includes(ortInput.toLowerCase()))
-      : []
+    ortInput.length > 0 ? ortsSuggestions.filter((ort) => ort.toLowerCase().includes(ortInput.toLowerCase())) : []
 
   return (
     <div className="container mx-auto p-4">
@@ -458,7 +456,7 @@ export function EntdeckenPageRedesigned() {
                           <Search className="h-4 w-4" />
                         </Button>
                       </div>
-                      {showOrtSuggestions && filteredOrtsSuggestions && filteredOrtsSuggestions.length > 0 && (
+                      {showOrtSuggestions && filteredOrtsSuggestions.length > 0 && (
                         <div className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
                           {filteredOrtsSuggestions.map((suggestion, index) => (
                             <div
