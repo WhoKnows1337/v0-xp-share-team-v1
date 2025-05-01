@@ -69,13 +69,13 @@ export function EntdeckenPageUpdated() {
     }
 
     // Kategorien
-    if (selectedCategories.length > 0) {
+    if (selectedCategories && selectedCategories.length > 0) {
       filtered = filtered.filter((item) => selectedCategories.includes(item.kategorie.name))
       console.log("Nach Kategoriefilter:", filtered.length)
     }
 
     // Tags
-    if (selectedTags.length > 0) {
+    if (selectedTags && selectedTags.length > 0) {
       filtered = filtered.filter((item) => selectedTags.some((tag) => item.tags.includes(tag)))
       console.log("Nach Tagfilter:", filtered.length)
     }
