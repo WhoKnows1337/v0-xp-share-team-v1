@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/mock-users"
 import { getTotalUnreadMessages } from "@/lib/mock-messages"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { mockUsers } from "@/lib/mock-users"
 
 interface DashboardSidebarProps {
   activeTab: string
@@ -30,6 +31,28 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
 
     return () => clearInterval(interval)
   }, [currentUser])
+
+  const handleProfileClick = () => {
+    // Verwende den aktuellen Benutzernamen für die Profil-URL
+    const username = currentUser?.username || "demo-user"
+    console.log("Sidebar: Navigiere zum Profil von:", username)
+
+    // Überprüfen, ob der Benutzer existiert
+    const user = mockUsers.find((u) => u.username.toLowerCase() === username.toLowerCase())
+    if (user) {
+      router.push(`/profil/${encodeURIComponent(user.username)}`)
+      onTabChange("profil")
+    } else {
+      console.error("Benutzer nicht gefunden:", username)
+      // Fallback auf den ersten verfügbaren Benutzer
+      if (mockUsers.length > 0) {
+        router.push(`/profil/${encodeURIComponent(mockUsers[0].username)}`)
+        onTabChange("profil")
+      } else {
+        alert("Keine Benutzer verfügbar. Bitte überprüfen Sie die Mock-Daten.")
+      }
+    }
+  }
 
   const navItems = [
     {
@@ -97,12 +120,7 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
       name: "Profil",
       icon: User,
       tab: "profil",
-      action: () => {
-        // Verwende den aktuellen Benutzernamen für die Profil-URL
-        const username = currentUser?.username || "mein-profil"
-        router.push(`/profil/${username}`)
-        onTabChange("profil")
-      },
+      action: handleProfileClick,
     },
   ]
 

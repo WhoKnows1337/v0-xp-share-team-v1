@@ -1,8 +1,10 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -30,8 +32,9 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [unreadMessages, setUnreadMessages] = useState(0)
   const pathname = usePathname()
+  const router = useRouter()
   const currentUser = getCurrentUser()
-  const currentUsername = currentUser.username
+  const currentUsername = currentUser?.username || "demo-user"
   const { sidebarVisible, toggleSidebar } = useSidebar()
 
   useEffect(() => {
@@ -68,6 +71,25 @@ export function Navbar() {
   const handleToggleSidebar = () => {
     console.log("Toggle sidebar, current state:", sidebarVisible)
     toggleSidebar()
+  }
+
+  const handleProfileClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    console.log("Navigiere zum Profil von:", currentUsername)
+
+    // Überprüfen, ob der Benutzer existiert
+    const user = mockUsers.find((u) => u.username.toLowerCase() === currentUsername.toLowerCase())
+    if (user) {
+      router.push(`/profil/${encodeURIComponent(user.username)}`)
+    } else {
+      console.error("Benutzer nicht gefunden:", currentUsername)
+      // Fallback auf den ersten verfügbaren Benutzer
+      if (mockUsers.length > 0) {
+        router.push(`/profil/${encodeURIComponent(mockUsers[0].username)}`)
+      } else {
+        alert("Keine Benutzer verfügbar. Bitte überprüfen Sie die Mock-Daten.")
+      }
+    }
   }
 
   // Auf der Startseite nicht anzeigen
@@ -197,8 +219,9 @@ export function Navbar() {
               <DropdownMenuLabel>Mein Konto</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href={`/profil/${encodeURIComponent(currentUsername)}`}>Profil</Link>
+                <Link href="/">Startseite</Link>
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleProfileClick}>Profil</DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/dashboard">Dashboard</Link>
               </DropdownMenuItem>

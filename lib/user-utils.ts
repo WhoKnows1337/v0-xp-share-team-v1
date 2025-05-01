@@ -19,5 +19,5 @@ export function findUserByUsername(username: string) {
 
 export function isCurrentUser(username: string) {
   const currentUser = getCurrentUser()
-  return currentUser.username.toLowerCase() === username.toLowerCase()
+  return currentUser?.username?.toLowerCase() === username?.toLowerCase()
 }

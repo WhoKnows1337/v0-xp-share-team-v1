@@ -66,7 +66,14 @@ export function UserLink({ username, avatar, isVerifiziert = false, size = "md",
       // Zeige eine Benachrichtigung an, dass der Benutzer nicht gefunden wurde
       toast({
         title: "Benutzer nicht gefunden",
-        description: `Der Benutzer "${username}" konnte nicht gefunden werden.`,
+        description: (
+          <div>
+            <p>Der Benutzer "{username}" konnte nicht gefunden werden.</p>
+            <button onClick={() => router.push("/")} className="text-blue-500 underline mt-2">
+              Zurück zur Startseite
+            </button>
+          </div>
+        ),
         variant: "destructive",
       })
     }
