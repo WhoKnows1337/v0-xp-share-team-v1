@@ -163,7 +163,7 @@ export function BeschreibungSchritt({ data, updateData }: BeschreibungSchrittPro
 
         {/* Automatisch erkannte Kategorie anzeigen, wenn Beschreibung länger als 50 Zeichen ist */}
         {data.beschreibung.length >= 50 && (
-          <div className="mt-4 p-3 bg-green-900/20 border border-green-700/30 rounded-md animate-fadeIn">
+          <div className="mt-4 p-4 bg-green-900/20 border border-green-700/30 rounded-md animate-fadeIn">
             <h4 className="text-green-400 font-medium flex items-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -185,7 +185,7 @@ export function BeschreibungSchritt({ data, updateData }: BeschreibungSchrittPro
               <span className="text-white font-medium">Erkannt:</span>
               <span className="ml-2 text-green-400 font-medium">{getErkannteKategorie()}</span>
             </div>
-            <p className="mt-2 text-xs text-green-300/80">
+            <p className="mt-2 text-sm text-green-300/80">
               Diese Kategorie wurde basierend auf deiner Beschreibung automatisch erkannt. Du kannst sie im
               Kategorie-Schritt anpassen.
             </p>

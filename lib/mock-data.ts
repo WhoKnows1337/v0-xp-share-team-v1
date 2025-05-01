@@ -4,6 +4,8 @@ export interface Kategorie {
   name: string
   icon: string
   farbe: string
+  beschreibung?: string
+  parentCategory?: string
 }
 
 export interface Erlebnis {
@@ -72,13 +74,27 @@ export const mockKategorien: Kategorie[] = [
   { name: "Spirituelle Heilung", icon: "✨", farbe: "#8b5cf6" },
   { name: "Unerklärliche Begegnung", icon: "🔮", farbe: "#8b5cf6" },
   { name: "Kollektive Erfahrung", icon: "🧠", farbe: "#10b981" },
-  { name: "UFO-Sichtung", icon: "👽", farbe: "#6d28d9" },
+  {
+    name: "Himmelsphänomen",
+    icon: "✨",
+    farbe: "#6d28d9",
+    beschreibung: "Beobachtungen ungewöhnlicher Erscheinungen am Himmel, von Lichtobjekten bis zu Naturphänomenen.",
+  },
   { name: "Astralreisen", icon: "Star", farbe: "#805AD5" },
   { name: "Traumreisen", icon: "Cloud", farbe: "#4C51BF" },
   { name: "Spirituelle Erfahrung", icon: "Sun", farbe: "#DD6B20" },
   { name: "Spirituelle Führung", icon: "Shield", farbe: "#805AD5" },
   { name: "Energiearbeit", icon: "Zap", farbe: "#D53F8C" },
   { name: "Quantenheilung", icon: "Activity", farbe: "#3182CE" },
+  // Unterkategorien für Himmelsphänomene
+  { name: "Lichtobjekt beobachtet", icon: "Sun", farbe: "#6d28d9", parentCategory: "Himmelsphänomen" },
+  { name: "Blitze am Himmel", icon: "Zap", farbe: "#6d28d9", parentCategory: "Himmelsphänomen" },
+  { name: "UFO-Sichtung", icon: "👽", farbe: "#6d28d9", parentCategory: "Himmelsphänomen" },
+  { name: "Meteorit gesichtet", icon: "Star", farbe: "#6d28d9", parentCategory: "Himmelsphänomen" },
+  { name: "Sternschnuppe", icon: "Star", farbe: "#6d28d9", parentCategory: "Himmelsphänomen" },
+  { name: "Polarlicht", icon: "Sparkles", farbe: "#6d28d9", parentCategory: "Himmelsphänomen" },
+  { name: "Himmelsleuchten", icon: "Sun", farbe: "#6d28d9", parentCategory: "Himmelsphänomen" },
+  { name: "Seltsame Wolkenformation", icon: "Cloud", farbe: "#6d28d9", parentCategory: "Himmelsphänomen" },
 ]
 
 // Tags für Erlebnisse
@@ -200,6 +216,7 @@ export const mockErlebnisse: Erlebnis[] = [
       name: "UFO-Sichtung",
       icon: "👽",
       farbe: "#6d28d9",
+      parentCategory: "Himmelsphänomen",
     },
     tags: ["Lichter", "Nachthimmel", "Formation", "Schwarzwald"],
     ort: {
@@ -552,6 +569,8 @@ export const mockErlebnisse: Erlebnis[] = [
     status: "veröffentlicht",
     kiZusammenfassung:
       "Diese Erfahrung dokumentiert einen Fall von präkognitiver Intuition mit lebensrettenden Konsequenzen. Der Autor beschreibt ein plötzliches, intensives Angstgefühl und einen klaren inneren Impuls, seinen gewohnten Weg zu ändern, ohne erkennbaren äußeren Anlass. Die spätere Bestätigung, dass genau zu diesem Zeitpunkt an seinem üblichen Weg ein Unfall geschah, deutet auf eine Form von Vorahnung hin, die in der parapsychologischen Forschung als 'Präkognition' oder 'Prämonition' bezeichnet wird.",
+    englishSummary:
+      "This experience documents a case of precognitive intuition with life-saving consequences. The author describes a sudden, intense feeling of fear and a clear inner impulse to change his usual route without any recognizable external cause. The later confirmation that an accident occurred at exactly that time on his usual path suggests a form of premonition that is referred to in parapsychological research as 'precognition' or 'premonition'.",
     englishSummary:
       "This experience documents a case of precognitive intuition with life-saving consequences. The author describes a sudden, intense feeling of fear and a clear inner impulse to change his usual route without any recognizable external cause. The later confirmation that an accident occurred at exactly that time on his usual path suggests a form of premonition that is referred to in parapsychological research as 'precognition' or 'premonition'.",
     kiZusammenfassungStatus: "completed",

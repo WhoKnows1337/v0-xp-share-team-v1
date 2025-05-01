@@ -4,7 +4,22 @@ import { useState, useEffect, useRef } from "react"
 import type { ErlebnisData } from "../erlebnis-wizard"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Moon, Sparkles, Zap, Rocket, Ghost, Lightbulb, Compass, HelpCircle, Cpu, X, Search, Check } from "lucide-react"
+import {
+  Moon,
+  Sparkles,
+  Zap,
+  Rocket,
+  Ghost,
+  Lightbulb,
+  Compass,
+  HelpCircle,
+  Cpu,
+  X,
+  Search,
+  Check,
+  Heart,
+  Leaf,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
@@ -36,10 +51,10 @@ const hauptkategorien = [
     description: "Vorahnungen, starke Eingebungen, Bauchgefühle die sich bewahrheitet haben",
   },
   {
-    id: "ufo",
-    name: "UFO-Sichtung",
+    id: "himmelsphänomen",
+    name: "Himmelsphänomen",
     icon: Rocket,
-    description: "Beobachtungen unidentifizierter Flugobjekte oder Lichter",
+    description: "UFO/UAP-Sichtungen, Meteoriten, Polarlichter und andere bedeutsame Phänomene am Himmel",
   },
   {
     id: "paranormal",
@@ -61,6 +76,18 @@ const hauptkategorien = [
     description: "Erfahrungen mit veränderten Bewusstseinszuständen und visionären Erlebnissen",
   },
   { id: "sonstiges", name: "Sonstiges", icon: HelpCircle, description: "Andere außergewöhnliche Erfahrungen" },
+  {
+    id: "gesundheit",
+    name: "Gesundheit",
+    icon: Heart,
+    description: "Erfahrungen mit Behandlungen, Heilmethoden, Medikamenten und gesundheitsfördernden Praktiken",
+  },
+  {
+    id: "natur",
+    name: "Natur",
+    icon: Leaf,
+    description: "Außergewöhnliche Naturerlebnisse, Naturphänomene und Begegnungen mit der natürlichen Welt",
+  },
 ]
 
 // Unterkategorien für jede Hauptkategorie
@@ -107,7 +134,7 @@ const unterkategorien: Record<string, { id: string; name: string; description: s
     },
     { id: "intuition-wissen", name: "Wissen", description: "Plötzliches Wissen ohne erkennbare Quelle" },
   ],
-  ufo: [
+  himmelsphänomen: [
     { id: "ufo-lichter", name: "Ungewöhnliche Lichter", description: "Beobachtung seltsamer Lichter am Himmel" },
     {
       id: "ufo-objekt",
@@ -237,6 +264,60 @@ const unterkategorien: Record<string, { id: string; name: string; description: s
     { id: "sonstiges-heilung", name: "Spontanheilung", description: "Unerklärliche Heilung oder Genesung" },
     { id: "sonstiges-telepathie", name: "Telepathie", description: "Gedankenübertragung oder mentale Verbindung" },
   ],
+  gesundheit: [
+    {
+      id: "gesundheit-heilung",
+      name: "Heilungserfahrung",
+      description: "Ungewöhnliche oder bemerkenswerte Heilungsprozesse",
+    },
+    {
+      id: "gesundheit-behandlung",
+      name: "Alternative Behandlung",
+      description: "Erfahrungen mit alternativen oder komplementären Heilmethoden",
+    },
+    {
+      id: "gesundheit-medikament",
+      name: "Medikamentenerfahrung",
+      description: "Ungewöhnliche Reaktionen oder Erfahrungen mit Medikamenten",
+    },
+    {
+      id: "gesundheit-yoga",
+      name: "Yoga & Meditation",
+      description: "Transformative Erfahrungen durch Yoga oder Meditationspraxis",
+    },
+    {
+      id: "gesundheit-atem",
+      name: "Atemtechniken",
+      description: "Erfahrungen mit bewussten Atemtechniken und deren Auswirkungen",
+    },
+  ],
+  natur: [
+    {
+      id: "natur-katastrophe",
+      name: "Naturkatastrophe",
+      description: "Erlebnisse während oder im Zusammenhang mit Naturkatastrophen",
+    },
+    {
+      id: "natur-phaenomen",
+      name: "Seltenes Naturphänomen",
+      description: "Beobachtung ungewöhnlicher oder seltener Naturphänomene",
+    },
+    {
+      id: "natur-begegnung",
+      name: "Tierbegegnung",
+      description: "Außergewöhnliche Begegnungen mit Tieren oder ungewöhnliches Tierverhalten",
+    },
+    {
+      id: "natur-landschaft",
+      name: "Besondere Landschaft",
+      description: "Erlebnisse an Orten mit besonderer Energie oder Atmosphäre",
+    },
+    {
+      id: "natur-wetter",
+      name: "Wetterphänomen",
+      description: "Ungewöhnliche Wetterereignisse oder atmosphärische Erscheinungen",
+    },
+  ],
 }
 
 // Beispiele für jede Hauptkategorie
@@ -251,7 +332,7 @@ const beispiele: Record<string, string[]> = {
     "Ich sah ein helles Licht und fühlte tiefe Ruhe und Frieden",
     "Ich begegnete verstorbenen Verwandten, die mich begrüßten",
   ],
-  ufo: [
+  himmelsphänomen: [
     "Drei pulsierende Lichter in Dreiecksformation, die plötzlich verschwanden",
     "Ein scheibenförmiges Objekt, das unmögliche Flugmanöver ausführte",
     "Ein leuchtendes Objekt, das mehrere Minuten still am Himmel stand",
@@ -281,6 +362,16 @@ const beispiele: Record<string, string[]> = {
     "Meine chronische Krankheit verschwand über Nacht ohne medizinische Erklärung",
     "Ich erlebte mehrere Stunden Zeitverlust, die ich nicht erklären kann",
   ],
+  gesundheit: [
+    "Nach einer speziellen Atemtechnik konnte ich plötzlich eine chronische Verspannung lösen",
+    "Während einer Yoga-Sitzung erlebte ich eine intensive Energieströmung durch meinen Körper",
+    "Ein Heilkraut, das mir empfohlen wurde, führte zu einer unerwarteten Besserung meiner Symptome",
+  ],
+  natur: [
+    "Kurz vor dem Erdbeben verhielten sich alle Tiere in der Umgebung merkwürdig still",
+    "Ich beobachtete eine perfekte Lichtsäule über dem See, die nicht durch normale Lichtbrechung erklärbar war",
+    "In diesem Waldgebiet schien die Zeit anders zu verlaufen und ich verlor jedes Zeitgefühl",
+  ],
 }
 
 // Farbschemata für jede Hauptkategorie
@@ -309,7 +400,7 @@ const kategorienFarben: Record<
     activeBg: "bg-amber-900/40",
     iconColor: "text-amber-400",
   },
-  ufo: {
+  himmelsphänomen: {
     bg: "bg-green-900/20",
     border: "border-green-700/40",
     hoverBg: "hover:bg-green-900/30",
@@ -357,6 +448,20 @@ const kategorienFarben: Record<
     hoverBg: "hover:bg-teal-900/30",
     activeBg: "bg-teal-900/40",
     iconColor: "text-teal-400",
+  },
+  gesundheit: {
+    bg: "bg-rose-900/20",
+    border: "border-rose-700/40",
+    hoverBg: "hover:bg-rose-900/30",
+    activeBg: "bg-rose-900/40",
+    iconColor: "text-rose-400",
+  },
+  natur: {
+    bg: "bg-emerald-900/20",
+    border: "border-emerald-700/40",
+    hoverBg: "hover:bg-emerald-900/30",
+    activeBg: "bg-emerald-900/40",
+    iconColor: "text-emerald-400",
   },
 }
 
@@ -544,7 +649,8 @@ export function KategorieSchritt({ data, updateData }: KategorieSchrittProps) {
                     "flex items-start p-4 bg-white/5 border border-white/20 rounded-lg cursor-pointer transition-all hover:bg-white/10",
                     isSelected && "border-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]",
                     isAutomatisch && isSelected && "border-amber-500/70 shadow-[0_0_5px_rgba(245,158,11,0.3)]",
-                    "min-h-[120px]", // Einheitliche Mindesthöhe für alle Boxen
+                    "min-h-[140px]", // Erhöhte Mindesthöhe für alle Boxen
+                    kategorie.id === "traum" && "h-full", // Zusätzliche Klasse für die Traumbox
                   )}
                   ref={index === 0 ? firstOptionRef : null}
                   tabIndex={0}

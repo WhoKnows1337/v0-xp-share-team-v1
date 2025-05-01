@@ -6,8 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { TitelSchritt } from "./wizard/titel-schritt"
 import { KategorieSchritt } from "./wizard/kategorie-schritt"
 import { BeschreibungSchritt } from "./wizard/beschreibung-schritt"
-import { DatumSchritt } from "./wizard/datum-schritt"
-import { OrtSchritt } from "./wizard/ort-schritt"
+import { DatumOrtSchritt } from "./wizard/datum-ort-schritt"
 import { TagsSchritt } from "./wizard/tags-schritt"
 import { MedienSchritt } from "./wizard/medien-schritt"
 import { PrivatsphareSchritt } from "./wizard/privatsphare-schritt"
@@ -142,13 +141,12 @@ export function ErlebnisWizard({ onComplete }: ErlebnisWizardProps) {
     return () => clearInterval(autoSaveInterval)
   }, [data])
 
-  // Ändere die Reihenfolge der Schritte, um "Titel" an Position 0, "Beschreibung" an Position 1 und "Kategorie" an Position 2 zu setzen
+  // Aktualisierte Schritte mit kombiniertem Datum-Ort-Schritt
   const schritte = [
     { name: "Titel", component: TitelSchritt },
     { name: "Beschreibung", component: BeschreibungSchritt },
     { name: "Kategorie", component: KategorieSchritt },
-    { name: "Datum", component: DatumSchritt },
-    { name: "Ort", component: OrtSchritt },
+    { name: "Datum & Ort", component: DatumOrtSchritt },
     { name: "Tags", component: TagsSchritt },
     { name: "Medien", component: MedienSchritt },
     { name: "Privatsphäre", component: PrivatsphareSchritt },

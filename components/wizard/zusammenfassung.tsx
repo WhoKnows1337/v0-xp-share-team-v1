@@ -4,7 +4,7 @@ import type { ErlebnisData } from "../erlebnis-wizard"
 import { format } from "date-fns"
 import { de } from "date-fns/locale"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, MapPin, Lock, LinkIcon, Globe, Users, FileText, Tag, ImageIcon } from "lucide-react"
+import { Calendar, MapPin, Lock, LinkIcon, Globe, Users, FileText, Tag, ImageIcon, Clock } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, Sparkles } from "lucide-react"
 
@@ -95,6 +95,22 @@ export function Zusammenfassung({ data }: ZusammenfassungProps) {
   const isComplete =
     data.titel.trim().length > 0 && data.kategorie.trim().length > 0 && data.beschreibung.trim().length > 0
 
+  // Formatiere die Uhrzeit, falls vorhanden
+  const formatTimeIfAvailable = (date?: Date) => {
+    if (!date) return null
+
+    const hours = date.getHours()
+    const minutes = date.getMinutes()
+
+    // Prüfe, ob eine Uhrzeit gesetzt wurde (nicht 00:00)
+    if (hours === 0 && minutes === 0) return null
+
+    return format(date, "HH:mm")
+  }
+
+  // Formatierte Uhrzeit
+  const formattedTime = formatTimeIfAvailable(data.datum)
+
   return (
     <div className="space-y-6">
       <div>
@@ -114,7 +130,7 @@ export function Zusammenfassung({ data }: ZusammenfassungProps) {
       <div className="bg-white/5 rounded-lg border border-white/10 overflow-hidden">
         <div className="p-4 border-b border-white/10">
           <h2 className="text-xl font-semibold">{data.titel || "Kein Titel angegeben"}</h2>
-          <div className="flex items-center mt-2 text-sm text-gray-300">
+          <div className="flex flex-wrap items-center mt-2 text-sm text-gray-300 gap-y-2">
             <Badge variant="outline" className="mr-2 bg-primary/20 border-primary/30">
               {kategorienMap[data.kategorie] || "Keine Kategorie"}
               {data.unterkategorie && findUnterkategorieName(data.kategorie, data.unterkategorie) && (
@@ -124,10 +140,22 @@ export function Zusammenfassung({ data }: ZusammenfassungProps) {
                 </span>
               )}
             </Badge>
-            <span className="flex items-center mr-3">
-              <Calendar className="h-3.5 w-3.5 mr-1 opacity-70" />
-              {data.datum ? format(data.datum, "PPP", { locale: de }) : "Kein Datum angegeben"}
-            </span>
+
+            {/* Kombinierte Datum/Zeit-Anzeige */}
+            {data.datum && (
+              <div className="flex items-center mr-3">
+                <Calendar className="h-3.5 w-3.5 mr-1 opacity-70" />
+                <span>{format(data.datum, "PPP", { locale: de })}</span>
+                {formattedTime && (
+                  <>
+                    <Clock className="h-3.5 w-3.5 mx-1 opacity-70" />
+                    <span>{formattedTime} Uhr</span>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Ort-Anzeige */}
             {data.ort && (
               <span className="flex items-center">
                 <MapPin className="h-3.5 w-3.5 mr-1 opacity-70" />

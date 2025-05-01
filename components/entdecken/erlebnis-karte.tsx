@@ -1,313 +1,215 @@
 "use client"
 
-import React from "react"
+import type React from "react"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Calendar, MapPin, Eye, Heart, MessageSquare, MoreHorizontal, Bookmark, Share2, Flag } from "lucide-react"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Calendar, Clock, MapPin, MessageSquare, Bookmark } from "lucide-react"
+import { format } from "date-fns"
+import { de } from "date-fns/locale"
 import { Button } from "@/components/ui/button"
-import { UserLink } from "@/components/user-link"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import type { Erlebnis } from "@/types/erlebnis"
-import { toast } from "@/components/ui/use-toast"
-import { ErlebnisAPI, UserAPI } from "@/lib/mock-api"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Copy } from "lucide-react"
+import { useState } from "react"
+import Link from "next/link"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { cn } from "@/lib/utils"
 
 interface ErlebnisKarteProps {
-  erlebnis: Erlebnis
+  id: string
+  titel: string
+  beschreibung: string
+  kategorie: string
+  unterkategorie?: string
+  datum?: Date
+  ort?: string
+  autor: {
+    id: string
+    name: string
+    avatar?: string
+  }
+  kommentare: number
+  lesezeichen: boolean
+  tags: string[]
+  bild?: string
+  kiZusammenfassung?: string
+  className?: string
   compact?: boolean
-  onUpdate?: (updatedErlebnis: Erlebnis) => void
 }
 
-export function ErlebnisKarte({ erlebnis, compact = false, onUpdate }: ErlebnisKarteProps) {
-  const router = useRouter()
-  const [liked, setLiked] = useState(false)
-  const [likesCount, setLikesCount] = useState(erlebnis.statistik?.likes || 0)
-  const [isBookmarked, setIsBookmarked] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+// Kategorien-Map
+const kategorienMap: Record<string, string> = {
+  traum: "Traum",
+  nahtoderfahrung: "Nahtoderfahrung",
+  intuition: "Intuition",
+  ufo: "UFO-Sichtung",
+  paranormal: "Paranormales",
+  synchronizitat: "Synchronizität",
+  spirituell: "Spirituelle Erfahrung",
+  psychodelisch: "Psychodelische Reisen",
+  sonstiges: "Sonstiges",
+}
 
-  // Check bookmark status on mount
-  React.useEffect(() => {
-    const checkBookmarkStatus = async () => {
-      try {
-        const { bookmarks } = await UserAPI.getUserBookmarks()
-        setIsBookmarked(bookmarks.some((b) => b.id === erlebnis.id))
-      } catch (error) {
-        console.error("Error checking bookmark status:", error)
-      }
-    }
+export function ErlebnisKarte({
+  id,
+  titel,
+  beschreibung,
+  kategorie,
+  unterkategorie,
+  datum,
+  ort,
+  autor,
+  kommentare,
+  lesezeichen: initialLesezeichen,
+  tags,
+  bild,
+  kiZusammenfassung,
+  className,
+  compact = false,
+}: ErlebnisKarteProps) {
+  const [lesezeichen, setLesezeichen] = useState(initialLesezeichen)
 
-    checkBookmarkStatus()
-  }, [erlebnis.id])
+  // Formatiere die Uhrzeit, falls vorhanden
+  const formatTimeIfAvailable = (date?: Date) => {
+    if (!date) return null
 
-  const handleLike = async (e: React.MouseEvent) => {
+    const hours = date.getHours()
+    const minutes = date.getMinutes()
+
+    // Prüfe, ob eine Uhrzeit gesetzt wurde (nicht 00:00)
+    if (hours === 0 && minutes === 0) return null
+
+    return format(date, "HH:mm")
+  }
+
+  // Formatierte Uhrzeit
+  const formattedTime = formatTimeIfAvailable(datum)
+
+  // Kürze die Beschreibung für die Kartenansicht
+  const kurzeBeschreibung = kiZusammenfassung || beschreibung
+  const maxLength = compact ? 80 : 150
+  const displayBeschreibung =
+    kurzeBeschreibung.length > maxLength ? `${kurzeBeschreibung.substring(0, maxLength)}...` : kurzeBeschreibung
+
+  // Toggle Lesezeichen
+  const toggleLesezeichen = (e: React.MouseEvent) => {
+    e.preventDefault()
     e.stopPropagation()
-
-    try {
-      setIsLoading(true)
-      const newLikedState = !liked
-      setLiked(newLikedState)
-      setLikesCount(newLikedState ? likesCount + 1 : likesCount - 1)
-
-      const result = await ErlebnisAPI.likeErlebnis(erlebnis.id, newLikedState)
-
-      if (result.success && onUpdate) {
-        onUpdate({
-          ...erlebnis,
-          statistik: {
-            ...erlebnis.statistik,
-            likes: result.likes,
-          },
-        })
-      }
-
-      if (newLikedState) {
-        toast({
-          description: "Dir gefällt dieses Erlebnis",
-          duration: 1500,
-        })
-      }
-    } catch (error) {
-      console.error("Error liking experience:", error)
-      // Revert on error
-      setLiked(!liked)
-      setLikesCount(liked ? likesCount - 1 : likesCount + 1)
-
-      toast({
-        title: "Fehler",
-        description: "Die Aktion konnte nicht durchgeführt werden.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
+    setLesezeichen(!lesezeichen)
   }
-
-  const handleBookmark = async (e: React.MouseEvent) => {
-    e.stopPropagation()
-
-    try {
-      setIsLoading(true)
-      const result = await UserAPI.toggleBookmark(erlebnis.id)
-      setIsBookmarked(result.isBookmarked)
-
-      toast({
-        description: result.message,
-        duration: 1500,
-      })
-    } catch (error) {
-      console.error("Error toggling bookmark:", error)
-      toast({
-        title: "Fehler",
-        description: "Die Aktion konnte nicht durchgeführt werden.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleShare = (e: React.MouseEvent) => {
-    e.stopPropagation()
-
-    // Create the URL for the experience
-    const shareUrl = `${window.location.origin}/erlebnis/${erlebnis.id}`
-
-    // Copy to clipboard
-    navigator.clipboard.writeText(shareUrl)
-
-    toast({
-      description: "Link in die Zwischenablage kopiert",
-      duration: 1500,
-    })
-  }
-
-  const handleReport = (e: React.MouseEvent) => {
-    e.stopPropagation()
-
-    toast({
-      title: "Erlebnis gemeldet",
-      description: "Vielen Dank für deine Meldung. Wir werden den Inhalt überprüfen.",
-      duration: 3000,
-    })
-  }
-
-  const handleCardClick = () => {
-    router.push(`/erlebnis/${erlebnis.id}`)
-  }
-
-  const handleUserLinkClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-  }
-
-  const handleMenuClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-  }
-
-  // Sicherstellen, dass erlebnis.medien existiert und ein Array ist
-  const medien = Array.isArray(erlebnis.medien) ? erlebnis.medien : []
-  const mainImage = medien.length > 0 ? medien[0].url : "/placeholder.svg"
 
   return (
-    <Card
-      className={`overflow-hidden transition-all duration-300 hover:shadow-md cursor-pointer ${compact ? "h-full" : ""}`}
-      onClick={handleCardClick}
-    >
-      <div className="relative">
-        <img
-          src={mainImage || "/placeholder.svg"}
-          alt={erlebnis.titel}
-          className={`w-full object-cover ${compact ? "h-32" : "h-48"}`}
-          onError={(e) => {
-            // Fallback for broken images
-            ;(e.target as HTMLImageElement).src = "/placeholder.svg"
-          }}
-        />
-        {erlebnis.kategorie && (
-          <div className="absolute top-2 left-2">
-            <Badge style={{ backgroundColor: erlebnis.kategorie.farbe }} className="text-white">
-              {erlebnis.kategorie.name}
-            </Badge>
+    <Link href={`/erlebnis/${id}`} passHref>
+      <Card
+        className={cn(
+          "h-full overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:border-primary/30 cursor-pointer bg-white/5 border-white/10 text-white",
+          className,
+        )}
+      >
+        {bild && !compact && (
+          <div className="relative w-full h-40 overflow-hidden">
+            <img
+              src={bild || "/placeholder.svg"}
+              alt={titel}
+              className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           </div>
         )}
-        <div className="absolute top-2 right-2" onClick={handleMenuClick}>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="bg-white/80 hover:bg-white/90 dark:bg-slate-800/80 dark:hover:bg-slate-800/90"
-                disabled={isLoading}
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleBookmark}>
-                <Bookmark className={`h-4 w-4 mr-2 ${isBookmarked ? "fill-current text-blue-500" : ""}`} />
-                {isBookmarked ? "Aus Lesezeichen entfernen" : "Als Lesezeichen speichern"}
-              </DropdownMenuItem>
 
-              <Popover>
-                <PopoverTrigger asChild>
-                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Teilen
-                  </DropdownMenuItem>
-                </PopoverTrigger>
-                <PopoverContent className="w-56 p-2" align="start">
-                  <div className="grid gap-1">
-                    <Button
-                      variantt="ghost"
-                      size="sm"
-                      className="flex items-center justify-start gap-2 w-full"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        const shareUrl = `${window.location.origin}/erlebnis/${erlebnis.id}`
-                        navigator.clipboard.writeText(shareUrl)
-                        toast({
-                          description: "Link in die Zwischenablage kopiert",
-                          duration: 1500,
-                        })
-                      }}
-                    >
-                      <Copy className="h-4 w-4" />
-                      <span>Link kopieren</span>
-                    </Button>
-                  </div>
-                </PopoverContent>
-              </Popover>
+        <CardHeader className={cn("pb-2", compact && "p-3")}>
+          <div className="flex justify-between items-start">
+            <Badge variant="outline" className="mb-2 bg-primary/20 border-primary/30">
+              {kategorienMap[kategorie] || kategorie}
+              {unterkategorie && (
+                <span className="ml-1">
+                  {" • "}
+                  {unterkategorie}
+                </span>
+              )}
+            </Badge>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-8 w-8 rounded-full",
+                lesezeichen ? "text-yellow-400 hover:text-yellow-500" : "text-gray-400 hover:text-gray-300",
+              )}
+              onClick={toggleLesezeichen}
+              aria-label={lesezeichen ? "Von Lesezeichen entfernen" : "Zu Lesezeichen hinzufügen"}
+            >
+              <Bookmark className={cn("h-5 w-5", lesezeichen && "fill-current")} />
+            </Button>
+          </div>
+          <h3 className={cn("font-semibold leading-tight", compact ? "text-base" : "text-lg")}>{titel}</h3>
+        </CardHeader>
 
-              <DropdownMenuItem onClick={handleReport} className="text-red-500">
-                <Flag className="h-4 w-4 mr-2" />
-                Melden
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
+        <CardContent className={cn("py-2", compact && "p-3 pt-0")}>
+          <p className={cn("text-gray-300 line-clamp-3", compact && "text-sm line-clamp-2")}>{displayBeschreibung}</p>
+        </CardContent>
 
-      <CardContent className={`pt-4 ${compact ? "pb-2" : ""}`}>
-        <h3 className={`font-semibold mb-2 ${compact ? "text-base" : "text-lg"}`}>{erlebnis.titel}</h3>
-        {!compact && (
-          <p className="text-muted-foreground text-sm mb-3">
-            {erlebnis.kiZusammenfassung || erlebnis.kurzfassung || ""}
-          </p>
-        )}
+        <CardFooter className={cn("flex flex-col items-start pt-0", compact && "p-3")}>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400 mb-2 w-full">
+            {/* Kombinierte Datum/Zeit-Anzeige */}
+            {datum && (
+              <div className="flex items-center">
+                <Calendar className="h-3 w-3 mr-1" />
+                <span>{format(datum, "dd.MM.yyyy", { locale: de })}</span>
+                {formattedTime && (
+                  <>
+                    <Clock className="h-3 w-3 mx-1" />
+                    <span>{formattedTime}</span>
+                  </>
+                )}
+              </div>
+            )}
 
-        {!compact && erlebnis.tags && erlebnis.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-3">
-            {erlebnis.tags.slice(0, 4).map((tag, index) => (
-              <Badge key={index} variant="outline" className="text-xs">
-                #{tag}
-              </Badge>
-            ))}
-            {erlebnis.tags.length > 4 && (
-              <Badge variant="outline" className="text-xs">
-                +{erlebnis.tags.length - 4}
-              </Badge>
+            {/* Ort-Anzeige */}
+            {ort && (
+              <div className="flex items-center">
+                <MapPin className="h-3 w-3 mr-1" />
+                <span className="truncate max-w-[150px]">{ort}</span>
+              </div>
+            )}
+
+            {/* Kommentare-Anzeige */}
+            <div className="flex items-center ml-auto">
+              <MessageSquare className="h-3 w-3 mr-1" />
+              <span>{kommentare}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center w-full">
+            <Link
+              href={`/profil/${autor.id}`}
+              className="flex items-center hover:text-white"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Avatar className="h-6 w-6 mr-2">
+                <AvatarImage src={autor.avatar || "/placeholder.svg"} alt={autor.name} />
+                <AvatarFallback className="text-xs bg-primary/20">
+                  {autor.name.substring(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-xs">{autor.name}</span>
+            </Link>
+
+            {/* Tags (nur anzeigen, wenn nicht kompakt) */}
+            {!compact && tags.length > 0 && (
+              <div className="flex flex-wrap gap-1 ml-auto">
+                {tags.slice(0, 2).map((tag) => (
+                  <Badge key={tag} variant="outline" className="text-xs py-0 h-5 bg-white/5 border-white/10">
+                    {tag}
+                  </Badge>
+                ))}
+                {tags.length > 2 && (
+                  <Badge variant="outline" className="text-xs py-0 h-5 bg-white/5 border-white/10">
+                    +{tags.length - 2}
+                  </Badge>
+                )}
+              </div>
             )}
           </div>
-        )}
-
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <div className="flex items-center">
-            <Calendar className="h-3 w-3 mr-1" />
-            <span>{erlebnis.datum}</span>
-          </div>
-          {erlebnis.ort && (
-            <div className="flex items-center">
-              <MapPin className="h-3 w-3 mr-1" />
-              <span>{erlebnis.ort.name}</span>
-            </div>
-          )}
-        </div>
-      </CardContent>
-
-      <CardFooter className={`border-t pt-3 flex justify-between ${compact ? "pb-2" : ""}`}>
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-          <div className="flex items-center">
-            <Eye className="h-3 w-3 mr-1" />
-            <span>{erlebnis.statistik?.ansichten || 0}</span>
-          </div>
-          <Button
-            size="sm"
-            variant="ghost"
-            className={`flex items-center gap-1 p-0 h-auto ${liked ? "text-red-500" : ""}`}
-            onClick={handleLike}
-            disabled={isLoading}
-          >
-            <Heart className={`h-3 w-3 ${liked ? "fill-current" : ""}`} />
-            <span>{likesCount}</span>
-          </Button>
-          <div className="flex items-center">
-            <MessageSquare className="h-3 w-3 mr-1" />
-            <span>{erlebnis.statistik?.kommentare || 0}</span>
-          </div>
-        </div>
-
-        {erlebnis.autor && (
-          <div onClick={handleUserLinkClick}>
-            <UserLink
-              username={
-                typeof erlebnis.autor === "string"
-                  ? erlebnis.autor
-                  : erlebnis.autor.name || erlebnis.autor.username || "Unbekannt"
-              }
-              avatar={typeof erlebnis.autor === "string" ? undefined : erlebnis.autor.avatar}
-              isVerifiziert={
-                typeof erlebnis.autor === "string"
-                  ? false
-                  : erlebnis.autor.isVerifiziert || erlebnis.autor.verifiziert || false
-              }
-              size="sm"
-            />
-          </div>
-        )}
-      </CardFooter>
-    </Card>
+        </CardFooter>
+      </Card>
+    </Link>
   )
 }
