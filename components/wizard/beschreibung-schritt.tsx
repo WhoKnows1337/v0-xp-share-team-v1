@@ -79,6 +79,20 @@ export function BeschreibungSchritt({ data, updateData }: BeschreibungSchrittPro
     alert("Video wurde aufgenommen und wird in den Medien gespeichert. Die Transkription wird später verfügbar sein.")
   }
 
+  // Funktion zur Bestimmung der erkannten Kategorie basierend auf der Beschreibung
+  const getErkannteKategorie = () => {
+    const text = data.beschreibung.toLowerCase()
+    if (text.includes("traum")) {
+      return "Traum - Luzider Traum"
+    } else if (text.includes("meditation")) {
+      return "Meditation - Tiefenmeditation"
+    } else if (text.includes("licht")) {
+      return "UFO-Sichtung - Lichtphänomene"
+    } else {
+      return "Spirituelle Erfahrung - Bewusstseinserweiterung"
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div>
@@ -146,6 +160,37 @@ export function BeschreibungSchritt({ data, updateData }: BeschreibungSchrittPro
             </button>
           </div>
         </div>
+
+        {/* Automatisch erkannte Kategorie anzeigen, wenn Beschreibung länger als 50 Zeichen ist */}
+        {data.beschreibung.length >= 50 && (
+          <div className="mt-4 p-3 bg-green-900/20 border border-green-700/30 rounded-md animate-fadeIn">
+            <h4 className="text-green-400 font-medium flex items-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              Automatisch erkannte Kategorie
+            </h4>
+            <div className="mt-2 flex items-center">
+              <span className="text-white font-medium">Erkannt:</span>
+              <span className="ml-2 text-green-400 font-medium">{getErkannteKategorie()}</span>
+            </div>
+            <p className="mt-2 text-xs text-green-300/80">
+              Diese Kategorie wurde basierend auf deiner Beschreibung automatisch erkannt. Du kannst sie im
+              Kategorie-Schritt anpassen.
+            </p>
+          </div>
+        )}
 
         {showMediaRecorder && (
           <div className="mt-2 p-3 bg-slate-800/50 border border-slate-700/50 rounded-md">

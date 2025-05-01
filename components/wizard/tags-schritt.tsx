@@ -78,9 +78,6 @@ export function TagsSchritt({ data, updateData }: TagsSchrittProps) {
     if (e.key === "Enter") {
       e.preventDefault()
       addTag(inputValue)
-    } else if (e.key === "Tab" && suggestions.length > 0) {
-      e.preventDefault()
-      addTag(suggestions[0])
     }
   }
 

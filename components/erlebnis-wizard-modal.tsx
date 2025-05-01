@@ -48,8 +48,8 @@ export function ErlebnisWizardModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="max-w-4xl">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl max-h-[95vh] p-0 overflow-hidden">
+        <DialogHeader className="px-6 pt-6 pb-2">
           <DialogTitle>Neues Erlebnis erstellen</DialogTitle>
           <DialogDescription>
             Teile dein Erlebnis mit der Community. Fülle die folgenden Schritte aus, um dein Erlebnis zu erstellen.

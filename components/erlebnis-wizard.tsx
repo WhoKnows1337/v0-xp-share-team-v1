@@ -20,6 +20,14 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { WhiteboardImage } from "./whiteboard/whiteboard"
 import { AehnlicheFindenButton } from "./wizard/aehnliche-finden-button"
 
+// Scrollbar-Stile für Firefox
+const scrollbarStyles = `
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  }
+`
+
 // Konstante für localStorage-Keys
 const STORAGE_KEY_DATA = "erlebnis-wizard-data"
 const STORAGE_KEY_STEP = "erlebnis-wizard-schritt"
@@ -45,12 +53,13 @@ export type ErlebnisData = {
   privatsphare: "privat" | "link" | "offentlich" | "gruppe"
   gruppenId?: string
   lastUpdated?: number
+  autoErkannteKategorie?: string // Neue Eigenschaft für automatisch erkannte Kategorie
 }
 
 // Sinnvolle Standardwerte für alle Felder
 const initialData: ErlebnisData = {
   titel: "",
-  kategorie: "",
+  kategorie: "automatisch", // Automatisch erkennen als Standard
   unterkategorie: undefined,
   beschreibung: "",
   datum: new Date(), // Aktuelles Datum als Standard
@@ -61,6 +70,7 @@ const initialData: ErlebnisData = {
   whiteboardImages: [],
   mediaComments: [], // Initialisiere leeres Array für Kommentare
   privatsphare: "offentlich", // Öffentlich als Standard
+  autoErkannteKategorie: undefined, // Wird später durch KI gefüllt
 }
 
 interface ErlebnisWizardProps {
@@ -132,10 +142,11 @@ export function ErlebnisWizard({ onComplete }: ErlebnisWizardProps) {
     return () => clearInterval(autoSaveInterval)
   }, [data])
 
+  // Ändere die Reihenfolge der Schritte, um "Titel" an Position 0, "Beschreibung" an Position 1 und "Kategorie" an Position 2 zu setzen
   const schritte = [
     { name: "Titel", component: TitelSchritt },
-    { name: "Kategorie", component: KategorieSchritt },
     { name: "Beschreibung", component: BeschreibungSchritt },
+    { name: "Kategorie", component: KategorieSchritt },
     { name: "Datum", component: DatumSchritt },
     { name: "Ort", component: OrtSchritt },
     { name: "Tags", component: TagsSchritt },
@@ -282,115 +293,128 @@ export function ErlebnisWizard({ onComplete }: ErlebnisWizardProps) {
   }
 
   return (
-    <Card className="bg-white/10 backdrop-blur-sm border-none text-white">
-      <CardContent className="p-6">
-        {/* Miniaturisierte Navigations-Icons in den oberen Ecken */}
-        <div className="relative h-8">
-          {schritt > 0 && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={prevStep}
-              className="absolute left-0 top-0 h-6 w-6 rounded-full bg-slate-800/60 hover:bg-primary/60 text-white border border-slate-700/50 shadow-sm transition-all duration-200"
-              aria-label="Zurück zum vorherigen Schritt"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="m15 18-6-6 6-6" />
-              </svg>
-            </Button>
-          )}
-          {schritt < schritte.length - 1 && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={nextStep}
-              className="absolute right-0 top-0 h-6 w-6 rounded-full bg-slate-800/60 hover:bg-primary/60 text-white border border-slate-700/50 shadow-sm transition-all duration-200"
-              aria-label="Weiter zum nächsten Schritt"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="m9 18 6-6-6-6" />
-              </svg>
-            </Button>
-          )}
-        </div>
-
-        {/* Fortschrittsanzeige mit mehr Abstand nach oben */}
-        <div className="mb-6 mt-4">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium">
-              Schritt {schritt + 1} von {schritte.length}: {schritte[schritt].name}
-            </span>
-            <div className="flex items-center gap-2">
-              {autoSaveStatus === "saving" && <span className="text-sm text-gray-400">Speichern...</span>}
-              {autoSaveStatus === "saved" && (
-                <span className="text-sm text-green-400 flex items-center">
-                  <Check className="h-3 w-3 mr-1" /> Gespeichert
+    <>
+      {/* Scrollbar-Stile für Webkit-Browser */}
+      <style jsx global>{`
+        .scrollbar-thin::-webkit-scrollbar {
+          width: 6px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+          background-color: rgba(255, 255, 255, 0.2);
+          border-radius: 3px;
+        }
+      `}</style>
+      <Card className="bg-white/10 backdrop-blur-sm border-none text-white max-h-[90vh] flex flex-col">
+        <CardContent className="p-6 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+          {/* Fortschrittsanzeige mit mehr Abstand nach oben */}
+          <div className="mb-6 mt-4">
+            <div className="flex justify-between items-center mb-2">
+              <div className="flex items-center">
+                {schritt > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={prevStep}
+                    className="h-6 w-6 mr-2 rounded-full bg-slate-800/60 hover:bg-primary/60 text-white border border-slate-700/50 shadow-sm transition-all duration-200"
+                    aria-label="Zurück zum vorherigen Schritt"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="m15 18-6-6 6-6" />
+                    </svg>
+                  </Button>
+                )}
+                <span className="text-sm font-medium">
+                  Schritt {schritt + 1} von {schritte.length}: {schritte[schritt].name}
                 </span>
-              )}
-              {data.lastUpdated && autoSaveStatus === "idle" && (
-                <span className="text-sm text-gray-400">
-                  Zuletzt gespeichert: {new Date(data.lastUpdated).toLocaleTimeString()}
-                </span>
-              )}
-              <span className="text-sm">{Math.round(fortschritt)}%</span>
+                {schritt < schritte.length - 1 && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={nextStep}
+                    className="h-6 w-6 ml-2 rounded-full bg-slate-800/60 hover:bg-primary/60 text-white border border-slate-700/50 shadow-sm transition-all duration-200"
+                    aria-label="Weiter zum nächsten Schritt"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="m9 18 6-6-6-6" />
+                    </svg>
+                  </Button>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                {autoSaveStatus === "saving" && <span className="text-sm text-gray-400">Speichern...</span>}
+                {autoSaveStatus === "saved" && (
+                  <span className="text-sm text-green-400 flex items-center">
+                    <Check className="h-3 w-3 mr-1" /> Gespeichert
+                  </span>
+                )}
+                {data.lastUpdated && autoSaveStatus === "idle" && (
+                  <span className="text-sm text-gray-400">
+                    Zuletzt gespeichert: {new Date(data.lastUpdated).toLocaleTimeString()}
+                  </span>
+                )}
+                <span className="text-sm">{Math.round(fortschritt)}%</span>
+              </div>
             </div>
+            <Progress
+              value={fortschritt}
+              className="h-2 bg-white/10"
+              indicatorStyle={{
+                background: "linear-gradient(90deg, #1e40af, #00ff7f)",
+                boxShadow: "0 0 10px rgba(0, 255, 127, 0.5)",
+              }}
+            />
           </div>
-          <Progress
-            value={fortschritt}
-            className="h-2 bg-white/10"
-            indicatorStyle={{
-              background: "linear-gradient(90deg, #1e40af, #00ff7f)",
-              boxShadow: "0 0 10px rgba(0, 255, 127, 0.5)",
-            }}
-          />
-        </div>
 
-        {!isOnline && (
-          <Alert className="mb-4 bg-yellow-900/30 border-yellow-800 text-white">
-            <WifiOff className="h-4 w-4 mr-2" />
-            <AlertDescription>
-              Du bist offline. Deine Änderungen werden lokal gespeichert und automatisch synchronisiert, sobald du
-              wieder online bist.
-            </AlertDescription>
-          </Alert>
-        )}
+          {!isOnline && (
+            <Alert className="mb-4 bg-yellow-900/30 border-yellow-800 text-white">
+              <WifiOff className="h-4 w-4 mr-2" />
+              <AlertDescription>
+                Du bist offline. Deine Änderungen werden lokal gespeichert und automatisch synchronisiert, sobald du
+                wieder online bist.
+              </AlertDescription>
+            </Alert>
+          )}
 
-        {/* Aria-live Region für Screenreader-Ankündigungen */}
-        <div className="sr-only" aria-live="polite">
-          Schritt {schritt + 1} von {schritte.length}: {schritte[schritt].name}
-        </div>
+          {/* Aria-live Region für Screenreader-Ankündigungen */}
+          <div className="sr-only" aria-live="polite">
+            Schritt {schritt + 1} von {schritte.length}: {schritte[schritt].name}
+          </div>
 
-        <div role="form" aria-label={`Erlebnis erstellen: ${schritte[schritt].name}`}>
-          <CurrentComponent data={data} updateData={updateData} />
-        </div>
+          <div role="form" aria-label={`Erlebnis erstellen: ${schritte[schritt].name}`} className="mb-20">
+            <CurrentComponent data={data} updateData={updateData} />
+          </div>
+        </CardContent>
 
-        <div className="flex justify-between mt-8">
-          <div className="flex items-center">
+        <div className="flex justify-between p-4 border-t border-white/10 bg-black/20 sticky bottom-0">
+          <div className="flex items-center flex-wrap gap-2">
             {schritt > 0 && (
               <Button
                 variant="ghost"
                 onClick={prevStep}
-                className="mr-2 border border-white text-white hover:bg-white/20"
+                className="border border-white text-white hover:bg-white/20"
                 aria-label="Zurück zum vorherigen Schritt"
               >
                 Zurück
@@ -418,7 +442,7 @@ export function ErlebnisWizard({ onComplete }: ErlebnisWizardProps) {
             <Button
               variant="ghost"
               onClick={resetForm}
-              className="ml-2 border border-red-500 text-red-400 hover:bg-red-900/20"
+              className="border border-red-500 text-red-400 hover:bg-red-900/20"
               aria-label="Formular zurücksetzen"
             >
               Zurücksetzen
@@ -426,7 +450,7 @@ export function ErlebnisWizard({ onComplete }: ErlebnisWizardProps) {
 
             {/* Füge den "Ähnliche finden"-Button hinzu, aber nur im Zusammenfassungs-Schritt */}
             {schritt === schritte.length - 1 && (
-              <div className="ml-2">
+              <div className="ml-0 sm:ml-2 mt-2 sm:mt-0">
                 <AehnlicheFindenButton data={data} />
               </div>
             )}
@@ -470,18 +494,7 @@ export function ErlebnisWizard({ onComplete }: ErlebnisWizardProps) {
             )}
           </div>
         </div>
-
-        {/* Tastaturnavigations-Hilfe für Barrierefreiheit */}
-        <div className="mt-6 text-sm text-gray-400 border-t border-white/10 pt-4">
-          <p className="font-medium mb-1">Tastaturnavigation:</p>
-          <ul className="list-disc list-inside space-y-1">
-            <li>Tab: Zwischen Elementen navigieren</li>
-            <li>Enter/Space: Button aktivieren oder Option auswählen</li>
-            <li>Pfeiltasten: In Auswahlfeldern navigieren</li>
-            <li>Escape: Dialoge schließen</li>
-          </ul>
-        </div>
-      </CardContent>
-    </Card>
+      </Card>
+    </>
   )
 }

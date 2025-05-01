@@ -4,21 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import type { ErlebnisData } from "../erlebnis-wizard"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import {
-  Moon,
-  Sparkles,
-  Zap,
-  Rocket,
-  Ghost,
-  Lightbulb,
-  Compass,
-  HelpCircle,
-  Cpu,
-  ChevronDown,
-  ChevronUp,
-  X,
-  Search,
-} from "lucide-react"
+import { Moon, Sparkles, Zap, Rocket, Ghost, Lightbulb, Compass, HelpCircle, Cpu, X, Search, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
@@ -28,8 +14,14 @@ interface KategorieSchrittProps {
   updateData: (data: Partial<ErlebnisData>) => void
 }
 
-// Hauptkategorien
+// Hauptkategorien - Reihenfolge angepasst
 const hauptkategorien = [
+  {
+    id: "automatisch",
+    name: "Automatisch erkennen",
+    icon: Cpu,
+    description: "KI analysiert deine Beschreibung und wählt die passende Kategorie",
+  },
   { id: "traum", name: "Traum", icon: Moon, description: "Luzide Träume, wiederkehrende Träume, prophetische Träume" },
   {
     id: "nahtoderfahrung",
@@ -69,12 +61,6 @@ const hauptkategorien = [
     description: "Erfahrungen mit veränderten Bewusstseinszuständen und visionären Erlebnissen",
   },
   { id: "sonstiges", name: "Sonstiges", icon: HelpCircle, description: "Andere außergewöhnliche Erfahrungen" },
-  {
-    id: "automatisch",
-    name: "Automatisch erkennen",
-    icon: Cpu,
-    description: "KI analysiert deine Beschreibung und wählt die passende Kategorie",
-  },
 ]
 
 // Unterkategorien für jede Hauptkategorie
@@ -389,6 +375,21 @@ export function KategorieSchritt({ data, updateData }: KategorieSchrittProps) {
   const [subcategoryFilter, setSubcategoryFilter] = useState("")
   const [showSubcategoryInput, setShowSubcategoryInput] = useState(false)
 
+  // State für automatisch erkannte Kategorie
+  const [autoErkannteKategorie, setAutoErkannteKategorie] = useState<string>("traum")
+
+  // State für automatisch erkannte Unterkategorie
+  const [autoErkannteUnterkategorie, setAutoErkannteUnterkategorie] = useState<string | null>("traum-luzid")
+
+  // Stelle sicher, dass die automatisch erkannte Kategorie immer verfügbar ist
+  useEffect(() => {
+    // Wenn keine Kategorie erkannt wurde, setze eine Standard-Mock-Kategorie
+    if (!autoErkannteKategorie) {
+      setAutoErkannteKategorie("traum")
+      updateData({ autoErkannteKategorie: "traum" })
+    }
+  }, [autoErkannteKategorie, updateData])
+
   // Setze den Fokus auf die erste Option, wenn keine Kategorie ausgewählt ist
   useEffect(() => {
     if (!data.kategorie && firstOptionRef.current) {
@@ -452,8 +453,28 @@ export function KategorieSchritt({ data, updateData }: KategorieSchrittProps) {
     return null
   }
 
+  // Finde den Namen der automatisch erkannten Kategorie
+  const getAutoErkannteKategorieName = () => {
+    if (!autoErkannteKategorie) return null
+
+    const kategorie = hauptkategorien.find((k) => k.id === autoErkannteKategorie)
+    return kategorie ? kategorie.name : null
+  }
+
+  // Finde den Namen der automatisch erkannten Unterkategorie
+  const getAutoErkannteUnterkategorieName = () => {
+    if (!autoErkannteUnterkategorie) return null
+
+    for (const categoryId in unterkategorien) {
+      const subcat = unterkategorien[categoryId].find((s) => s.id === autoErkannteUnterkategorie)
+      if (subcat) return subcat.name
+    }
+
+    return null
+  }
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-16">
       <div>
         <h3 className="text-xl font-semibold mb-2">Wähle eine Kategorie für dein Erlebnis</h3>
         <p className="text-gray-300 mb-4">
@@ -485,7 +506,7 @@ export function KategorieSchritt({ data, updateData }: KategorieSchrittProps) {
       )}
 
       <RadioGroup
-        value={data.kategorie}
+        value={data.kategorie || "automatisch"} // Standardmäßig "automatisch" auswählen
         onValueChange={(value) => {
           updateData({ kategorie: value })
           // Wenn eine neue Kategorie ausgewählt wird, setze die Unterkategorie zurück
@@ -552,13 +573,19 @@ export function KategorieSchritt({ data, updateData }: KategorieSchrittProps) {
                       {kategorie.description}
                     </p>
 
-                    {/* Indikator für Unterkategorien (nur anzeigen, wenn Unterkategorien vorhanden sind) */}
-                    {hasSubcats && !isAutomatisch && (
-                      <div className="mt-2 text-xs text-primary/80">
-                        {isExpanded ? (
-                          <ChevronUp className="h-3 w-3 inline-block" />
-                        ) : (
-                          <ChevronDown className="h-3 w-3 inline-block" />
+                    {/* Anzeige der automatisch erkannten Kategorie unter der Beschreibung */}
+                    {isAutomatisch && autoErkannteKategorie && (
+                      <div className="mt-2 space-y-1">
+                        <div className="flex items-center">
+                          <Check className="h-4 w-4 mr-1 text-green-400" />
+                          <span className="text-green-400 font-medium">Erkannt: {getAutoErkannteKategorieName()}</span>
+                        </div>
+                        {autoErkannteUnterkategorie && (
+                          <div className="flex items-center pl-5">
+                            <span className="text-green-400/80 text-sm">
+                              Unterkategorie: {getAutoErkannteUnterkategorieName()}
+                            </span>
+                          </div>
                         )}
                       </div>
                     )}

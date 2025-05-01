@@ -83,6 +83,24 @@
   animation: bookmark 0.5s ease-in-out;
 }
 
+/* 
+Füge die Animation für das Einblenden der automatisch erkannten Kategorie hinzu
+*/
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
 /* Sidebar-spezifische Stile */
 .sidebar-width {
   width: 16rem; /* 256px oder 64 in Tailwind */
