@@ -8,6 +8,8 @@ import { RelevanteChannels } from "@/components/erlebnis/relevante-channels"
 import { AehnlicheErlebnisse } from "@/components/erlebnis/aehnliche-erlebnisse"
 import { ErlebnisAktionen } from "@/components/erlebnis/erlebnis-aktionen"
 import { ErlebnisMetadaten } from "@/components/erlebnis/erlebnis-metadaten"
+import { KIAnalyse } from "@/components/erlebnis/ki-analyse"
+import { MusterTrends } from "@/components/erlebnis/muster-trends"
 import { Loading } from "@/components/loading"
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar"
 import { SkipLink } from "@/components/ui/skip-link"
@@ -73,6 +75,16 @@ export default function ErlebnisPage() {
     )
   }
 
+  // Extrahiere die benötigten Metadaten aus dem Erlebnis-Objekt
+  const kategorie = typeof erlebnis.kategorie === "object" ? erlebnis.kategorie.name : erlebnis.kategorie
+  const autor = typeof erlebnis.autor === "object" ? erlebnis.autor.name || erlebnis.autor.username : erlebnis.autor
+  const autorId = typeof erlebnis.autor === "object" ? erlebnis.autor.id : "unbekannt"
+  const tags = Array.isArray(erlebnis.tags) ? erlebnis.tags : []
+  const aufrufe = erlebnis.statistik?.ansichten || erlebnis.aufrufe || 0
+
+  // Extrahiere den Ortsnamen aus dem Ortsobjekt
+  const ortName = typeof erlebnis.ort === "object" ? erlebnis.ort.name : erlebnis.ort
+
   return (
     <>
       <SkipLink href="#erlebnis-content">Zum Erlebnis-Inhalt springen</SkipLink>
@@ -94,8 +106,25 @@ export default function ErlebnisPage() {
               {/* Rechte Spalte - Metadaten und Aktionen */}
               <div className="lg:col-span-1 space-y-6">
                 <ErlebnisAktionen erlebnis={erlebnis} />
-                <ErlebnisMetadaten erlebnis={erlebnis} />
-                <RelevanteChannels tags={erlebnis.tags} kategorie={erlebnis.kategorie?.name} />
+                <ErlebnisMetadaten
+                  kategorie={kategorie}
+                  unterkategorie={erlebnis.unterkategorie}
+                  datum={erlebnis.datum}
+                  ort={ortName}
+                  autor={autor}
+                  autorId={autorId}
+                  tags={tags}
+                  aufrufe={aufrufe}
+                />
+                {/* KI-Analyse hinzugefügt */}
+                <KIAnalyse erlebnis={erlebnis} />
+                <MusterTrends
+                  erlebnisId={erlebnis.id}
+                  muster={erlebnis.muster}
+                  trends={erlebnis.trends}
+                  einsichten={erlebnis.einsichten}
+                />
+                <RelevanteChannels tags={erlebnis.tags} kategorie={kategorie} />
                 <AehnlicheErlebnisse erlebnisse={erlebnis.aehnlicheErlebnisse || []} />
               </div>
             </div>

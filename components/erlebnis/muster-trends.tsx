@@ -1,139 +1,83 @@
 "use client"
 
-import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { TrendingUp, Lightbulb, Users, Sparkles } from "lucide-react"
+import { Lightbulb, TrendingUp, Zap } from "lucide-react"
 
 interface MusterTrendsProps {
   erlebnisId: string
+  muster?: string[]
+  trends?: string[]
+  einsichten?: string[]
 }
 
-export function MusterTrends({ erlebnisId }: MusterTrendsProps) {
-  const [isLoading, setIsLoading] = useState(false)
+export function MusterTrends({ erlebnisId, muster = [], trends = [], einsichten = [] }: MusterTrendsProps) {
+  // Fallback-Daten, falls keine übergeben wurden
+  const fallbackMuster = ["Bewusstseinserweiterung", "Spirituelle Transformation", "Außerkörperliche Erfahrung"]
 
-  // Mock-Daten für Muster und Trends
-  const musterData = {
-    haeufigeMuster: [
-      {
-        name: "Meditation als Auslöser",
-        beschreibung: "Tiefe Meditation geht häufig außerkörperlichen Erfahrungen voraus",
-        haeufigkeit: 78,
-      },
-      {
-        name: "Gefühl des Schwebens",
-        beschreibung: "Das Gefühl, über dem eigenen Körper zu schweben, ist ein wiederkehrendes Element",
-        haeufigkeit: 65,
-      },
-      {
-        name: "Zeitverzerrung",
-        beschreibung: "Verändertes Zeitempfinden während der Erfahrung",
-        haeufigkeit: 52,
-      },
-    ],
-    erkenntnisse: [
-      "Außerkörperliche Erfahrungen treten häufiger bei regelmäßig Meditierenden auf",
-      "Die Erfahrungen werden überwiegend als positiv und bereichernd beschrieben",
-      "Viele Berichte erwähnen eine veränderte Wahrnehmung von Raum und Zeit",
-    ],
-    aehnlicheCluster: [
-      {
-        name: "Luzide Träume",
-        aehnlichkeit: 72,
-        anzahlErlebnisse: 156,
-      },
-      {
-        name: "Tiefenmeditation",
-        aehnlichkeit: 68,
-        anzahlErlebnisse: 89,
-      },
-      {
-        name: "Spirituelle Erfahrungen",
-        aehnlichkeit: 61,
-        anzahlErlebnisse: 124,
-      },
-    ],
-  }
+  const fallbackTrends = [
+    "Zunehmende Berichte über Astralreisen",
+    "Verbindung zu Meditation und Achtsamkeit",
+    "Interesse an transpersonaler Psychologie",
+  ]
+
+  const fallbackEinsichten = [
+    "Verbindung zwischen Traumzuständen und Bewusstseinserweiterung",
+    "Ähnlichkeiten zu schamanischen Reisen",
+    "Potenzial für persönliches Wachstum",
+  ]
+
+  // Verwende übergebene Daten oder Fallbacks
+  const anzuzeigendeMuster = muster?.length > 0 ? muster : fallbackMuster
+  const anzuzeigendeTrends = trends?.length > 0 ? trends : fallbackTrends
+  const anzuzeigendeEinsichten = einsichten?.length > 0 ? einsichten : fallbackEinsichten
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center mb-2">
-        <TrendingUp className="h-5 w-5 mr-2 text-primary" />
-        <h2 className="text-xl font-bold">Muster & Trends</h2>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center">
-              <Sparkles className="h-5 w-5 mr-2 text-amber-500" />
-              Häufige Muster
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {musterData.haeufigeMuster.map((muster, index) => (
-                <div key={index}>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="font-medium">{muster.name}</span>
-                    <Badge variant="outline">{muster.haeufigkeit}%</Badge>
-                  </div>
-                  <Progress value={muster.haeufigkeit} className="h-2 mb-1" />
-                  <p className="text-xs text-muted-foreground">{muster.beschreibung}</p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center">
-              <Lightbulb className="h-5 w-5 mr-2 text-yellow-500" />
-              Erkenntnisse
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2 list-disc pl-5">
-              {musterData.erkenntnisse.map((erkenntnis, index) => (
-                <li key={index} className="text-sm">
-                  {erkenntnis}
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg flex items-center">
-            <Users className="h-5 w-5 mr-2 text-blue-500" />
-            Ähnliche Erfahrungscluster
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {musterData.aehnlicheCluster.map((cluster, index) => (
-              <div key={index}>
-                <div className="flex justify-between items-center mb-1">
-                  <span className="font-medium">{cluster.name}</span>
-                  <div className="flex items-center space-x-2">
-                    <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20">
-                      {cluster.anzahlErlebnisse} Erlebnisse
-                    </Badge>
-                    <Badge variant="outline" className="bg-green-50 dark:bg-green-900/20">
-                      {cluster.aehnlichkeit}% Ähnlichkeit
-                    </Badge>
-                  </div>
-                </div>
-                <Progress value={cluster.aehnlichkeit} className="h-2" />
-              </div>
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg flex items-center">
+          <Zap className="h-5 w-5 mr-2 text-yellow-500" />
+          KI-Muster & Trends
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <h3 className="text-sm font-medium flex items-center mb-2">
+            <Lightbulb className="h-4 w-4 mr-1.5 text-yellow-500" />
+            Erkannte Muster
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {anzuzeigendeMuster.map((muster, index) => (
+              <Badge key={index} variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/30">
+                {muster}
+              </Badge>
             ))}
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-medium flex items-center mb-2">
+            <TrendingUp className="h-4 w-4 mr-1.5 text-blue-500" />
+            Aktuelle Trends
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {anzuzeigendeTrends.map((trend, index) => (
+              <Badge key={index} variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/30">
+                {trend}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        <div className="pt-2">
+          <h3 className="text-sm font-medium mb-2">KI-Einsichten</h3>
+          <ul className="text-xs text-gray-500 space-y-1 list-disc pl-4">
+            {anzuzeigendeEinsichten.map((einsicht, index) => (
+              <li key={index}>{einsicht}</li>
+            ))}
+          </ul>
+        </div>
+      </CardContent>
+    </Card>
   )
 }

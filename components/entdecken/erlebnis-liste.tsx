@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Grid, List, SlidersHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -10,7 +10,6 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { ErlebnisFilter } from "./erlebnis-filter"
 import { motion, AnimatePresence } from "framer-motion"
 import { ErlebnisKarte } from "./erlebnis-karte"
-import { useEffect, useRef } from "react"
 
 interface ErlebnisListeProps {
   erlebnisse: any[] // Verwenden Sie any[] für Flexibilität mit verschiedenen Datenstrukturen
@@ -30,7 +29,7 @@ interface ErlebnisListeProps {
 }
 
 export function ErlebnisListe({
-  erlebnisse,
+  erlebnisse = [], // Provide default empty array to prevent undefined errors
   ansicht,
   onLoadMore,
   isLoading,
@@ -183,25 +182,73 @@ export function ErlebnisListe({
           {viewMode === "grid" ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {erlebnisse.map((erlebnis) => (
-                <ErlebnisKarte key={erlebnis.id} erlebnis={erlebnis} />
+                <ErlebnisKarte
+                  key={erlebnis.id}
+                  erlebnis={erlebnis}
+                  // Add default props to prevent errors
+                  id={erlebnis.id || ""}
+                  titel={erlebnis.titel || ""}
+                  beschreibung={erlebnis.beschreibung || erlebnis.kurzfassung || ""}
+                  kategorie={
+                    typeof erlebnis.kategorie === "string" ? erlebnis.kategorie : erlebnis.kategorie?.name || ""
+                  }
+                  unterkategorie={erlebnis.unterkategorie}
+                  datum={erlebnis.datum ? new Date(erlebnis.datum) : undefined}
+                  ort={typeof erlebnis.ort === "string" ? erlebnis.ort : erlebnis.ort?.name}
+                  autor={
+                    typeof erlebnis.autor === "string"
+                      ? { id: erlebnis.autor, name: erlebnis.autor, avatar: undefined }
+                      : {
+                          id: erlebnis.autor?.id || "unknown",
+                          name: erlebnis.autor?.name || "Unbekannt",
+                          avatar: erlebnis.autor?.avatar,
+                        }
+                  }
+                  kommentare={erlebnis.kommentare || erlebnis.statistik?.kommentare || 0}
+                  lesezeichen={false}
+                  tags={erlebnis.tags || []}
+                  bild={erlebnis.medien?.[0]?.url}
+                  kiZusammenfassung={erlebnis.kiZusammenfassung}
+                />
               ))}
             </div>
           ) : (
             <div className="space-y-4">
               {erlebnisse.map((erlebnis) => (
-                <ErlebnisKarte key={erlebnis.id} erlebnis={erlebnis} compact />
+                <ErlebnisKarte
+                  key={erlebnis.id}
+                  erlebnis={erlebnis}
+                  compact
+                  // Add default props to prevent errors
+                  id={erlebnis.id || ""}
+                  titel={erlebnis.titel || ""}
+                  beschreibung={erlebnis.beschreibung || erlebnis.kurzfassung || ""}
+                  kategorie={
+                    typeof erlebnis.kategorie === "string" ? erlebnis.kategorie : erlebnis.kategorie?.name || ""
+                  }
+                  unterkategorie={erlebnis.unterkategorie}
+                  datum={erlebnis.datum ? new Date(erlebnis.datum) : undefined}
+                  ort={typeof erlebnis.ort === "string" ? erlebnis.ort : erlebnis.ort?.name}
+                  autor={
+                    typeof erlebnis.autor === "string"
+                      ? { id: erlebnis.autor, name: erlebnis.autor, avatar: undefined }
+                      : {
+                          id: erlebnis.autor?.id || "unknown",
+                          name: erlebnis.autor?.name || "Unbekannt",
+                          avatar: erlebnis.autor?.avatar,
+                        }
+                  }
+                  kommentare={erlebnis.kommentare || erlebnis.statistik?.kommentare || 0}
+                  lesezeichen={false}
+                  tags={erlebnis.tags || []}
+                  bild={erlebnis.medien?.[0]?.url}
+                  kiZusammenfassung={erlebnis.kiZusammenfassung}
+                />
               ))}
             </div>
           )}
         </motion.div>
       </AnimatePresence>
-
-      {erlebnisse.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">Keine Erlebnisse gefunden.</p>
-          <p className="text-muted-foreground">Versuche, deine Filter anzupassen.</p>
-        </div>
-      )}
 
       {/* Lade-Indikator für Infinite Scrolling */}
       {hasMore && onLoadMore && (

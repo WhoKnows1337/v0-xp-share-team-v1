@@ -572,6 +572,8 @@ export const mockErlebnisse: Erlebnis[] = [
     englishSummary:
       "This experience documents a case of precognitive intuition with life-saving consequences. The author describes a sudden, intense feeling of fear and a clear inner impulse to change his usual route without any recognizable external cause. The later confirmation that an accident occurred at exactly that time on his usual path suggests a form of premonition that is referred to in parapsychological research as 'precognition' or 'premonition'.",
     englishSummary:
+      "This experience documents a case of precognitive intuition with life-saving consequences. The author describes a sudden, intense feeling of fear and a clear inner impulse",
+    englishSummary:
       "This experience documents a case of precognitive intuition with life-saving consequences. The author describes a sudden, intense feeling of fear and a clear inner impulse to change his usual route without any recognizable external cause. The later confirmation that an accident occurred at exactly that time on his usual path suggests a form of premonition that is referred to in parapsychological research as 'precognition' or 'premonition'.",
     kiZusammenfassungStatus: "completed",
   },
