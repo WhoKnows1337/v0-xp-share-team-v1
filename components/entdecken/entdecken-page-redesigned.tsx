@@ -1,26 +1,23 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { mockErlebnisse } from "@/lib/mock-data"
-import { ErlebnisListe } from "./erlebnis-liste"
-import { ErlebnisFilter } from "./erlebnis-filter"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ErlebnisFilter } from "./erlebnis-filter"
+import { ErlebnisListe } from "./erlebnis-liste"
 import { InteractiveMap } from "../map/interactive-map"
-import { OrtFilter } from "./ort-filter"
-import { Container } from "@/components/ui/container"
-import { Button } from "@/components/ui/button"
-import { MapPin, List, Grid, SlidersHorizontal } from "lucide-react"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { ZeitStrahl } from "./zeit-strahl"
-import { SearchAutocomplete } from "./search-autocomplete"
+import { mockErlebnisse } from "@/lib/mock-data"
+import type { Erlebnis } from "@/types/erlebnis"
+import { Container } from "@/components/ui/container"
 import { useRouter, useSearchParams } from "next/navigation"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function EntdeckenPageRedesigned() {
-  // Ensure we have a default array of erlebnisse
-  const [erlebnisse, setErlebnisse] = useState<any[]>([])
-  const [filteredErlebnisse, setFilteredErlebnisse] = useState<any[]>([])
+  const [erlebnisse, setErlebnisse] = useState<Erlebnis[]>([])
+  const [filteredErlebnisse, setFilteredErlebnisse] = useState<Erlebnis[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [ansicht, setAnsicht] = useState<"karten" | "liste" | "karte" | "zeitstrahl">("karten")
+  const [ansicht, setAnsicht] = useState("liste")
+  const [selectedYear, setSelectedYear] = useState<number | null>(null)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [radius, setRadius] = useState(50) // Radius in km
@@ -29,100 +26,54 @@ export function EntdeckenPageRedesigned() {
   const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
   const searchParams = useSearchParams()
+  const [isInitialLoading, setIsInitialLoading] = useState(true)
+  const [selectedKategorien, setSelectedKategorien] = useState<string[]>([])
+  const [selectedTags2, setSelectedTags2] = useState<string[]>([])
+  const [zeitraumFilter, setZeitraumFilter] = useState<string>("alle")
+  const [ortFilter, setOrtFilter] = useState<string>("")
+  const [sortierung, setSortierung] = useState<string>("neueste")
+  const [anzeigeLimit, setAnzeigeLimit] = useState<number>(12)
+  const [hasMore, setHasMore] = useState<boolean>(false)
+  const [gefilterteErlebnisse, setGefilterteErlebnisse] = useState<any[]>([])
+  const [suchbegriff, setSuchbegriff] = useState<string>("")
 
-  // Lade Erlebnisse beim ersten Rendern
   useEffect(() => {
     // Simuliere API-Aufruf
-    setTimeout(() => {
-      setErlebnisse(mockErlebnisse || [])
-      setFilteredErlebnisse(mockErlebnisse || [])
-      setIsLoading(false)
-    }, 1000)
-
-    // Prüfe URL-Parameter
-    const query = searchParams?.get("q")
-    const kategorie = searchParams?.get("kategorie")
-    const tag = searchParams?.get("tag")
-
-    if (query) {
-      setSearchQuery(query)
+    const fetchData = async () => {
+      setIsLoading(true)
+      try {
+        // Simuliere Netzwerklatenz
+        await new Promise((resolve) => setTimeout(resolve, 800))
+        setErlebnisse(mockErlebnisse)
+        setFilteredErlebnisse(mockErlebnisse)
+      } catch (error) {
+        console.error("Fehler beim Laden der Erlebnisse:", error)
+      } finally {
+        setIsLoading(false)
+        setIsInitialLoading(false)
+      }
     }
 
-    if (kategorie) {
-      setSelectedCategories([kategorie])
-    }
+    fetchData()
+  }, [])
 
-    if (tag) {
-      setSelectedTags([tag])
-    }
-  }, [searchParams])
-
-  // Filtere Erlebnisse basierend auf Suchbegriff, Kategorien und Tags
-  useEffect(() => {
-    if (!erlebnisse || erlebnisse.length === 0) {
-      setFilteredErlebnisse([])
-      return
-    }
-
-    let filtered = [...erlebnisse]
-
-    // Filtere nach Suchbegriff
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase()
-      filtered = filtered.filter(
-        (erlebnis) =>
-          erlebnis.titel.toLowerCase().includes(query) ||
-          (erlebnis.beschreibung && erlebnis.beschreibung.toLowerCase().includes(query)) ||
-          (erlebnis.kurzfassung && erlebnis.kurzfassung.toLowerCase().includes(query)) ||
-          (erlebnis.tags && erlebnis.tags.some((tag: string) => tag.toLowerCase().includes(query))),
-      )
-    }
-
-    // Filtere nach Kategorien
-    if (selectedCategories.length > 0) {
-      filtered = filtered.filter((erlebnis) => {
-        const kategorieNamen =
-          typeof erlebnis.kategorie === "string" ? erlebnis.kategorie : erlebnis.kategorie?.name || ""
-
-        return selectedCategories.some((cat) => kategorieNamen.toLowerCase() === cat.toLowerCase())
-      })
-    }
-
-    // Filtere nach Tags
-    if (selectedTags.length > 0) {
-      filtered = filtered.filter(
-        (erlebnis) => erlebnis.tags && erlebnis.tags.some((tag: string) => selectedTags.includes(tag)),
-      )
-    }
-
-    // Filtere nach Standort
-    if (selectedLocation) {
-      filtered = filtered.filter((erlebnis) => {
-        if (!erlebnis.ort || !erlebnis.ort.koordinaten) return false
-
-        // Berechne Entfernung zwischen zwei Punkten (Haversine-Formel)
-        const R = 6371 // Erdradius in km
-        const lat1 = selectedLocation.lat
-        const lon1 = selectedLocation.lng
-        const lat2 = erlebnis.ort.koordinaten.lat
-        const lon2 = erlebnis.ort.koordinaten.lng
-
-        const dLat = ((lat2 - lat1) * Math.PI) / 180
-        const dLon = ((lon2 - lon1) * Math.PI) / 180
-
-        const a =
-          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-          Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
-
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-        const distance = R * c
-
-        return distance <= radius
-      })
-    }
-
+  const handleFilterChange = (filtered: Erlebnis[]) => {
     setFilteredErlebnisse(filtered)
-  }, [erlebnisse, searchQuery, selectedCategories, selectedTags, selectedLocation, radius])
+  }
+
+  const handleYearSelect = (year: number) => {
+    setSelectedYear(year)
+    const filtered = erlebnisse.filter((erlebnis) => {
+      const erlebnisJahr = new Date(erlebnis.datum).getFullYear()
+      return erlebnisJahr === year
+    })
+    setFilteredErlebnisse(filtered)
+  }
+
+  const handleViewChange = (view: string) => {
+    console.log("Ansicht geändert zu:", view)
+    setAnsicht(view)
+  }
 
   // Funktion zum Zurücksetzen aller Filter
   const resetAllFilters = () => {
@@ -159,139 +110,67 @@ export function EntdeckenPageRedesigned() {
     router.push(url.pathname + url.search)
   }
 
+  if (isInitialLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="space-y-6">
+          <Skeleton className="h-10 w-[200px]" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="rounded-lg overflow-hidden">
+                <Skeleton className="h-[200px] w-full" />
+                <div className="p-4 space-y-2">
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-2/3" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <Container className="py-8">
       <div className="flex flex-col space-y-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex flex-col gap-4">
           <h1 className="text-3xl font-bold">Erlebnisse entdecken</h1>
-
-          <div className="w-full md:w-auto">
-            <SearchAutocomplete
-              value={searchQuery}
-              onChange={setSearchQuery}
-              onSearch={(query) => {
-                setSearchQuery(query)
-                updateUrlWithParams({ q: query, kategorie: selectedCategories[0], tag: selectedTags[0] })
-              }}
-            />
-          </div>
+          <p className="text-muted-foreground">
+            Entdecke außergewöhnliche Erlebnisse von anderen Nutzern und lasse dich inspirieren.
+          </p>
         </div>
 
-        <Tabs defaultValue="karten" onValueChange={(value) => setAnsicht(value as any)}>
-          <div className="flex justify-between items-center mb-4">
-            <TabsList>
-              <TabsTrigger value="karten">
-                <Grid className="h-4 w-4 mr-2" />
-                Karten
-              </TabsTrigger>
-              <TabsTrigger value="liste">
-                <List className="h-4 w-4 mr-2" />
-                Liste
-              </TabsTrigger>
-              <TabsTrigger value="karte">
-                <MapPin className="h-4 w-4 mr-2" />
-                Karte
-              </TabsTrigger>
-              <TabsTrigger value="zeitstrahl">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-4 w-4 mr-2"
-                >
-                  <line x1="12" y1="2" x2="12" y2="22"></line>
-                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                </svg>
-                Zeitstrahl
-              </TabsTrigger>
-            </TabsList>
+        <ErlebnisFilter erlebnisse={erlebnisse} onFilterChange={handleFilterChange} />
 
-            <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-              <SheetTrigger asChild>
-                <Button variant="outline">
-                  <SlidersHorizontal className="h-4 w-4 mr-2" />
-                  Filter
-                </Button>
-              </SheetTrigger>
-              <SheetContent>
-                <ErlebnisFilter
-                  selectedCategories={selectedCategories}
-                  setSelectedCategories={setSelectedCategories}
-                  selectedTags={selectedTags}
-                  setSelectedTags={setSelectedTags}
-                  onFilterChange={() => {
-                    updateUrlWithParams({
-                      q: searchQuery,
-                      kategorie: selectedCategories[0],
-                      tag: selectedTags[0],
-                    })
-                    setIsFilterOpen(false)
-                  }}
-                  onReset={resetAllFilters}
-                />
-              </SheetContent>
-            </Sheet>
-          </div>
-
-          <TabsContent value="karten" className="mt-0">
-            <ErlebnisListe
-              erlebnisse={filteredErlebnisse}
-              ansicht="karten"
-              isLoading={isLoading}
-              hasMore={false}
-              onResetFilter={resetAllFilters}
-              filterValues={{
-                suchbegriff: searchQuery,
-                kategorien: selectedCategories,
-                tags: selectedTags,
-              }}
-            />
-          </TabsContent>
+        <Tabs defaultValue="liste" value={ansicht} onValueChange={handleViewChange} className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsTrigger value="liste">Liste</TabsTrigger>
+            <TabsTrigger value="karte">Karte</TabsTrigger>
+            <TabsTrigger value="zeitstrahl">Zeitstrahl</TabsTrigger>
+          </TabsList>
 
           <TabsContent value="liste" className="mt-0">
-            <ErlebnisListe
-              erlebnisse={filteredErlebnisse}
-              ansicht="kompakt"
-              isLoading={isLoading}
-              hasMore={false}
-              onResetFilter={resetAllFilters}
-              filterValues={{
-                suchbegriff: searchQuery,
-                kategorien: selectedCategories,
-                tags: selectedTags,
-              }}
-            />
+            <ErlebnisListe erlebnisse={filteredErlebnisse} isLoading={isLoading} />
           </TabsContent>
 
           <TabsContent value="karte" className="mt-0">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="md:col-span-1">
-                <OrtFilter
-                  selectedLocation={selectedLocation}
-                  setSelectedLocation={setSelectedLocation}
-                  radius={radius}
-                  setRadius={setRadius}
-                />
-              </div>
-              <div className="md:col-span-2">
-                <InteractiveMap
-                  erlebnisse={filteredErlebnisse}
-                  selectedLocation={selectedLocation}
-                  radius={radius}
-                  onLocationSelect={setSelectedLocation}
-                />
-              </div>
+            <div className="rounded-lg border bg-card">
+              <InteractiveMap erlebnisse={filteredErlebnisse} />
             </div>
           </TabsContent>
 
           <TabsContent value="zeitstrahl" className="mt-0">
-            <ZeitStrahl erlebnisse={filteredErlebnisse} />
+            <div className="rounded-lg border bg-card p-6">
+              <ZeitStrahl erlebnisse={erlebnisse} onYearSelect={handleYearSelect} selectedYear={selectedYear} />
+              <div className="mt-8">
+                <h3 className="text-lg font-medium mb-4">
+                  {selectedYear ? `Erlebnisse aus dem Jahr ${selectedYear}` : "Alle Erlebnisse"}
+                </h3>
+                <ErlebnisListe erlebnisse={filteredErlebnisse} isLoading={isLoading} />
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

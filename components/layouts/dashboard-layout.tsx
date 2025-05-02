@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { useSidebar } from "@/contexts/sidebar-context"
 import { Menu, Home, BarChart2, Compass, MessageSquare, Book, Settings, Users } from "lucide-react"
 
 interface DashboardLayoutProps {
@@ -20,7 +19,6 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children, activeTab }: DashboardLayoutProps) {
   const pathname = usePathname()
   const [isMobile, setIsMobile] = useState(false)
-  const { sidebarVisible } = useSidebar()
 
   useEffect(() => {
     const checkMobile = () => {
@@ -96,9 +94,9 @@ export function DashboardLayout({ children, activeTab }: DashboardLayoutProps) {
 
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar für Desktop */}
-      {!isMobile && sidebarVisible && (
-        <aside className="w-64 border-r bg-background hidden md:block">
+      {/* Sidebar für Desktop - IMMER anzeigen und fixiert */}
+      {!isMobile && (
+        <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 border-r bg-background hidden md:block z-40">
           <SidebarContent />
         </aside>
       )}
@@ -107,19 +105,19 @@ export function DashboardLayout({ children, activeTab }: DashboardLayoutProps) {
       {isMobile && (
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="md:hidden absolute left-4 top-4 z-50">
+            <Button variant="ghost" size="icon" className="md:hidden fixed left-4 top-20 z-50">
               <Menu className="h-6 w-6" />
               <span className="sr-only">Menü öffnen</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-64 p-0">
+          <SheetContent side="left" className="w-64 p-0 mt-16">
             <SidebarContent />
           </SheetContent>
         </Sheet>
       )}
 
       {/* Hauptinhalt */}
-      <main className={cn("flex-1", !sidebarVisible && "ml-0", sidebarVisible && !isMobile && "md:ml-0")}>
+      <main className={cn("flex-1", !isMobile && "md:ml-64 pt-16")}>
         <div className="container mx-auto px-4 py-6">{children}</div>
       </main>
     </div>

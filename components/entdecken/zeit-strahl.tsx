@@ -1,109 +1,116 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Slider } from "@/components/ui/slider"
 import { Button } from "@/components/ui/button"
-import { Play, Pause } from "lucide-react"
+import { cn } from "@/lib/utils"
+import type { Erlebnis } from "@/types/erlebnis"
 
 interface ZeitStrahlProps {
-  minJahr: number
-  maxJahr: number
-  onChange: (jahr: number) => void
-  initialJahr?: number
+  erlebnisse: Erlebnis[]
+  onYearSelect?: (year: number) => void
+  selectedYear: number | null
 }
 
-export function ZeitStrahl({ minJahr, maxJahr, onChange, initialJahr }: ZeitStrahlProps) {
-  const [jahr, setJahr] = useState<number>(initialJahr || minJahr)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const animationRef = useRef<number | null>(null)
-  const lastUpdateTimeRef = useRef<number>(0)
-  const speedRef = useRef<number>(1) // Jahre pro Sekunde
+export function ZeitStrahl({ erlebnisse, onYearSelect = () => {}, selectedYear }: ZeitStrahlProps) {
+  const [years, setYears] = useState<number[]>([])
+  const [counts, setCounts] = useState<Record<number, number>>({})
+  const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (initialJahr !== undefined) {
-      setJahr(initialJahr)
-    }
-  }, [initialJahr])
+    if (erlebnisse.length === 0) return
+
+    // Extrahiere alle Jahre aus den Erlebnissen
+    const erlebnisYears = erlebnisse.map((e) => new Date(e.datum).getFullYear())
+
+    // Finde das minimale und maximale Jahr
+    const minYear = Math.min(...erlebnisYears)
+    const maxYear = Math.max(...erlebnisYears)
+
+    // Erstelle ein Array mit allen Jahren im Bereich
+    const allYears = Array.from({ length: maxYear - minYear + 1 }, (_, i) => minYear + i)
+
+    // Zähle die Anzahl der Erlebnisse pro Jahr
+    const yearCounts: Record<number, number> = {}
+    erlebnisYears.forEach((year) => {
+      yearCounts[year] = (yearCounts[year] || 0) + 1
+    })
+
+    setYears(allYears)
+    setCounts(yearCounts)
+  }, [erlebnisse])
 
   useEffect(() => {
-    onChange(jahr)
-  }, [jahr, onChange])
+    // Scrolle zum ausgewählten Jahr, wenn eines ausgewählt ist
+    if (selectedYear && containerRef.current) {
+      const yearElement = document.getElementById(`year-${selectedYear}`)
+      if (yearElement) {
+        const containerRect = containerRef.current.getBoundingClientRect()
+        const yearRect = yearElement.getBoundingClientRect()
 
-  const animate = (time: number) => {
-    if (!lastUpdateTimeRef.current) {
-      lastUpdateTimeRef.current = time
-    }
-
-    const deltaTime = time - lastUpdateTimeRef.current
-    if (deltaTime > 1000 / speedRef.current) {
-      setJahr((prevJahr) => {
-        const newJahr = prevJahr + 1
-        if (newJahr > maxJahr) {
-          setIsPlaying(false)
-          return minJahr
-        }
-        return newJahr
-      })
-      lastUpdateTimeRef.current = time
-    }
-
-    if (isPlaying) {
-      animationRef.current = requestAnimationFrame(animate)
-    }
-  }
-
-  useEffect(() => {
-    if (isPlaying) {
-      animationRef.current = requestAnimationFrame(animate)
-    } else if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current)
-    }
-
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current)
+        containerRef.current.scrollLeft = yearElement.offsetLeft - containerRect.width / 2 + yearRect.width / 2
       }
     }
-  }, [isPlaying])
+  }, [selectedYear])
 
-  const togglePlay = () => {
-    setIsPlaying(!isPlaying)
-    lastUpdateTimeRef.current = 0
+  const handleYearClick = (year: number) => {
+    if (onYearSelect) {
+      onYearSelect(year)
+    }
   }
 
-  const handleChange = (values: number[]) => {
-    setJahr(values[0])
+  const getBarHeight = (count: number) => {
+    const maxCount = Math.max(...Object.values(counts))
+    const minHeight = 20 // Minimale Höhe in Pixeln
+    const maxHeight = 100 // Maximale Höhe in Pixeln
+
+    if (maxCount === 0) return minHeight
+
+    return minHeight + (count / maxCount) * (maxHeight - minHeight)
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <span className="text-sm font-medium">Zeitstrahl</span>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-            onClick={togglePlay}
-            aria-label={isPlaying ? "Pause" : "Abspielen"}
-          >
-            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-          </Button>
-          <span className="text-lg font-bold">{jahr}</span>
+    <div className="w-full">
+      <h3 className="text-lg font-medium mb-4">Zeitstrahl der Erlebnisse</h3>
+
+      <div
+        ref={containerRef}
+        className="relative w-full overflow-x-auto pb-6 pt-2 px-4"
+        style={{ scrollbarWidth: "thin" }}
+      >
+        <div className="flex items-end space-x-2 min-w-max">
+          {years.map((year) => {
+            const count = counts[year] || 0
+            const height = getBarHeight(count)
+
+            return (
+              <div key={year} id={`year-${year}`} className="flex flex-col items-center">
+                <Button
+                  variant={selectedYear === year ? "default" : "outline"}
+                  size="sm"
+                  className={cn(
+                    "px-3 py-1 text-xs rounded-md transition-all",
+                    selectedYear === year ? "bg-primary text-primary-foreground" : "hover:bg-accent",
+                  )}
+                  onClick={() => handleYearClick(year)}
+                >
+                  {year}
+                  {count > 0 && <span className="ml-1">({count})</span>}
+                </Button>
+
+                <div
+                  className={cn(
+                    "w-6 mt-1 rounded-t-sm transition-all",
+                    selectedYear === year ? "bg-primary" : "bg-muted-foreground/30",
+                  )}
+                  style={{ height: `${height}px` }}
+                />
+              </div>
+            )
+          })}
         </div>
-      </div>
-      <Slider
-        defaultValue={[jahr]}
-        min={minJahr}
-        max={maxJahr}
-        step={1}
-        value={[jahr]}
-        onValueChange={handleChange}
-        className="my-4"
-      />
-      <div className="flex justify-between text-xs text-muted-foreground">
-        <span>{minJahr}</span>
-        <span>{maxJahr}</span>
+
+        {/* Horizontale Linie */}
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-border" />
       </div>
     </div>
   )

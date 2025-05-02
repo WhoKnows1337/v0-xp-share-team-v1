@@ -117,3 +117,31 @@ Füge die Animation für das Einblenden der automatisch erkannten Kategorie hinz
     width: 100%;
   }
 }
+
+/* Fixierte Sidebar-Stile */
+.fixed-sidebar {
+  position: fixed;
+  top: 4rem; /* 64px für die Navbar-Höhe */
+  left: 0;
+  height: calc(100vh - 4rem);
+  overflow-y: auto;
+  z-index: 40;
+}
+
+/* Verhindert horizontales Scrollen bei fixierter Sidebar */
+html,
+body {
+  overflow-x: hidden;
+}
+
+/* Hauptinhalt-Padding für fixierte Elemente */
+.main-content {
+  padding-top: 4rem; /* 64px für die Navbar-Höhe */
+  padding-left: 16rem; /* 256px für die Sidebar-Breite */
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding-left: 0;
+  }
+}

@@ -2,32 +2,30 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
-import { Navbar } from "@/components/navbar"
-import { SkipLink } from "@/components/ui/skip-link"
-import { XPAssistant } from "@/components/xp-assistant/xp-assistant"
-import { ErlebnisWizardModal } from "@/components/erlebnis-wizard-modal"
+import { usePathname } from "next/navigation"
+import { DashboardLayout } from "@/components/layouts/dashboard-layout"
 
-export default function ClientLayout({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = useState(false)
+interface ClientLayoutProps {
+  children: React.ReactNode
+}
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+export default function ClientLayout({ children }: ClientLayoutProps) {
+  const pathname = usePathname()
 
-  if (!mounted) {
-    return null
+  // Bestimme den aktiven Tab basierend auf dem Pfadnamen
+  let activeTab = ""
+  if (pathname?.includes("/dashboard")) activeTab = "dashboard"
+  else if (pathname?.includes("/insights")) activeTab = "insights"
+  else if (pathname?.includes("/entdecken")) activeTab = "entdecken"
+  else if (pathname?.includes("/nachrichten")) activeTab = "nachrichten"
+  else if (pathname?.includes("/xp-buch")) activeTab = "xp-buch"
+  else if (pathname?.includes("/community")) activeTab = "community"
+  else if (pathname?.includes("/einstellungen")) activeTab = "einstellungen"
+
+  // Verwende das Dashboard-Layout für alle Seiten außer der Startseite
+  if (pathname === "/") {
+    return <>{children}</>
   }
 
-  return (
-    <>
-      <SkipLink />
-      <Navbar />
-      <main id="main-content" className="min-h-screen">
-        <div className="container mx-auto px-4 py-6">{children}</div>
-      </main>
-      <XPAssistant />
-      <ErlebnisWizardModal />
-    </>
-  )
+  return <DashboardLayout activeTab={activeTab}>{children}</DashboardLayout>
 }

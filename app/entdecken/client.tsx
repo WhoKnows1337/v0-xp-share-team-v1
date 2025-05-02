@@ -1,10 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { EntdeckenPage } from "@/components/entdecken/entdecken-page"
-import { Loading } from "@/components/loading"
+import { useState, useEffect } from "react"
+import { EntdeckenPageRedesigned } from "@/components/entdecken/entdecken-page-redesigned"
 
-export default function EntdeckenClient() {
+export function EntdeckenClient() {
   const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
@@ -12,8 +11,20 @@ export default function EntdeckenClient() {
   }, [])
 
   if (!isClient) {
-    return <Loading />
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-pulse flex flex-col items-center gap-4">
+          <div className="h-8 bg-muted rounded w-64"></div>
+          <div className="h-32 bg-muted rounded w-full max-w-3xl"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-64 bg-muted rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
   }
 
-  return <EntdeckenPage />
+  return <EntdeckenPageRedesigned />
 }

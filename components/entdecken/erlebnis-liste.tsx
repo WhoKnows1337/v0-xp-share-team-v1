@@ -98,6 +98,25 @@ export function ErlebnisListe({
   }
 
   // Wenn keine Erlebnisse vorhanden sind
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-16">
+        <div className="space-y-4 w-full max-w-md">
+          <div className="flex items-center space-x-4">
+            <Skeleton className="h-12 w-12 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-[250px]" />
+              <Skeleton className="h-4 w-[200px]" />
+            </div>
+          </div>
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-[150px] w-full rounded-md" />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   if (!erlebnisse || erlebnisse.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">

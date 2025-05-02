@@ -20,12 +20,11 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Benachrichtigungen } from "@/components/nachrichten/benachrichtigungen"
 import { NachrichtenButton } from "@/components/nachrichten/nachrichten-button"
 import { openErlebnisWizard } from "@/components/erlebnis-wizard-modal"
-import { Search, Menu, Plus, PanelLeft } from "lucide-react"
+import { Search, Menu, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getCurrentUser } from "@/lib/mock-users"
 import { getTotalUnreadMessages } from "@/lib/mock-messages"
 import { mockUsers } from "@/lib/mock-users"
-import { useSidebar } from "@/contexts/sidebar-context"
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -35,10 +34,6 @@ export function Navbar() {
   const router = useRouter()
   const currentUser = getCurrentUser()
   const currentUsername = currentUser?.username || "demo-user"
-  const { sidebarVisible, toggleSidebar } = useSidebar()
-
-  // Definiere showSidebarToggle basierend auf dem aktuellen Pfad
-  const showSidebarToggle = pathname?.includes("/dashboard") || pathname?.includes("/insights")
 
   useEffect(() => {
     const handleScroll = () => {
@@ -69,11 +64,6 @@ export function Navbar() {
     openErlebnisWizard()
   }
 
-  const handleToggleSidebar = () => {
-    console.log("Toggle sidebar, current state:", sidebarVisible)
-    toggleSidebar()
-  }
-
   const handleProfileClick = (e: React.MouseEvent) => {
     e.preventDefault()
     console.log("Navigiere zum Profil von:", currentUsername)
@@ -96,28 +86,13 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 w-full transition-all duration-200",
+        "fixed top-0 left-0 right-0 z-50 w-full transition-all duration-200",
         isScrolled ? "bg-background/80 backdrop-blur-md shadow-sm" : "bg-background",
       )}
     >
       <div className="container mx-auto flex h-16 items-center px-4">
         {/* Linke Seite - Logo und Mobile Menu */}
         <div className="flex items-center mr-4">
-          {/* Hamburger für Sidebar Toggle - nur auf bestimmten Seiten anzeigen */}
-          {showSidebarToggle && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleToggleSidebar}
-              className="mr-2"
-              aria-label={sidebarVisible ? "Seitenleiste ausblenden" : "Seitenleiste einblenden"}
-              aria-expanded={sidebarVisible}
-            >
-              <PanelLeft className="h-5 w-5" />
-              <span className="sr-only">Seitenleiste {sidebarVisible ? "ausblenden" : "einblenden"}</span>
-            </Button>
-          )}
-
           {/* Mobile Menu Trigger */}
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild className="md:hidden mr-2">

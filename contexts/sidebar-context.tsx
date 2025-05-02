@@ -17,30 +17,30 @@ const SidebarContext = createContext<SidebarContextType>({
 })
 
 export function SidebarProvider({ children }: { children: ReactNode }) {
-  // Initialisiere den Zustand aus dem localStorage, falls vorhanden
-  const [sidebarVisible, setSidebarVisible] = useState(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("sidebarVisible")
-      return saved !== null ? JSON.parse(saved) : true
-    }
-    return true
-  })
+  // Immer auf true initialisieren, damit die Sidebar immer sichtbar ist
+  const [sidebarVisible, setSidebarVisible] = useState(true)
 
+  // Diese Funktionen behalten wir bei, aber sie haben keinen Effekt mehr
   const toggleSidebar = () => {
-    console.log("Toggling sidebar from", sidebarVisible, "to", !sidebarVisible)
-    setSidebarVisible((prev) => !prev)
+    console.log("Sidebar toggle wurde aufgerufen, aber die Sidebar bleibt sichtbar")
+    // Wir setzen den Zustand nicht mehr, damit die Sidebar immer sichtbar bleibt
   }
 
-  const showSidebar = () => setSidebarVisible(true)
-  const hideSidebar = () => setSidebarVisible(false)
+  const showSidebar = () => {
+    setSidebarVisible(true)
+  }
 
-  // Speichere den Zustand im localStorage, wenn er sich ändert
+  const hideSidebar = () => {
+    console.log("Sidebar hide wurde aufgerufen, aber die Sidebar bleibt sichtbar")
+    // Wir setzen den Zustand nicht mehr, damit die Sidebar immer sichtbar bleibt
+  }
+
+  // Stellen Sie sicher, dass der Zustand im localStorage immer auf true gesetzt ist
   useEffect(() => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("sidebarVisible", JSON.stringify(sidebarVisible))
+      localStorage.setItem("sidebarVisible", "true")
     }
-    console.log("Sidebar context state changed:", sidebarVisible)
-  }, [sidebarVisible])
+  }, [])
 
   return (
     <SidebarContext.Provider value={{ sidebarVisible, toggleSidebar, showSidebar, hideSidebar }}>
