@@ -1,12 +1,14 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { openErlebnisWizard } from "../erlebnis-wizard-modal"
+import { useErlebnisWizard } from "../erlebnis-wizard-modal"
 
 export function CallToAction() {
+  const { openWizard } = useErlebnisWizard()
+
   const handleNewExperience = () => {
     console.log("Startseite CTA: Öffne ErlebnisWizard")
-    openErlebnisWizard()
+    openWizard()
   }
 
   return (

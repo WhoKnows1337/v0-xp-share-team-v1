@@ -22,7 +22,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
-import { openErlebnisWizard } from "../erlebnis-wizard-modal"
+import { useErlebnisWizard } from "../erlebnis-wizard-modal"
 import { UserLink } from "@/components/user-link"
 import { useRouter } from "next/navigation"
 
@@ -174,9 +174,11 @@ export function DashboardHome() {
   const [daysSinceLastExperience, setDaysSinceLastExperience] = useState(30)
   const router = useRouter()
 
+  const { openWizard } = useErlebnisWizard()
+
   const handleNewExperience = () => {
     console.log("Dashboard: Öffne ErlebnisWizard")
-    openErlebnisWizard()
+    openWizard()
   }
 
   const handleErlebnisClick = (item: any) => {

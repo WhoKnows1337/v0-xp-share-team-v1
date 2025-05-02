@@ -19,7 +19,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Benachrichtigungen } from "@/components/nachrichten/benachrichtigungen"
 import { NachrichtenButton } from "@/components/nachrichten/nachrichten-button"
-import { openErlebnisWizard } from "@/components/erlebnis-wizard-modal"
+import { useErlebnisWizard } from "@/components/erlebnis-wizard-modal"
 import { Search, Menu, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getCurrentUser } from "@/lib/mock-users"
@@ -58,10 +58,11 @@ export function Navbar() {
     return () => clearInterval(interval)
   }, [currentUser])
 
+  const { openWizard } = useErlebnisWizard()
+
   const handleNewExperience = () => {
     console.log("Navbar: Öffne ErlebnisWizard")
-    // Direkt aufrufen ohne Timeout
-    openErlebnisWizard()
+    openWizard()
   }
 
   const handleProfileClick = (e: React.MouseEvent) => {

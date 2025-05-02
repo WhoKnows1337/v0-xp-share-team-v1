@@ -1,53 +1,69 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import type React from "react"
+import { createContext, useContext, useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { ErlebnisWizard } from "./erlebnis-wizard"
+import { ErlebnisWizard } from "@/components/erlebnis-wizard"
 
-// Globaler Event-Emitter für das Öffnen des Wizards
-let wizardEventListeners: (() => void)[] = []
-
-export function addWizardOpenListener(listener: () => void) {
-  wizardEventListeners.push(listener)
-  return () => {
-    wizardEventListeners = wizardEventListeners.filter((l) => l !== listener)
-  }
+interface ErlebnisWizardContextType {
+  openWizard: () => void
+  closeWizard: () => void
+  isOpen: boolean
 }
 
-// Verbessere die Logging-Ausgaben für bessere Fehlerdiagnose
-export function openErlebnisWizard() {
-  console.log("openErlebnisWizard wurde aufgerufen, aktive Listener:", wizardEventListeners.length)
-  if (wizardEventListeners.length === 0) {
-    console.warn("Keine aktiven Listener für den ErlebnisWizard gefunden!")
+const ErlebnisWizardContext = createContext<ErlebnisWizardContextType | undefined>(undefined)
+
+export function useErlebnisWizard() {
+  const context = useContext(ErlebnisWizardContext)
+  if (!context) {
+    throw new Error("useErlebnisWizard must be used within a ErlebnisWizardProvider")
   }
-  wizardEventListeners.forEach((listener) => listener())
+  return context
 }
 
-export function ErlebnisWizardModal() {
+interface ErlebnisWizardProviderProps {
+  children: React.ReactNode
+}
+
+export function ErlebnisWizardProvider({ children }: ErlebnisWizardProviderProps) {
   const [isOpen, setIsOpen] = useState(false)
 
-  useEffect(() => {
-    // Registriere einen Listener für das Öffnen des Wizards
-    console.log("ErlebnisWizardModal: Registriere Listener")
-    const removeListener = addWizardOpenListener(() => {
-      console.log("ErlebnisWizard wird geöffnet")
-      setIsOpen(true)
-    })
+  const openWizard = () => {
+    console.log("ErlebnisWizard wird geöffnet")
+    setIsOpen(true)
+  }
 
-    // Cleanup beim Unmount
-    return () => {
-      console.log("ErlebnisWizardModal: Entferne Listener")
-      removeListener()
-    }
-  }, [])
-
-  const handleComplete = () => {
-    console.log("ErlebnisWizard: Abgeschlossen")
+  const closeWizard = () => {
+    console.log("ErlebnisWizard wird geschlossen")
     setIsOpen(false)
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <ErlebnisWizardContext.Provider value={{ openWizard, closeWizard, isOpen }}>
+      {children}
+    </ErlebnisWizardContext.Provider>
+  )
+}
+
+interface ErlebnisWizardModalProps {
+  isOpen: boolean
+  onClose: () => void
+}
+
+export function ErlebnisWizardModal({ isOpen, onClose }: ErlebnisWizardModalProps) {
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  const handleComplete = () => {
+    console.log("ErlebnisWizard: Abgeschlossen")
+    onClose()
+  }
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[95vh] p-0 overflow-hidden">
         <DialogHeader className="px-6 pt-6 pb-2">
           <DialogTitle>Neues Erlebnis erstellen</DialogTitle>
@@ -55,8 +71,30 @@ export function ErlebnisWizardModal() {
             Teile dein Erlebnis mit der Community. Fülle die folgenden Schritte aus, um dein Erlebnis zu erstellen.
           </DialogDescription>
         </DialogHeader>
-        {isOpen && <ErlebnisWizard onComplete={handleComplete} />}
+        {isMounted && isOpen && <ErlebnisWizard onComplete={handleComplete} />}
       </DialogContent>
     </Dialog>
+  )
+}
+
+// Für Abwärtskompatibilität mit bestehendem Code
+export function openErlebnisWizard() {
+  console.warn(
+    "Die Funktion openErlebnisWizard ist veraltet. Bitte verwenden Sie useErlebnisWizard().openWizard() stattdessen.",
+  )
+
+  // Versuche, den Context zu verwenden, wenn verfügbar
+  try {
+    const context = useContext(ErlebnisWizardContext)
+    if (context) {
+      context.openWizard()
+      return
+    }
+  } catch (error) {
+    console.error("Fehler beim Öffnen des ErlebnisWizards:", error)
+  }
+
+  console.error(
+    "ErlebnisWizardContext ist nicht verfügbar. Stellen Sie sicher, dass Sie den ErlebnisWizardProvider verwenden.",
   )
 }
