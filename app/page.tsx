@@ -9,10 +9,11 @@ import { XPAssistantProvider } from "@/components/xp-assistant-provider"
 import { SidebarProvider } from "@/contexts/sidebar-context"
 import { SkipLink } from "@/components/ui/skip-link"
 import { ErlebnisWizardProvider, ErlebnisWizardModal } from "@/components/erlebnis-wizard-modal"
+import { Startseite } from "@/components/startseite/startseite"
 
 const inter = Inter({ subsets: ["latin"] })
 
-export default function RootLayout({
+function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
@@ -49,4 +50,8 @@ import { useErlebnisWizard } from "@/components/erlebnis-wizard-modal"
 function ClientWizardModal() {
   const { isOpen, closeWizard } = useErlebnisWizard()
   return <ErlebnisWizardModal isOpen={isOpen} onClose={closeWizard} />
+}
+
+export default function Home() {
+  return <Startseite />
 }

@@ -34,6 +34,7 @@ export function Navbar() {
   const router = useRouter()
   const currentUser = getCurrentUser()
   const currentUsername = currentUser?.username || "demo-user"
+  const { openWizard } = useErlebnisWizard()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -57,8 +58,6 @@ export function Navbar() {
 
     return () => clearInterval(interval)
   }, [currentUser])
-
-  const { openWizard } = useErlebnisWizard()
 
   const handleNewExperience = () => {
     console.log("Navbar: Öffne ErlebnisWizard")
