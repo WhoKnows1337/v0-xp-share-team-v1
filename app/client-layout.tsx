@@ -2,30 +2,36 @@
 
 import type React from "react"
 
-import { usePathname } from "next/navigation"
-import { DashboardLayout } from "@/components/layouts/dashboard-layout"
+import { ThemeProvider } from "@/components/theme-provider"
+import { Navbar } from "@/components/navbar"
+import { Toaster } from "@/components/ui/toaster"
+import { XPAssistantProvider } from "@/components/xp-assistant-provider"
+import { SidebarProvider } from "@/contexts/sidebar-context"
+import { SkipLink } from "@/components/ui/skip-link"
+import { WizardModalWrapper } from "@/components/wizard-modal-wrapper"
+import { ErlebnisWizardProvider } from "@/components/erlebnis-wizard-modal"
+import { SubscriptionProvider } from "@/contexts/subscription-context"
 
-interface ClientLayoutProps {
+export default function ClientLayout({
+  children,
+}: {
   children: React.ReactNode
-}
-
-export default function ClientLayout({ children }: ClientLayoutProps) {
-  const pathname = usePathname()
-
-  // Bestimme den aktiven Tab basierend auf dem Pfadnamen
-  let activeTab = ""
-  if (pathname?.includes("/dashboard")) activeTab = "dashboard"
-  else if (pathname?.includes("/insights")) activeTab = "insights"
-  else if (pathname?.includes("/entdecken")) activeTab = "entdecken"
-  else if (pathname?.includes("/nachrichten")) activeTab = "nachrichten"
-  else if (pathname?.includes("/xp-buch")) activeTab = "xp-buch"
-  else if (pathname?.includes("/community")) activeTab = "community"
-  else if (pathname?.includes("/einstellungen")) activeTab = "einstellungen"
-
-  // Verwende das Dashboard-Layout für alle Seiten außer der Startseite
-  if (pathname === "/") {
-    return <>{children}</>
-  }
-
-  return <DashboardLayout activeTab={activeTab}>{children}</DashboardLayout>
+}) {
+  return (
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <SidebarProvider>
+        <SubscriptionProvider>
+          <XPAssistantProvider>
+            <ErlebnisWizardProvider>
+              <SkipLink />
+              <Navbar />
+              {children}
+              <WizardModalWrapper />
+              <Toaster />
+            </ErlebnisWizardProvider>
+          </XPAssistantProvider>
+        </SubscriptionProvider>
+      </SidebarProvider>
+    </ThemeProvider>
+  )
 }

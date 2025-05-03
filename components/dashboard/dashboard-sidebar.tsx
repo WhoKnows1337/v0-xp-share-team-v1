@@ -1,6 +1,18 @@
 "use client"
 import { cn } from "@/lib/utils"
-import { Home, Activity, Compass, User, TrendingUp, LogOut, FileText, Hash, Settings, Book } from "lucide-react"
+import {
+  Home,
+  Activity,
+  Compass,
+  User,
+  TrendingUp,
+  LogOut,
+  FileText,
+  Hash,
+  Settings,
+  Book,
+  BarChart2,
+} from "lucide-react"
 import { getCurrentUser } from "@/lib/mock-users"
 import { getTotalUnreadMessages } from "@/lib/mock-messages"
 import { useEffect, useState } from "react"
@@ -30,6 +42,14 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
     }, 30000) // Alle 30 Sekunden aktualisieren
 
     return () => clearInterval(interval)
+  }, [currentUser])
+
+  // Temporär: Füge eine Admin-Rolle zum aktuellen Benutzer hinzu
+  useEffect(() => {
+    if (currentUser) {
+      // @ts-ignore - Wir fügen temporär eine Rolle hinzu
+      currentUser.role = "admin"
+    }
   }, [currentUser])
 
   const handleProfileClick = () => {
@@ -132,6 +152,34 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
       tab: "profil",
       action: handleProfileClick,
     },
+    {
+      id: "settings",
+      name: "Einstellungen",
+      icon: Settings,
+      tab: "einstellungen",
+      action: () => {
+        router.push("/einstellungen")
+        onTabChange("einstellungen")
+      },
+    },
+    // Admin-Bereich hinzufügen (nur für Admins sichtbar)
+    {
+      id: "admin-divider",
+      name: "Admin-Bereich",
+      isDivider: true,
+      isAdmin: true,
+    },
+    {
+      id: "admin-tracking",
+      name: "Tracking & Metriken",
+      icon: BarChart2,
+      tab: "admin-tracking",
+      isAdmin: true,
+      action: () => {
+        router.push("/admin/tracking")
+        onTabChange("admin-tracking")
+      },
+    },
   ]
 
   return (
@@ -139,44 +187,51 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
       <div className="space-y-2 pt-2">
         <div className="px-3 pt-1">
           <div className="space-y-1">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={item.action}
-                className={cn(
-                  "w-full flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
-                  activeTab === item.tab ? "bg-accent" : "transparent",
-                )}
-                aria-current={activeTab === item.tab ? "page" : undefined}
-              >
-                <span className="flex items-center">
-                  <item.icon className="mr-2 h-4 w-4" aria-hidden="true" />
-                  {item.name}
-                </span>
-                {item.badge && item.badge > 0 && (
-                  <span className="ml-auto bg-primary text-primary-foreground text-xs rounded-full px-2 py-0.5">
-                    {item.badge > 9 ? "9+" : item.badge}
+            {navItems.map((item) => {
+              // Überprüfe, ob es sich um ein Admin-Element handelt und ob der Benutzer Admin ist
+              if (item.isAdmin && !(currentUser?.role === "admin")) {
+                return null
+              }
+
+              // Wenn es ein Divider ist
+              if (item.isDivider) {
+                return (
+                  <div key={item.id} className="px-3 py-2">
+                    <div className="text-xs font-semibold text-muted-foreground">{item.name}</div>
+                    <div className="h-px bg-border mt-1"></div>
+                  </div>
+                )
+              }
+
+              // Normales Menüelement
+              return (
+                <button
+                  key={item.id}
+                  onClick={item.action}
+                  className={cn(
+                    "w-full flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+                    activeTab === item.tab ? "bg-accent" : "transparent",
+                  )}
+                  aria-current={activeTab === item.tab ? "page" : undefined}
+                >
+                  <span className="flex items-center">
+                    <item.icon className="mr-2 h-4 w-4" aria-hidden="true" />
+                    {item.name}
                   </span>
-                )}
-              </button>
-            ))}
+                  {item.badge && item.badge > 0 && (
+                    <span className="ml-auto bg-primary text-primary-foreground text-xs rounded-full px-2 py-0.5">
+                      {item.badge > 9 ? "9+" : item.badge}
+                    </span>
+                  )}
+                </button>
+              )
+            })}
           </div>
         </div>
       </div>
 
       <div className="mt-auto p-4">
         <div className="space-y-1">
-          <button
-            className="w-full flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-            aria-label="Einstellungen öffnen"
-            onClick={() => {
-              // Öffne die Einstellungen als Dialog oder navigiere zur Einstellungsseite
-              console.log("Einstellungen öffnen")
-            }}
-          >
-            <Settings className="mr-2 h-4 w-4" aria-hidden="true" />
-            Einstellungen
-          </button>
           <button
             className="w-full flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
             aria-label="Abmelden"

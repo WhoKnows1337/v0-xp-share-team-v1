@@ -1,11 +1,10 @@
-import { Suspense } from "react"
+import ClientLayout from "../client-layout"
 import { Dashboard } from "@/components/dashboard/dashboard"
-import Loading from "@/app/loading"
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={<Loading />}>
+    <ClientLayout>
       <Dashboard />
-    </Suspense>
+    </ClientLayout>
   )
 }

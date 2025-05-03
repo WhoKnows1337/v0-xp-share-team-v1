@@ -11,7 +11,7 @@ interface ErlebnisWizardContextType {
   closeWizard: () => void
 }
 
-const ErlebnisWizardContext = createContext<ErlebnisWizardContextType | undefined>(undefined)
+export const ErlebnisWizardContext = createContext<ErlebnisWizardContextType | undefined>(undefined)
 
 export function ErlebnisWizardProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -33,19 +33,19 @@ export function ErlebnisWizardProvider({ children }: { children: React.ReactNode
 
 export function useErlebnisWizard() {
   const context = useContext(ErlebnisWizardContext)
-  if (!context) {
+  if (context === undefined) {
     throw new Error("useErlebnisWizard must be used within a ErlebnisWizardProvider")
   }
   return context
 }
 
-// Hier ist die fehlende ErlebnisWizardModal-Komponente
+// Hier ist die ErlebnisWizardModal-Komponente
 interface ErlebnisWizardModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  isOpen: boolean
+  onClose: () => void
 }
 
-export function ErlebnisWizardModal({ open, onOpenChange }: ErlebnisWizardModalProps) {
+export function ErlebnisWizardModal({ isOpen, onClose }: ErlebnisWizardModalProps) {
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
@@ -54,19 +54,19 @@ export function ErlebnisWizardModal({ open, onOpenChange }: ErlebnisWizardModalP
 
   const handleComplete = () => {
     console.log("ErlebnisWizard: Abgeschlossen")
-    onOpenChange(false)
+    onClose()
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[95vh] p-0 overflow-hidden">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden">
         <DialogHeader className="px-6 pt-6 pb-2">
           <DialogTitle>Neues Erlebnis erstellen</DialogTitle>
           <DialogDescription>
             Teile dein Erlebnis mit der Community. Fülle die folgenden Schritte aus, um dein Erlebnis zu erstellen.
           </DialogDescription>
         </DialogHeader>
-        {isMounted && open && <ErlebnisWizard onComplete={handleComplete} />}
+        {isMounted && isOpen && <ErlebnisWizard onComplete={handleComplete} />}
       </DialogContent>
     </Dialog>
   )
@@ -74,8 +74,6 @@ export function ErlebnisWizardModal({ open, onOpenChange }: ErlebnisWizardModalP
 
 // Für Abwärtskompatibilität mit bestehendem Code
 export function openErlebnisWizard() {
-  console.log("openErlebnisWizard wurde aufgerufen")
-
   // Verwende das benutzerdefinierte Event
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event("openErlebnisWizard"))

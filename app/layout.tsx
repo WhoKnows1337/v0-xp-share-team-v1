@@ -2,14 +2,6 @@ import type React from "react"
 import "@/app/globals.css"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
-import { ThemeProvider } from "@/components/theme-provider"
-import { Navbar } from "@/components/navbar"
-import { Toaster } from "@/components/ui/toaster"
-import { XPAssistantProvider } from "@/components/xp-assistant-provider"
-import { SidebarProvider } from "@/contexts/sidebar-context"
-import { SkipLink } from "@/components/ui/skip-link"
-import { WizardModalWrapper } from "@/components/wizard-modal-wrapper"
-import { ErlebnisWizardProvider } from "@/components/erlebnis-wizard-modal"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -26,21 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="de" suppressHydrationWarning>
-      <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <SidebarProvider>
-            <XPAssistantProvider>
-              <ErlebnisWizardProvider>
-                <SkipLink />
-                <Navbar />
-                {children}
-                <WizardModalWrapper />
-                <Toaster />
-              </ErlebnisWizardProvider>
-            </XPAssistantProvider>
-          </SidebarProvider>
-        </ThemeProvider>
-      </body>
+      <body className={inter.className}>{children}</body>
     </html>
   )
 }

@@ -13,6 +13,7 @@ import { findUserByUsername } from "@/lib/user-utils"
 import { toast } from "@/components/ui/use-toast"
 import { EinblickeTrends } from "./einblicke-trends"
 import { DashboardLayout } from "@/components/layouts/dashboard-layout"
+import { ErlebnisWizardProvider } from "@/components/erlebnis-wizard-modal"
 
 type DashboardTab =
   | "home"
@@ -110,7 +111,9 @@ function DashboardContent({ initialTab = "home", username }: DashboardProps) {
 export function Dashboard(props: DashboardProps) {
   return (
     <ProfileProvider>
-      <DashboardContent {...props} />
+      <ErlebnisWizardProvider>
+        <DashboardContent {...props} />
+      </ErlebnisWizardProvider>
     </ProfileProvider>
   )
 }

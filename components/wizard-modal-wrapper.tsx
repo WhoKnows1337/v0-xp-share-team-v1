@@ -1,15 +1,18 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { ErlebnisWizardModal, useErlebnisWizard } from "@/components/erlebnis-wizard-modal"
 
 export function WizardModalWrapper() {
-  const { isOpen, openWizard, closeWizard } = useErlebnisWizard()
+  const [isMounted, setIsMounted] = useState(false)
+  const { isOpen, closeWizard } = useErlebnisWizard()
 
   useEffect(() => {
-    // Event-Listener für das Öffnen des Wizards
+    setIsMounted(true)
+
+    // Event-Listener für das benutzerdefinierte Event
     const handleOpenWizard = () => {
-      openWizard()
+      console.log("WizardModalWrapper: Event 'openErlebnisWizard' empfangen")
     }
 
     window.addEventListener("openErlebnisWizard", handleOpenWizard)
@@ -17,7 +20,9 @@ export function WizardModalWrapper() {
     return () => {
       window.removeEventListener("openErlebnisWizard", handleOpenWizard)
     }
-  }, [openWizard])
+  }, [])
 
-  return <ErlebnisWizardModal open={isOpen} onOpenChange={(open) => (open ? openWizard() : closeWizard())} />
+  if (!isMounted) return null
+
+  return <ErlebnisWizardModal isOpen={isOpen} onClose={closeWizard} />
 }

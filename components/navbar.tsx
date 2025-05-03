@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useContext } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -19,8 +19,21 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Benachrichtigungen } from "@/components/nachrichten/benachrichtigungen"
 import { NachrichtenButton } from "@/components/nachrichten/nachrichten-button"
-import { useErlebnisWizard } from "@/components/erlebnis-wizard-modal"
-import { Search, Menu, Plus } from "lucide-react"
+import { ErlebnisWizardContext } from "@/components/erlebnis-wizard-modal"
+import {
+  Search,
+  Menu,
+  Plus,
+  Crown,
+  Settings,
+  BarChart2,
+  Home,
+  Book,
+  Compass,
+  Activity,
+  TrendingUp,
+  Hash,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getCurrentUser } from "@/lib/mock-users"
 import { getTotalUnreadMessages } from "@/lib/mock-messages"
@@ -34,7 +47,16 @@ export function Navbar() {
   const router = useRouter()
   const currentUser = getCurrentUser()
   const currentUsername = currentUser?.username || "demo-user"
-  const { openWizard } = useErlebnisWizard()
+
+  // Sicherer Zugriff auf den ErlebnisWizardContext
+  const erlebnisWizardContext = useContext(ErlebnisWizardContext)
+  const openWizard = () => {
+    if (erlebnisWizardContext) {
+      erlebnisWizardContext.openWizard()
+    } else {
+      console.warn("ErlebnisWizardContext ist nicht verfügbar")
+    }
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -83,6 +105,16 @@ export function Navbar() {
     }
   }
 
+  // Temporär: Füge eine Admin-Rolle zum aktuellen Benutzer hinzu
+  useEffect(() => {
+    if (currentUser) {
+      // @ts-ignore - Wir fügen temporär eine Rolle hinzu
+      currentUser.role = "admin"
+    }
+  }, [currentUser])
+
+  const isAdmin = currentUser?.role === "admin"
+
   return (
     <header
       className={cn(
@@ -102,36 +134,126 @@ export function Navbar() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-              <nav className="flex flex-col gap-4 mt-8">
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <span>Dashboard</span>
-                </Link>
-                <Link
-                  href="/insights"
-                  className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <span>Insights & Trends</span>
-                </Link>
-                <Link
-                  href="/entdecken"
-                  className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <span>Entdecken</span>
-                </Link>
-                <Link
-                  href="/xp-buch"
-                  className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <span>XP-Buch</span>
-                </Link>
-              </nav>
+              <div className="flex flex-col h-full">
+                <div className="py-4">
+                  <Link href="/dashboard" className="flex items-center mb-6">
+                    <span className="font-bold text-xl">XP-Share</span>
+                  </Link>
+                  <nav className="flex flex-col gap-1">
+                    <Link
+                      href="/dashboard"
+                      className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Home className="h-4 w-4" />
+                      <span>Dashboard</span>
+                    </Link>
+                    <Link
+                      href="/insights"
+                      className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <TrendingUp className="h-4 w-4" />
+                      <span>Insights & Trends</span>
+                    </Link>
+                    <Link
+                      href="/entdecken"
+                      className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Compass className="h-4 w-4" />
+                      <span>Entdecken</span>
+                    </Link>
+                    <Link
+                      href="/dashboard?tab=meine-erlebnisse"
+                      className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Activity className="h-4 w-4" />
+                      <span>Meine Erlebnisse</span>
+                    </Link>
+                    <Link
+                      href="/channels"
+                      className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Hash className="h-4 w-4" />
+                      <span>Channels</span>
+                    </Link>
+                    <Link
+                      href="/xp-buch"
+                      className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Book className="h-4 w-4" />
+                      <span>XP-Buch</span>
+                    </Link>
+                    <Link
+                      href="/pricing"
+                      className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Crown className="h-4 w-4" />
+                      <span>Premium & Preise</span>
+                    </Link>
+                    <Link
+                      href="/einstellungen"
+                      className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Settings className="h-4 w-4" />
+                      <span>Einstellungen</span>
+                    </Link>
+
+                    {isAdmin && (
+                      <>
+                        <div className="px-4 py-2 mt-4">
+                          <div className="text-xs font-semibold text-muted-foreground">Admin-Bereich</div>
+                          <div className="h-px bg-border mt-1"></div>
+                        </div>
+                        <Link
+                          href="/admin"
+                          className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <Settings className="h-4 w-4" />
+                          <span>Admin Dashboard</span>
+                        </Link>
+                        <Link
+                          href="/admin/tracking"
+                          className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <BarChart2 className="h-4 w-4" />
+                          <span>Tracking & Metriken</span>
+                        </Link>
+                      </>
+                    )}
+                  </nav>
+                </div>
+
+                <div className="mt-auto border-t pt-4">
+                  <div
+                    className="flex items-center gap-3 px-4 py-2 cursor-pointer"
+                    onClick={(e) => {
+                      handleProfileClick(e)
+                      setIsMobileMenuOpen(false)
+                    }}
+                  >
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage
+                        src={mockUsers.find((u) => u.username === currentUsername)?.avatar || "/placeholder.svg"}
+                        alt={currentUsername}
+                      />
+                      <AvatarFallback>{currentUsername.charAt(0).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-sm font-medium">{currentUser?.name}</p>
+                      <p className="text-xs text-muted-foreground">@{currentUsername}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </SheetContent>
           </Sheet>
 
@@ -170,6 +292,17 @@ export function Navbar() {
             <Plus className="h-5 w-5" />
           </Button>
 
+          {/* Premium Button hinzufügen */}
+          <Button
+            variant="default"
+            size="sm"
+            className="hidden md:flex items-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600"
+            onClick={() => router.push("/pricing")}
+          >
+            <Crown className="h-4 w-4" />
+            <span>Premium</span>
+          </Button>
+
           <Benachrichtigungen />
 
           <NachrichtenButton />
@@ -205,10 +338,30 @@ export function Navbar() {
                 <Link href="/xp-buch">XP-Buch</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
+                <Link href="/pricing">Premium & Preise</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
                 <Link href="/einstellungen">Einstellungen</Link>
               </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/settings/subscription">Abo verwalten</Link>
+              </DropdownMenuItem>
+              {isAdmin && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Administration</DropdownMenuLabel>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin">Admin Dashboard</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/tracking">Tracking & Metriken</Link>
+                  </DropdownMenuItem>
+                </>
+              )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Abmelden</DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/">Abmelden</Link>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
