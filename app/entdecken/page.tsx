@@ -1,10 +1,5 @@
-import AppLayout from "../app-layout"
-import { EntdeckenPage } from "@/components/entdecken/entdecken-page"
+import { EntdeckenPageUpdated } from "@/components/entdecken/entdecken-page-updated"
 
-export default function EntdeckenPageRoute() {
-  return (
-    <AppLayout>
-      <EntdeckenPage />
-    </AppLayout>
-  )
+export default function EntdeckenPage() {
+  return <EntdeckenPageUpdated />
 }

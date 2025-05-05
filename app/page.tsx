@@ -1,5 +1,5 @@
 import { Startseite } from "@/components/startseite/startseite"
 
-export default function Home() {
+export default function HomePage() {
   return <Startseite />
 }

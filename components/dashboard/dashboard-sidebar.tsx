@@ -1,4 +1,5 @@
 "use client"
+
 import { cn } from "@/lib/utils"
 import {
   Home,
@@ -15,12 +16,14 @@ import {
   PartyPopper,
   Award,
   Trophy,
+  MessageSquare,
+  Users,
 } from "lucide-react"
 import { getCurrentUser } from "@/lib/mock-users"
 import { getTotalUnreadMessages } from "@/lib/mock-messages"
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { mockUsers } from "@/lib/mock-users"
+import Link from "next/link"
+import Image from "next/image"
 
 interface DashboardSidebarProps {
   activeTab: string
@@ -31,18 +34,15 @@ interface DashboardSidebarProps {
 export function DashboardSidebar({ activeTab, onTabChange, className }: DashboardSidebarProps) {
   const [unreadMessages, setUnreadMessages] = useState(0)
   const currentUser = getCurrentUser()
-  const router = useRouter()
 
   useEffect(() => {
-    // Aktualisiere den Zähler für ungelesene Nachrichten
     const count = getTotalUnreadMessages(currentUser)
     setUnreadMessages(count)
 
-    // In einer echten Anwendung würde hier ein Echtzeit-Update über WebSockets erfolgen
     const interval = setInterval(() => {
       const newCount = getTotalUnreadMessages(currentUser)
       setUnreadMessages(newCount)
-    }, 30000) // Alle 30 Sekunden aktualisieren
+    }, 30000)
 
     return () => clearInterval(interval)
   }, [currentUser])
@@ -55,145 +55,105 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
     }
   }, [currentUser])
 
-  const handleProfileClick = () => {
-    // Verwende den aktuellen Benutzernamen für die Profil-URL
-    const username = currentUser?.username || "demo-user"
-    console.log("Sidebar: Navigiere zum Profil von:", username)
-
-    // Überprüfen, ob der Benutzer existiert
-    const user = mockUsers.find((u) => u.username.toLowerCase() === username.toLowerCase())
-    if (user) {
-      router.push(`/profil/${encodeURIComponent(user.username)}`)
-      onTabChange("profil")
-    } else {
-      console.error("Benutzer nicht gefunden:", username)
-      // Fallback auf den ersten verfügbaren Benutzer
-      if (mockUsers.length > 0) {
-        router.push(`/profil/${encodeURIComponent(mockUsers[0].username)}`)
-        onTabChange("profil")
-      } else {
-        alert("Keine Benutzer verfügbar. Bitte überprüfen Sie die Mock-Daten.")
-      }
-    }
-  }
-
   const navItems = [
     {
       id: "home",
       name: "Dashboard",
       icon: Home,
       tab: "home",
-      action: () => {
-        router.push("/dashboard")
-        onTabChange("home")
-      },
+      href: "/dashboard",
     },
     {
       id: "insights-trends",
       name: "Insights & Trends",
       icon: TrendingUp,
       tab: "insights-trends",
-      action: () => {
-        router.push("/insights")
-        onTabChange("insights-trends")
-      },
-    },
-    {
-      id: "my-experiences",
-      name: "Meine Erlebnisse",
-      icon: FileText,
-      tab: "meine-erlebnisse",
-      action: () => {
-        router.push("/dashboard?tab=meine-erlebnisse")
-        onTabChange("meine-erlebnisse")
-      },
-    },
-    {
-      id: "activities",
-      name: "Aktivitäten",
-      icon: Activity,
-      tab: "aktivitäten",
-      action: () => {
-        router.push("/dashboard?tab=aktivitäten")
-        onTabChange("aktivitäten")
-      },
+      href: "/insights",
     },
     {
       id: "discover",
       name: "Entdecken",
       icon: Compass,
       tab: "entdecken",
-      action: () => {
-        router.push("/entdecken")
-        onTabChange("entdecken")
-      },
+      href: "/entdecken",
+    },
+    {
+      id: "messages",
+      name: "Nachrichten",
+      icon: MessageSquare,
+      tab: "nachrichten",
+      href: "/nachrichten",
+      badge: unreadMessages,
+    },
+    {
+      id: "xp-book",
+      name: "XP-Buch",
+      icon: Book,
+      tab: "xp-buch",
+      href: "/xp-buch",
+    },
+    {
+      id: "community",
+      name: "Community",
+      icon: Users,
+      tab: "community",
+      href: "/community",
+    },
+    {
+      id: "my-experiences",
+      name: "Meine Erlebnisse",
+      icon: FileText,
+      tab: "meine-erlebnisse",
+      href: "/dashboard?tab=meine-erlebnisse",
+    },
+    {
+      id: "activities",
+      name: "Aktivitäten",
+      icon: Activity,
+      tab: "aktivitäten",
+      href: "/dashboard?tab=aktivitäten",
     },
     {
       id: "channels",
       name: "Channels",
       icon: Hash,
       tab: "channels",
-      action: () => {
-        router.push("/channels")
-        onTabChange("channels")
-      },
-    },
-    {
-      id: "xp-book",
-      name: "XP Buch",
-      icon: Book,
-      tab: "xp-buch",
-      action: () => {
-        router.push("/xp-buch")
-        onTabChange("xp-buch")
-      },
+      href: "/channels",
     },
     {
       id: "achievements",
       name: "Achievements",
       icon: Award,
       tab: "achievements",
-      action: () => {
-        router.push("/achievements")
-        onTabChange("achievements")
-      },
+      href: "/achievements",
     },
     {
       id: "leaderboard",
       name: "Bestenliste",
       icon: Trophy,
       tab: "leaderboard",
-      action: () => {
-        router.push("/leaderboard")
-        onTabChange("leaderboard")
-      },
+      href: "/leaderboard",
     },
     {
       id: "referrals",
       name: "Freunde einladen",
       icon: PartyPopper,
       tab: "referrals",
-      action: () => {
-        router.push("/referrals")
-        onTabChange("referrals")
-      },
+      href: "/referrals",
     },
     {
       id: "profile",
       name: "Profil",
       icon: User,
       tab: "profil",
-      action: handleProfileClick,
+      href: `/profil/${encodeURIComponent(currentUser?.username || "demo-user")}`,
     },
     {
       id: "settings",
       name: "Einstellungen",
       icon: Settings,
       tab: "einstellungen",
-      action: () => {
-        router.push("/einstellungen")
-        onTabChange("einstellungen")
-      },
+      href: "/einstellungen",
     },
     // Admin-Bereich hinzufügen (nur für Admins sichtbar)
     {
@@ -203,22 +163,34 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
       isAdmin: true,
     },
     {
+      id: "admin-dashboard",
+      name: "Admin Dashboard",
+      icon: BarChart2,
+      tab: "admin-dashboard",
+      isAdmin: true,
+      href: "/admin",
+    },
+    {
       id: "admin-tracking",
       name: "Tracking & Metriken",
       icon: BarChart2,
       tab: "admin-tracking",
       isAdmin: true,
-      action: () => {
-        router.push("/admin/tracking")
-        onTabChange("admin-tracking")
-      },
+      href: "/admin/tracking",
     },
   ]
 
   return (
     <div className={cn("h-full flex flex-col justify-between overflow-hidden", className)}>
-      <div className="space-y-2 pt-2">
-        <div className="px-3 pt-1">
+      {/* Logo hinzufügen */}
+      <div className="p-4 border-b">
+        <Link href="/dashboard" className="flex items-center justify-center">
+          <Image src="/xp-share_logo.png" alt="XP Share Logo" width={40} height={40} className="w-auto h-10" />
+        </Link>
+      </div>
+
+      <div className="flex-1 overflow-y-auto py-2">
+        <div className="px-3">
           <div className="space-y-1">
             {navItems.map((item) => {
               // Überprüfe, ob es sich um ein Admin-Element handelt und ob der Benutzer Admin ist
@@ -238,11 +210,12 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
 
               // Normales Menüelement
               return (
-                <button
+                <Link
                   key={item.id}
-                  onClick={item.action}
+                  href={item.href}
+                  onClick={() => onTabChange(item.tab)}
                   className={cn(
-                    "w-full flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+                    "flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
                     activeTab === item.tab ? "bg-accent" : "transparent",
                   )}
                   aria-current={activeTab === item.tab ? "page" : undefined}
@@ -256,27 +229,27 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
                       {item.badge > 9 ? "9+" : item.badge}
                     </span>
                   )}
-                </button>
+                </Link>
               )
             })}
           </div>
         </div>
       </div>
 
-      <div className="mt-auto p-4">
+      <div className="mt-auto p-4 border-t">
         <div className="space-y-1">
-          <button
-            className="w-full flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+          <Link
+            href="/"
+            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
             aria-label="Abmelden"
             onClick={() => {
-              // Abmelden-Logik hier
-              router.push("/")
               console.log("Abmelden")
+              onTabChange("")
             }}
           >
             <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
             Abmelden
-          </button>
+          </Link>
         </div>
       </div>
     </div>

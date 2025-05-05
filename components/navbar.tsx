@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -39,16 +39,12 @@ export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [unreadMessages, setUnreadMessages] = useState(0)
   const pathname = usePathname()
-  const router = useRouter()
   const currentUser = getCurrentUser()
   const currentUsername = currentUser?.username || "demo-user"
   const isLoggedIn = true // Mock für den eingeloggten Zustand
-
-  // Admin-Rolle sofort beim Laden der Seite zuweisen
   const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
-    // Sofort die Admin-Rolle setzen, nicht in einem useEffect mit Abhängigkeiten
     setIsAdmin(true)
   }, [])
 
@@ -62,15 +58,13 @@ export function Navbar() {
   }, [])
 
   useEffect(() => {
-    // Aktualisiere den Zähler für ungelesene Nachrichten
     const count = getTotalUnreadMessages(currentUser)
     setUnreadMessages(count)
 
-    // In einer echten Anwendung würde hier ein Echtzeit-Update über WebSockets erfolgen
     const interval = setInterval(() => {
       const newCount = getTotalUnreadMessages(currentUser)
       setUnreadMessages(newCount)
-    }, 30000) // Alle 30 Sekunden aktualisieren
+    }, 30000)
 
     return () => clearInterval(interval)
   }, [currentUser])
@@ -78,18 +72,11 @@ export function Navbar() {
   const handleNewExperience = () => {
     console.log("Navbar: Öffne ErlebnisWizard")
 
-    // Löse das Event direkt aus
     if (typeof window !== "undefined") {
       console.log("Navbar: Löse Event 'openErlebnisWizard' aus")
       const event = new CustomEvent("openErlebnisWizard")
       window.dispatchEvent(event)
     }
-  }
-
-  // Verwende Link-Komponente statt router.push für die Navigation
-  const handleProfileClick = (username: string) => {
-    // Wir verwenden keine direkte Navigation mehr, sondern lassen das durch den Link-Klick erledigen
-    console.log("Profil anzeigen für:", username)
   }
 
   return (
@@ -98,7 +85,6 @@ export function Navbar() {
         {/* Linke Seite - Logo */}
         <div className="flex items-center">
           <Link href="/dashboard" className="flex items-center">
-            {/* Logo korrigiert, nicht mehr gestaucht */}
             <Image src="/xp-share_logo.png" alt="XP Share Logo" width={40} height={40} className="w-auto h-10" />
           </Link>
         </div>
@@ -115,16 +101,13 @@ export function Navbar() {
         <div className="flex items-center gap-2">
           {isLoggedIn ? (
             <>
-              {/* Freunde einladen Button - gleiche Höhe wie Erlebnis teilen */}
-              <Button
-                variant="outline"
-                size="sm"
-                className="hidden md:flex items-center gap-2"
-                onClick={() => router.push("/referrals")}
-              >
-                <PartyPopper className="h-4 w-4" />
-                <span>Freunde einladen</span>
-              </Button>
+              {/* Freunde einladen Button */}
+              <Link href="/referrals">
+                <Button variant="outline" size="sm" className="hidden md:flex items-center gap-2">
+                  <PartyPopper className="h-4 w-4" />
+                  <span>Freunde einladen</span>
+                </Button>
+              </Link>
 
               {/* Erlebnis teilen Button */}
               <Button
@@ -140,16 +123,17 @@ export function Navbar() {
               <NachrichtenButton />
               <Benachrichtigungen />
 
-              {/* Premium Button - gleiche Höhe wie Erlebnis teilen */}
-              <Button
-                variant="default"
-                size="sm"
-                className="hidden md:flex items-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600"
-                onClick={() => router.push("/pricing")}
-              >
-                <Crown className="h-4 w-4" />
-                <span>Premium</span>
-              </Button>
+              {/* Premium Button */}
+              <Link href="/pricing">
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="hidden md:flex items-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600"
+                >
+                  <Crown className="h-4 w-4" />
+                  <span>Premium</span>
+                </Button>
+              </Link>
 
               {/* Avatar mit Dropdown-Menü */}
               <DropdownMenu>
@@ -236,7 +220,6 @@ export function Navbar() {
                     </Link>
                   </DropdownMenuItem>
 
-                  {/* Admin-Punkte immer anzeigen, da isAdmin jetzt sofort gesetzt wird */}
                   {isAdmin && (
                     <>
                       <DropdownMenuSeparator />

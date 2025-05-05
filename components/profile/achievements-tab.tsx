@@ -8,10 +8,11 @@ import { Progress } from "@/components/ui/progress"
 import { Award, BookOpen, Heart, MessageSquare, Star, Trophy, Users } from "lucide-react"
 import type { Achievement } from "@/lib/mock-users"
 import { StreakMeter } from "@/components/xp/streak-meter"
+import { getCurrentUser } from "@/lib/mock-users"
 
 interface AchievementsTabProps {
-  achievements: Achievement[]
-  isOwner: boolean
+  achievements?: Achievement[]
+  isOwner?: boolean
   streak?: {
     current: number
     max: number
@@ -19,8 +20,23 @@ interface AchievementsTabProps {
   }
 }
 
-export function AchievementsTab({ achievements, isOwner, streak }: AchievementsTabProps) {
+export function AchievementsTab({
+  achievements: propAchievements,
+  isOwner = true,
+  streak: propStreak,
+}: AchievementsTabProps) {
   const [activeTab, setActiveTab] = useState("alle")
+
+  // Fallback auf den aktuellen Benutzer, wenn keine Achievements übergeben wurden
+  const currentUser = getCurrentUser()
+  const achievements = propAchievements || currentUser.achievements || []
+
+  // Mock-Streak, wenn keine übergeben wurde
+  const streak = propStreak || {
+    current: 7,
+    max: 14,
+    lastActivity: new Date().toISOString(),
+  }
 
   // Filtere Achievements basierend auf dem aktiven Tab
   const filteredAchievements =

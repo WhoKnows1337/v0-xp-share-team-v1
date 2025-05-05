@@ -12,7 +12,6 @@ import { BenutzerProfil } from "@/components/profil/benutzer-profil"
 import { findUserByUsername } from "@/lib/user-utils"
 import { toast } from "@/components/ui/use-toast"
 import { EinblickeTrends } from "./einblicke-trends"
-import { DashboardLayout } from "@/components/layouts/dashboard-layout"
 import { ErlebnisWizardProvider } from "@/components/erlebnis-wizard-modal"
 
 type DashboardTab =
@@ -61,7 +60,7 @@ function DashboardContent({ initialTab = "home", username }: DashboardProps) {
   }
 
   return (
-    <DashboardLayout activeTab={activeTab} onTabChange={setActiveTab}>
+    <div className="flex-1">
       {error ? (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
           <p>{error}</p>
@@ -94,7 +93,7 @@ function DashboardContent({ initialTab = "home", username }: DashboardProps) {
           <BenutzerProfil benutzer={activeProfile} />
         </div>
       ) : (
-        <>
+        <div className="container mx-auto px-4 py-6">
           {activeTab === "home" && <DashboardHome />}
           {activeTab === "insights-trends" && <EinblickeTrends />}
           {activeTab === "übersicht" && <DashboardOverview />}
@@ -102,9 +101,9 @@ function DashboardContent({ initialTab = "home", username }: DashboardProps) {
           {activeTab === "geteilte-erlebnisse" && <GeteilteErlebnisse />}
           {activeTab === "aktivitäten" && <AktivitaetsFeed />}
           {activeTab === "entdecken" && <EntdeckenPageUpdated />}
-        </>
+        </div>
       )}
-    </DashboardLayout>
+    </div>
   )
 }
 
