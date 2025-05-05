@@ -3,9 +3,10 @@
 import { useState } from "react"
 import { PriceCard } from "@/components/subscription/price-card"
 import { PricingToggle } from "@/components/subscription/pricing-toggle"
+import { subscriptionPlans } from "@/types/subscription"
 
 export default function PricingPage() {
-  const [isAnnual, setIsAnnual] = useState(true)
+  const [isYearly, setIsYearly] = useState(true)
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -14,56 +15,18 @@ export default function PricingPage() {
         <p className="text-muted-foreground max-w-2xl mx-auto">
           Entdecke die Vorteile von XP Share Premium und wähle den Plan, der am besten zu dir passt.
         </p>
-        <PricingToggle isAnnual={isAnnual} onToggle={() => setIsAnnual(!isAnnual)} className="mt-6" />
+        <PricingToggle isAnnual={isYearly} onToggle={() => setIsYearly(!isYearly)} className="mt-6" />
       </div>
 
       <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-        <PriceCard
-          title="Kostenlos"
-          price={0}
-          isAnnual={isAnnual}
-          features={[
-            "Grundlegende Erlebnis-Teilung",
-            "Begrenzte Speicherkapazität",
-            "Zugang zur Community",
-            "Basis-Analysen",
-          ]}
-          cta="Aktueller Plan"
-          variant="outline"
-          disabled
-        />
-        <PriceCard
-          title="Premium"
-          price={isAnnual ? 8.99 : 10.99}
-          isAnnual={isAnnual}
-          features={[
-            "Unbegrenzte Erlebnis-Teilung",
-            "Erweiterte Speicherkapazität",
-            "Prioritäts-Support",
-            "Erweiterte Analysen",
-            "Werbefreie Erfahrung",
-            "Exklusive Vorlagen",
-          ]}
-          cta="Upgrade auf Premium"
-          variant="default"
-          popular
-        />
-        <PriceCard
-          title="Business"
-          price={isAnnual ? 19.99 : 24.99}
-          isAnnual={isAnnual}
-          features={[
-            "Alles aus Premium",
-            "Team-Kollaboration",
-            "Admin-Dashboard",
-            "API-Zugang",
-            "Dedizierter Support",
-            "Anpassbare Berichte",
-            "Erweiterte Sicherheit",
-          ]}
-          cta="Kontaktiere uns"
-          variant="outline"
-        />
+        {subscriptionPlans.map((plan) => (
+          <PriceCard
+            key={plan.id}
+            plan={plan}
+            isYearly={isYearly}
+            onSelectPlan={() => console.log(`Selected plan: ${plan.id}`)}
+          />
+        ))}
       </div>
 
       <div className="mt-16 text-center">
