@@ -30,6 +30,26 @@ export type User = {
   entwuerfe?: any[]
 }
 
+// Füge die Achievement-Typen hinzu
+export interface Achievement {
+  id: string
+  name: string
+  beschreibung: string
+  icon: string
+  unlocked: boolean
+  progress?: {
+    current: number
+    total: number
+  }
+}
+
+// Erweitere die User-Schnittstelle um Achievements
+// export interface User {
+//   // Bestehende Felder...
+//   achievements?: Achievement[];
+//   // ...
+// }
+
 export interface Achievement {
   id: string
   name: string
@@ -584,6 +604,54 @@ export const mockUsers: User[] = [
       },
     ],
     badges: [{ id: "b1", name: "Karriere-Experte", farbe: "#DD6B20" }],
+    entwuerfe: [],
+  },
+  // Suche nach dem Benutzer "maxmustermann" und füge Achievements hinzu:
+  {
+    id: "user17",
+    username: "maxmustermann",
+    name: "Max Mustermann",
+    vorname: "Max",
+    nachname: "Mustermann",
+    email: "max@example.com",
+    avatar: "/diverse-avatars.png",
+    bio: "Ein fiktiver Benutzer für Testzwecke.",
+    isVerifiziert: false,
+    registriertSeit: "01.01.2023",
+    statistiken: {
+      erlebnisse: 5,
+      kommentare: 10,
+      erhalteneVotes: 20,
+      xpLevel: 1,
+      xpPunkte: 100,
+    },
+    achievements: [
+      {
+        id: "1",
+        name: "Erfahrener Autor",
+        beschreibung: "Hat mehr als 10 Erlebnisse geteilt",
+        icon: "BookOpen",
+        unlocked: true,
+      },
+      {
+        id: "2",
+        name: "Wöchentlicher Schreiber",
+        beschreibung: "Hat 7 Tage in Folge Einträge erstellt",
+        icon: "Flame",
+        unlocked: true,
+      },
+      {
+        id: "3",
+        name: "Community-Liebling",
+        beschreibung: "Hat mehr als 100 Likes erhalten",
+        icon: "Heart",
+        unlocked: false,
+        progress: {
+          current: 78,
+          total: 100,
+        },
+      },
+    ],
     entwuerfe: [],
   },
 ]

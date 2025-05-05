@@ -13,6 +13,8 @@ import {
   Book,
   BarChart2,
   PartyPopper,
+  Award,
+  Trophy,
 } from "lucide-react"
 import { getCurrentUser } from "@/lib/mock-users"
 import { getTotalUnreadMessages } from "@/lib/mock-messages"
@@ -144,6 +146,26 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
       action: () => {
         router.push("/xp-buch")
         onTabChange("xp-buch")
+      },
+    },
+    {
+      id: "achievements",
+      name: "Achievements",
+      icon: Award,
+      tab: "achievements",
+      action: () => {
+        router.push("/achievements")
+        onTabChange("achievements")
+      },
+    },
+    {
+      id: "leaderboard",
+      name: "Bestenliste",
+      icon: Trophy,
+      tab: "leaderboard",
+      action: () => {
+        router.push("/leaderboard")
+        onTabChange("leaderboard")
       },
     },
     {

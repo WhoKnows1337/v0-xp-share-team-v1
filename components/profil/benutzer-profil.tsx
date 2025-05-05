@@ -15,6 +15,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Home, User } from "lucide-react"
 import type { User as UserType } from "@/lib/mock-users"
+import { AchievementsTab } from "@/components/profile/achievements-tab" // Importiere den AchievementsTab
 
 interface BenutzerProfilProps {
   username?: string
@@ -115,13 +116,29 @@ export function BenutzerProfil({ username, benutzer, user }: BenutzerProfilProps
       <ProfilHeader benutzer={userToDisplay} isCurrentUser={isUserCurrentUser} />
 
       <div className="mt-8">
-        <ProfilTabs activeTab={activeTab} setActiveTab={setActiveTab} isCurrentUser={isUserCurrentUser} />
+        <ProfilTabs
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          isCurrentUser={isUserCurrentUser}
+          benutzer={userToDisplay}
+        />
 
         <div className="mt-6">
           {activeTab === "erlebnisse" && <ErlebnisseTab benutzer={userToDisplay} isCurrentUser={isUserCurrentUser} />}
           {activeTab === "kommentare" && <KommentareTab benutzer={userToDisplay} />}
           {activeTab === "lesezeichen" && isUserCurrentUser && <LesezeichenTab />}
           {activeTab === "statistiken" && <StatistikenTab benutzer={userToDisplay} />}
+          {activeTab === "achievements" && (
+            <AchievementsTab
+              achievements={userToDisplay.achievements || []}
+              isOwner={isUserCurrentUser}
+              streak={{
+                current: userToDisplay.statistiken?.streak || 0,
+                max: userToDisplay.statistiken?.maxStreak || 0,
+                lastActivity: userToDisplay.lastActivity || new Date().toISOString(),
+              }}
+            />
+          )}
         </div>
       </div>
     </div>

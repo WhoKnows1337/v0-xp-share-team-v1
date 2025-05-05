@@ -9,6 +9,8 @@ import { ProfilBearbeitenDialog } from "./profil-bearbeiten-dialog"
 import { EinstellungenDialog } from "./einstellungen-dialog"
 import { useRouter } from "next/navigation"
 import { toast } from "@/hooks/use-toast"
+import { LevelChip } from "@/components/xp/level-chip" // Importiere LevelChip
+import { StreakMeter } from "@/components/xp/streak-meter" // Importiere StreakMeter
 
 interface ProfilHeaderProps {
   benutzer: User
@@ -42,6 +44,13 @@ export function ProfilHeader({ benutzer, isCurrentUser }: ProfilHeaderProps) {
     router.push(`/nachrichten?newChat=${benutzer.username}`)
   }
 
+  // Mock-Streak für die Anzeige
+  const mockStreak = {
+    current: 7,
+    max: 14,
+    lastActivity: new Date().toISOString(),
+  }
+
   return (
     <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden">
       {/* Banner */}
@@ -68,7 +77,7 @@ export function ProfilHeader({ benutzer, isCurrentUser }: ProfilHeaderProps) {
           {/* Benutzerinfo */}
           <div className="flex-grow">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
+              <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-bold flex items-center gap-2">
                   {benutzer.username}
                   {benutzer.isVerifiziert && (
@@ -77,7 +86,25 @@ export function ProfilHeader({ benutzer, isCurrentUser }: ProfilHeaderProps) {
                     </span>
                   )}
                 </h1>
-                <p className="text-sm text-muted-foreground">Mitglied seit {benutzer.registriertSeit}</p>
+
+                {/* LevelChip-Komponente */}
+                <LevelChip
+                  level={benutzer.statistiken?.xpLevel || 1}
+                  levelInfo={{
+                    range:
+                      benutzer.statistiken?.xpLevel >= 26
+                        ? "Adept"
+                        : benutzer.statistiken?.xpLevel >= 11
+                          ? "Explorer"
+                          : "Novice",
+                    currentXP: benutzer.statistiken?.xpPunkte || 0,
+                    nextLevelXP: (benutzer.statistiken?.xpLevel || 1) * 1000,
+                    unlocks: [],
+                  }}
+                />
+
+                {/* StreakMeter-Komponente */}
+                <StreakMeter streak={mockStreak} />
               </div>
 
               <div className="flex gap-2">
