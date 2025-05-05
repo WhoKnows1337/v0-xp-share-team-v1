@@ -77,9 +77,14 @@ export function Navbar() {
   }, [currentUser])
 
   const handleNewExperience = () => {
-    // Löse ein benutzerdefiniertes Event aus, um den Wizard zu öffnen
-    const event = new CustomEvent("openErlebnisWizard")
-    window.dispatchEvent(event)
+    console.log("Navbar: Öffne ErlebnisWizard")
+
+    // Löse das Event direkt aus
+    if (typeof window !== "undefined") {
+      console.log("Navbar: Löse Event 'openErlebnisWizard' aus")
+      const event = new CustomEvent("openErlebnisWizard")
+      window.dispatchEvent(event)
+    }
   }
 
   const handleProfileClick = (username: string) => {

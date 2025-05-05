@@ -5,7 +5,7 @@ import { ErlebnisWizardModal, useErlebnisWizard } from "@/components/erlebnis-wi
 
 export function WizardModalWrapper() {
   const [isMounted, setIsMounted] = useState(false)
-  const { isOpen, closeWizard } = useErlebnisWizard()
+  const { isOpen, openWizard, closeWizard } = useErlebnisWizard()
 
   useEffect(() => {
     setIsMounted(true)
@@ -13,6 +13,7 @@ export function WizardModalWrapper() {
     // Event-Listener für das benutzerdefinierte Event
     const handleOpenWizard = () => {
       console.log("WizardModalWrapper: Event 'openErlebnisWizard' empfangen")
+      openWizard()
     }
 
     window.addEventListener("openErlebnisWizard", handleOpenWizard)
@@ -20,7 +21,7 @@ export function WizardModalWrapper() {
     return () => {
       window.removeEventListener("openErlebnisWizard", handleOpenWizard)
     }
-  }, [])
+  }, [openWizard])
 
   if (!isMounted) return null
 

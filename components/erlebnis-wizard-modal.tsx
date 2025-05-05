@@ -5,6 +5,22 @@ import { createContext, useContext, useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { ErlebnisWizard } from "@/components/erlebnis-wizard"
 
+// Globale Funktion zum Öffnen des Wizards
+if (typeof window !== "undefined") {
+  window.openErlebnisWizard = () => {
+    const event = new CustomEvent("openErlebnisWizard")
+    window.dispatchEvent(event)
+    console.log("Globale Funktion: ErlebnisWizard Event ausgelöst")
+  }
+}
+
+// Stelle sicher, dass der TypeScript-Compiler die globale Funktion kennt
+declare global {
+  interface Window {
+    openErlebnisWizard: () => void
+  }
+}
+
 interface ErlebnisWizardContextType {
   isOpen: boolean
   openWizard: () => void
@@ -17,20 +33,25 @@ export function ErlebnisWizardProvider({ children }: { children: React.ReactNode
   const [isOpen, setIsOpen] = useState(false)
 
   const openWizard = () => {
+    console.log("ErlebnisWizardProvider: openWizard aufgerufen")
     setIsOpen(true)
   }
 
   const closeWizard = () => {
+    console.log("ErlebnisWizardProvider: closeWizard aufgerufen")
     setIsOpen(false)
   }
 
   // Event-Listener für das benutzerdefinierte Event
   useEffect(() => {
     const handleOpenWizard = () => {
+      console.log("ErlebnisWizardProvider: Event 'openErlebnisWizard' empfangen")
       openWizard()
     }
 
+    // Verwende sowohl das Event-Objekt als auch den String für maximale Kompatibilität
     window.addEventListener("openErlebnisWizard", handleOpenWizard)
+
     return () => {
       window.removeEventListener("openErlebnisWizard", handleOpenWizard)
     }
@@ -69,7 +90,7 @@ export function ErlebnisWizardModal({ isOpen, onClose }: ErlebnisWizardModalProp
     onClose()
   }
 
-  if (!isOpen) return null
+  if (!isMounted) return null
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -86,9 +107,13 @@ export function ErlebnisWizardModal({ isOpen, onClose }: ErlebnisWizardModalProp
   )
 }
 
-// Für Abwärtskompatibilität mit bestehendem Code
+// Verbesserte Funktion zum Öffnen des Wizards
 export function openErlebnisWizard() {
+  console.log("openErlebnisWizard Funktion aufgerufen")
   if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event("openErlebnisWizard"))
+    // Verwende ein CustomEvent für bessere Kompatibilität
+    const event = new CustomEvent("openErlebnisWizard")
+    window.dispatchEvent(event)
+    console.log("openErlebnisWizard Event ausgelöst")
   }
 }

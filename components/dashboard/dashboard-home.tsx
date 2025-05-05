@@ -23,7 +23,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
-import { openErlebnisWizard } from "../erlebnis-wizard-modal"
+import { openErlebnisWizard } from "@/components/erlebnis-wizard-modal"
 import { UserLink } from "@/components/user-link"
 import { useRouter } from "next/navigation"
 import { InviteCard } from "@/components/referral/invite-card"
@@ -179,7 +179,16 @@ export function DashboardHome({ initialTab = "overview" }: { initialTab?: string
   // Verwende die openErlebnisWizard-Funktion statt des Hooks
   const handleNewExperience = () => {
     console.log("Dashboard: Öffne ErlebnisWizard")
+
+    // Rufe die Funktion direkt auf
     openErlebnisWizard()
+
+    // Alternativ, löse das Event direkt aus
+    if (typeof window !== "undefined") {
+      console.log("Dashboard: Löse Event 'openErlebnisWizard' aus")
+      const event = new CustomEvent("openErlebnisWizard")
+      window.dispatchEvent(event)
+    }
   }
 
   const handleErlebnisClick = (item: any) => {
