@@ -16,15 +16,17 @@ import {
   TrendingUp,
   Trophy,
   Users,
+  PartyPopper,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
-import { useErlebnisWizard } from "../erlebnis-wizard-modal"
+import { openErlebnisWizard } from "../erlebnis-wizard-modal"
 import { UserLink } from "@/components/user-link"
 import { useRouter } from "next/navigation"
+import { InviteCard } from "@/components/referral/invite-card"
 
 // Mock-Daten für den personalisierten Feed
 const personalizedFeed = [
@@ -166,7 +168,7 @@ const events = [
   },
 ]
 
-export function DashboardHome() {
+export function DashboardHome({ initialTab = "overview" }: { initialTab?: string }) {
   const [userName, setUserName] = useState("Alice")
   const [feedType, setFeedType] = useState("empfehlungen")
   const [lastActivity, setLastActivity] = useState("vor 3 Tagen")
@@ -174,11 +176,10 @@ export function DashboardHome() {
   const [daysSinceLastExperience, setDaysSinceLastExperience] = useState(30)
   const router = useRouter()
 
-  const { openWizard } = useErlebnisWizard()
-
+  // Verwende die openErlebnisWizard-Funktion statt des Hooks
   const handleNewExperience = () => {
     console.log("Dashboard: Öffne ErlebnisWizard")
-    openWizard()
+    openErlebnisWizard()
   }
 
   const handleErlebnisClick = (item: any) => {
@@ -204,13 +205,23 @@ export function DashboardHome() {
           <h1 className="text-3xl font-bold">Willkommen zurück, {userName}!</h1>
           <p className="text-slate-400">Dein letzter Besuch war {lastActivity}</p>
         </div>
-        <Button
-          className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
-          onClick={handleNewExperience}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Neues Erlebnis
-        </Button>
+        <div className="flex gap-2">
+          {/* Referral-Button hinzufügen */}
+          <Button
+            className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600"
+            onClick={() => router.push("/referrals")}
+          >
+            <PartyPopper className="mr-2 h-4 w-4" />
+            Freunde einladen
+          </Button>
+          <Button
+            className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
+            onClick={handleNewExperience}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Neues Erlebnis
+          </Button>
+        </div>
       </motion.div>
 
       {/* Hauptinhalt - zweispaltiges Layout */}
@@ -380,6 +391,9 @@ export function DashboardHome() {
 
         {/* Rechte Spalte - Statistiken, Trends und sekundäre Panels */}
         <div className="space-y-6">
+          {/* Referral-Karte hinzufügen */}
+          <InviteCard />
+
           {/* Statistik-Highlight / Muster der Woche */}
           <Card className="bg-slate-800/50 border-slate-700 text-white">
             <CardHeader>

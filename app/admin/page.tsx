@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Navbar } from "@/components/navbar"
+import AppLayout from "../app-layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -12,9 +12,8 @@ export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState("overview")
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="container mx-auto pt-24 pb-16 px-4">
+    <AppLayout>
+      <div className="container mx-auto pt-6 pb-16 px-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
             <h1 className="text-3xl font-bold">Admin Dashboard</h1>
@@ -213,6 +212,6 @@ export default function AdminDashboardPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </AppLayout>
   )
 }

@@ -1,9 +1,10 @@
+import AppLayout from "../../app-layout"
 import { TrackingDashboard } from "@/components/admin/tracking-dashboard"
 
-export default function TrackingPage() {
+export default function AdminTrackingPage() {
   return (
-    <div className="container mx-auto py-8">
+    <AppLayout>
       <TrackingDashboard />
-    </div>
+    </AppLayout>
   )
 }

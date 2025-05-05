@@ -11,7 +11,7 @@ interface ErlebnisWizardContextType {
   closeWizard: () => void
 }
 
-export const ErlebnisWizardContext = createContext<ErlebnisWizardContextType | undefined>(undefined)
+const ErlebnisWizardContext = createContext<ErlebnisWizardContextType | undefined>(undefined)
 
 export function ErlebnisWizardProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -24,9 +24,22 @@ export function ErlebnisWizardProvider({ children }: { children: React.ReactNode
     setIsOpen(false)
   }
 
+  // Event-Listener für das benutzerdefinierte Event
+  useEffect(() => {
+    const handleOpenWizard = () => {
+      openWizard()
+    }
+
+    window.addEventListener("openErlebnisWizard", handleOpenWizard)
+    return () => {
+      window.removeEventListener("openErlebnisWizard", handleOpenWizard)
+    }
+  }, [])
+
   return (
     <ErlebnisWizardContext.Provider value={{ isOpen, openWizard, closeWizard }}>
       {children}
+      <ErlebnisWizardModal isOpen={isOpen} onClose={closeWizard} />
     </ErlebnisWizardContext.Provider>
   )
 }
@@ -39,7 +52,6 @@ export function useErlebnisWizard() {
   return context
 }
 
-// Hier ist die ErlebnisWizardModal-Komponente
 interface ErlebnisWizardModalProps {
   isOpen: boolean
   onClose: () => void
@@ -57,6 +69,8 @@ export function ErlebnisWizardModal({ isOpen, onClose }: ErlebnisWizardModalProp
     onClose()
   }
 
+  if (!isOpen) return null
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden">
@@ -66,7 +80,7 @@ export function ErlebnisWizardModal({ isOpen, onClose }: ErlebnisWizardModalProp
             Teile dein Erlebnis mit der Community. Fülle die folgenden Schritte aus, um dein Erlebnis zu erstellen.
           </DialogDescription>
         </DialogHeader>
-        {isMounted && isOpen && <ErlebnisWizard onComplete={handleComplete} />}
+        {isMounted && <ErlebnisWizard onComplete={handleComplete} />}
       </DialogContent>
     </Dialog>
   )
@@ -74,7 +88,6 @@ export function ErlebnisWizardModal({ isOpen, onClose }: ErlebnisWizardModalProp
 
 // Für Abwärtskompatibilität mit bestehendem Code
 export function openErlebnisWizard() {
-  // Verwende das benutzerdefinierte Event
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event("openErlebnisWizard"))
   }

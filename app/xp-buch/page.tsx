@@ -1,10 +1,10 @@
-import { DashboardLayout } from "@/components/layouts/dashboard-layout"
+import AppLayout from "../app-layout"
 import { XPBuchLayout } from "@/components/xp-buch/xp-buch-layout"
 
 export default function XPBuchPage() {
   return (
-    <DashboardLayout activeTab="xp-buch">
+    <AppLayout>
       <XPBuchLayout />
-    </DashboardLayout>
+    </AppLayout>
   )
 }

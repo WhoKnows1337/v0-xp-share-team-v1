@@ -1,16 +1,10 @@
-"use client"
-
-import { DashboardLayout } from "@/components/layouts/dashboard-layout"
+import AppLayout from "../app-layout"
 import { ThemenChannels } from "@/components/nachrichten/themen-channels"
 
 export default function ChannelsPage() {
   return (
-    <DashboardLayout activeTab="channels">
-      <div className="container mx-auto p-4 h-[calc(100vh-4rem)]">
-        <div className="h-full rounded-lg border overflow-hidden">
-          <ThemenChannels />
-        </div>
-      </div>
-    </DashboardLayout>
+    <AppLayout>
+      <ThemenChannels />
+    </AppLayout>
   )
 }

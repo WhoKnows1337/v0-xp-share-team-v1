@@ -1,33 +1,34 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { useErlebnisWizard } from "../erlebnis-wizard-modal"
+import { Container } from "@/components/ui/container"
+import { useRouter } from "next/navigation"
+import { ReferralButton } from "@/components/referral/referral-button"
 
 export function CallToAction() {
-  const { openWizard } = useErlebnisWizard()
-
-  const handleNewExperience = () => {
-    console.log("Startseite CTA: Öffne ErlebnisWizard")
-    openWizard()
-  }
+  const router = useRouter()
 
   return (
-    <section className="py-16">
-      <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-12 text-center">
-        <h2 className="text-3xl font-bold mb-4">Bereit, deine Erlebnisse zu teilen?</h2>
-        <p className="text-xl mb-8 max-w-2xl mx-auto">
-          Erstelle noch heute ein Konto und beginne damit, deine besonderen Momente festzuhalten und mit anderen zu
-          teilen.
-        </p>
-        <div className="flex flex-wrap justify-center gap-4">
-          <Button size="lg" className="bg-white text-emerald-700 hover:bg-gray-100" onClick={handleNewExperience}>
-            Erlebnis teilen
-          </Button>
-          <Button size="lg" variant="outline" className="text-white border-white hover:bg-white/10">
-            Mehr erfahren
-          </Button>
+    <section className="py-16 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950">
+      <Container>
+        <div className="text-center space-y-6">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Bereit, deine Erlebnisse zu teilen?</h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Tritt der XP Share Community bei und entdecke eine neue Art, Erlebnisse zu dokumentieren, zu teilen und zu
+            verbinden.
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
+            <Button
+              size="lg"
+              onClick={() => router.push("/dashboard")}
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+            >
+              Jetzt starten
+            </Button>
+            <ReferralButton size="lg" text="Freunde einladen & Belohnungen erhalten" />
+          </div>
         </div>
-      </div>
+      </Container>
     </section>
   )
 }

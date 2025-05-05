@@ -1,8 +1,6 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useEffect, useContext } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -16,47 +14,44 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Benachrichtigungen } from "@/components/nachrichten/benachrichtigungen"
 import { NachrichtenButton } from "@/components/nachrichten/nachrichten-button"
-import { ErlebnisWizardContext } from "@/components/erlebnis-wizard-modal"
 import {
-  Search,
-  Menu,
-  Plus,
   Crown,
   Settings,
   BarChart2,
   Home,
   Book,
   Compass,
-  Activity,
   TrendingUp,
   Hash,
+  PartyPopper,
+  LogOut,
+  User,
+  Search,
+  Plus,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
 import { getCurrentUser } from "@/lib/mock-users"
 import { getTotalUnreadMessages } from "@/lib/mock-messages"
 import { mockUsers } from "@/lib/mock-users"
+import { Benachrichtigungen } from "@/components/nachrichten/benachrichtigungen"
+import Image from "next/image"
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [unreadMessages, setUnreadMessages] = useState(0)
   const pathname = usePathname()
   const router = useRouter()
   const currentUser = getCurrentUser()
   const currentUsername = currentUser?.username || "demo-user"
+  const isLoggedIn = true // Mock für den eingeloggten Zustand
 
-  // Sicherer Zugriff auf den ErlebnisWizardContext
-  const erlebnisWizardContext = useContext(ErlebnisWizardContext)
-  const openWizard = () => {
-    if (erlebnisWizardContext) {
-      erlebnisWizardContext.openWizard()
-    } else {
-      console.warn("ErlebnisWizardContext ist nicht verfügbar")
-    }
-  }
+  // Admin-Rolle sofort beim Laden der Seite zuweisen
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  useEffect(() => {
+    // Sofort die Admin-Rolle setzen, nicht in einem useEffect mit Abhängigkeiten
+    setIsAdmin(true)
+  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -82,20 +77,18 @@ export function Navbar() {
   }, [currentUser])
 
   const handleNewExperience = () => {
-    console.log("Navbar: Öffne ErlebnisWizard")
-    openWizard()
+    // Löse ein benutzerdefiniertes Event aus, um den Wizard zu öffnen
+    const event = new CustomEvent("openErlebnisWizard")
+    window.dispatchEvent(event)
   }
 
-  const handleProfileClick = (e: React.MouseEvent) => {
-    e.preventDefault()
-    console.log("Navigiere zum Profil von:", currentUsername)
-
+  const handleProfileClick = (username: string) => {
     // Überprüfen, ob der Benutzer existiert
-    const user = mockUsers.find((u) => u.username.toLowerCase() === currentUsername.toLowerCase())
+    const user = mockUsers.find((u) => u.username.toLowerCase() === username.toLowerCase())
     if (user) {
       router.push(`/profil/${encodeURIComponent(user.username)}`)
     } else {
-      console.error("Benutzer nicht gefunden:", currentUsername)
+      console.error("Benutzer nicht gefunden:", username)
       // Fallback auf den ersten verfügbaren Benutzer
       if (mockUsers.length > 0) {
         router.push(`/profil/${encodeURIComponent(mockUsers[0].username)}`)
@@ -105,265 +98,163 @@ export function Navbar() {
     }
   }
 
-  // Temporär: Füge eine Admin-Rolle zum aktuellen Benutzer hinzu
-  useEffect(() => {
-    if (currentUser) {
-      // @ts-ignore - Wir fügen temporär eine Rolle hinzu
-      currentUser.role = "admin"
-    }
-  }, [currentUser])
-
-  const isAdmin = currentUser?.role === "admin"
-
   return (
-    <header
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 w-full transition-all duration-200",
-        isScrolled ? "bg-background/80 backdrop-blur-md shadow-sm" : "bg-background",
-      )}
-    >
-      <div className="container mx-auto flex h-16 items-center px-4">
-        {/* Linke Seite - Logo und Mobile Menu */}
-        <div className="flex items-center mr-4">
-          {/* Mobile Menu Trigger */}
-          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-            <SheetTrigger asChild className="md:hidden mr-2">
-              <Button variant="ghost" size="icon">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Menü öffnen</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-              <div className="flex flex-col h-full">
-                <div className="py-4">
-                  <Link href="/dashboard" className="flex items-center mb-6">
-                    <span className="font-bold text-xl">XP-Share</span>
-                  </Link>
-                  <nav className="flex flex-col gap-1">
-                    <Link
-                      href="/dashboard"
-                      className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <Home className="h-4 w-4" />
-                      <span>Dashboard</span>
-                    </Link>
-                    <Link
-                      href="/insights"
-                      className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <TrendingUp className="h-4 w-4" />
-                      <span>Insights & Trends</span>
-                    </Link>
-                    <Link
-                      href="/entdecken"
-                      className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <Compass className="h-4 w-4" />
-                      <span>Entdecken</span>
-                    </Link>
-                    <Link
-                      href="/dashboard?tab=meine-erlebnisse"
-                      className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <Activity className="h-4 w-4" />
-                      <span>Meine Erlebnisse</span>
-                    </Link>
-                    <Link
-                      href="/channels"
-                      className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <Hash className="h-4 w-4" />
-                      <span>Channels</span>
-                    </Link>
-                    <Link
-                      href="/xp-buch"
-                      className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <Book className="h-4 w-4" />
-                      <span>XP-Buch</span>
-                    </Link>
-                    <Link
-                      href="/pricing"
-                      className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <Crown className="h-4 w-4" />
-                      <span>Premium & Preise</span>
-                    </Link>
-                    <Link
-                      href="/einstellungen"
-                      className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <Settings className="h-4 w-4" />
-                      <span>Einstellungen</span>
-                    </Link>
-
-                    {isAdmin && (
-                      <>
-                        <div className="px-4 py-2 mt-4">
-                          <div className="text-xs font-semibold text-muted-foreground">Admin-Bereich</div>
-                          <div className="h-px bg-border mt-1"></div>
-                        </div>
-                        <Link
-                          href="/admin"
-                          className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          <Settings className="h-4 w-4" />
-                          <span>Admin Dashboard</span>
-                        </Link>
-                        <Link
-                          href="/admin/tracking"
-                          className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          <BarChart2 className="h-4 w-4" />
-                          <span>Tracking & Metriken</span>
-                        </Link>
-                      </>
-                    )}
-                  </nav>
-                </div>
-
-                <div className="mt-auto border-t pt-4">
-                  <div
-                    className="flex items-center gap-3 px-4 py-2 cursor-pointer"
-                    onClick={(e) => {
-                      handleProfileClick(e)
-                      setIsMobileMenuOpen(false)
-                    }}
-                  >
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage
-                        src={mockUsers.find((u) => u.username === currentUsername)?.avatar || "/placeholder.svg"}
-                        alt={currentUsername}
-                      />
-                      <AvatarFallback>{currentUsername.charAt(0).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-sm font-medium">{currentUser?.name}</p>
-                      <p className="text-xs text-muted-foreground">@{currentUsername}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
-
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <span className="font-bold text-xl">XP-Share</span>
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center">
+        {/* Linke Seite - Logo */}
+        <div className="flex items-center">
+          <Link href="/dashboard" className="flex items-center">
+            {/* Logo korrigiert, nicht mehr gestaucht */}
+            <Image src="/xp-share_logo.png" alt="XP Share Logo" width={40} height={40} className="w-auto h-10" />
           </Link>
         </div>
 
         {/* Mitte - Suchleiste */}
         <div className="flex-1 flex justify-center px-4">
-          <div className="relative w-full max-w-2xl">
+          <div className="relative w-full max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input placeholder="Suchen..." className="pl-10 w-full" aria-label="Suche in XP-Share" />
           </div>
         </div>
 
         {/* Rechte Seite - Aktionsbuttons */}
-        <div className="flex items-center gap-2 ml-4">
-          <Button
-            variant="outline"
-            size="sm"
-            className="hidden md:flex items-center gap-2"
-            onClick={handleNewExperience}
-          >
-            <Plus className="h-4 w-4" />
-            <span>Erlebnis teilen</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            size="icon"
-            className="md:hidden"
-            onClick={handleNewExperience}
-            aria-label="Erlebnis teilen"
-          >
-            <Plus className="h-5 w-5" />
-          </Button>
-
-          {/* Premium Button hinzufügen */}
-          <Button
-            variant="default"
-            size="sm"
-            className="hidden md:flex items-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600"
-            onClick={() => router.push("/pricing")}
-          >
-            <Crown className="h-4 w-4" />
-            <span>Premium</span>
-          </Button>
-
-          <Benachrichtigungen />
-
-          <NachrichtenButton />
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+        <div className="flex items-center gap-2">
+          {isLoggedIn ? (
+            <>
+              {/* Freunde einladen Button - gleiche Höhe wie Erlebnis teilen */}
               <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-full"
-                aria-label="Benutzerprofil und Einstellungen"
+                variant="outline"
+                size="sm"
+                className="hidden md:flex items-center gap-2"
+                onClick={() => router.push("/referrals")}
               >
-                <Avatar className="h-8 w-8">
-                  <AvatarImage
-                    src={mockUsers.find((u) => u.username === currentUsername)?.avatar || "/placeholder.svg"}
-                    alt={currentUsername}
-                  />
-                  <AvatarFallback>{currentUsername.charAt(0).toUpperCase()}</AvatarFallback>
-                </Avatar>
+                <PartyPopper className="h-4 w-4" />
+                <span>Freunde einladen</span>
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-background">
-              <DropdownMenuLabel>Mein Konto</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/">Startseite</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleProfileClick}>Profil</DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/dashboard">Dashboard</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/xp-buch">XP-Buch</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/pricing">Premium & Preise</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/einstellungen">Einstellungen</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/settings/subscription">Abo verwalten</Link>
-              </DropdownMenuItem>
-              {isAdmin && (
-                <>
+
+              {/* Erlebnis teilen Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                className="hidden md:flex items-center gap-2"
+                onClick={handleNewExperience}
+              >
+                <Plus className="h-4 w-4" />
+                <span>Erlebnis teilen</span>
+              </Button>
+
+              <NachrichtenButton />
+              <Benachrichtigungen />
+
+              {/* Premium Button - gleiche Höhe wie Erlebnis teilen */}
+              <Button
+                variant="default"
+                size="sm"
+                className="hidden md:flex items-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600"
+                onClick={() => router.push("/pricing")}
+              >
+                <Crown className="h-4 w-4" />
+                <span>Premium</span>
+              </Button>
+
+              {/* Avatar mit Dropdown-Menü */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage
+                        src={currentUser?.avatar || "/placeholder.svg"}
+                        alt={currentUser?.name || "Benutzer"}
+                      />
+                      <AvatarFallback>{currentUser?.name?.charAt(0) || "U"}</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{currentUser?.name}</p>
+                      <p className="text-xs leading-none text-muted-foreground">@{currentUsername}</p>
+                    </div>
+                  </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuLabel>Administration</DropdownMenuLabel>
-                  <DropdownMenuItem asChild>
-                    <Link href="/admin">Admin Dashboard</Link>
+                  <DropdownMenuItem onClick={() => handleProfileClick(currentUsername)}>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profil</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/admin/tracking">Tracking & Metriken</Link>
+                  <DropdownMenuItem onClick={() => router.push("/dashboard")}>
+                    <Home className="mr-2 h-4 w-4" />
+                    <span>Dashboard</span>
                   </DropdownMenuItem>
-                </>
-              )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/">Abmelden</Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                  <DropdownMenuItem onClick={() => router.push("/entdecken")}>
+                    <Compass className="mr-2 h-4 w-4" />
+                    <span>Entdecken</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/xp-buch")}>
+                    <Book className="mr-2 h-4 w-4" />
+                    <span>XP-Buch</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/channels")}>
+                    <Hash className="mr-2 h-4 w-4" />
+                    <span>Channels</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/insights")}>
+                    <TrendingUp className="mr-2 h-4 w-4" />
+                    <span>Insights</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/referrals")}>
+                    <PartyPopper className="mr-2 h-4 w-4" />
+                    <span>Freunde einladen</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/pricing")}>
+                    <Crown className="mr-2 h-4 w-4" />
+                    <span>Premium & Preise</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/settings/subscription")}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Abo verwalten</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/einstellungen")}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Einstellungen</span>
+                  </DropdownMenuItem>
+
+                  {/* Admin-Punkte immer anzeigen, da isAdmin jetzt sofort gesetzt wird */}
+                  {isAdmin && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel>Administration</DropdownMenuLabel>
+                      <DropdownMenuItem onClick={() => router.push("/admin")}>
+                        <Settings className="mr-2 h-4 w-4" />
+                        <span>Admin Dashboard</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => router.push("/admin/tracking")}>
+                        <BarChart2 className="mr-2 h-4 w-4" />
+                        <span>Tracking & Metriken</span>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => router.push("/")}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Abmelden</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          ) : (
+            <>
+              <Link href="/login">
+                <Button variant="ghost" size="sm">
+                  Anmelden
+                </Button>
+              </Link>
+              <Link href="/register">
+                <Button size="sm">Registrieren</Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>

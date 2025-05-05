@@ -12,6 +12,7 @@ import {
   Settings,
   Book,
   BarChart2,
+  PartyPopper,
 } from "lucide-react"
 import { getCurrentUser } from "@/lib/mock-users"
 import { getTotalUnreadMessages } from "@/lib/mock-messages"
@@ -143,6 +144,16 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
       action: () => {
         router.push("/xp-buch")
         onTabChange("xp-buch")
+      },
+    },
+    {
+      id: "referrals",
+      name: "Freunde einladen",
+      icon: PartyPopper,
+      tab: "referrals",
+      action: () => {
+        router.push("/referrals")
+        onTabChange("referrals")
       },
     },
     {

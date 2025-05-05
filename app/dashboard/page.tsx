@@ -1,10 +1,18 @@
-import ClientLayout from "../client-layout"
-import { Dashboard } from "@/components/dashboard/dashboard"
+import AppLayout from "../app-layout"
+import { DashboardHome } from "@/components/dashboard/dashboard-home"
+import { DashboardReferralBanner } from "@/components/referral/dashboard-referral-banner"
 
-export default function DashboardPage() {
+interface DashboardPageProps {
+  searchParams: { [key: string]: string | string[] | undefined }
+}
+
+export default function DashboardPage({ searchParams }: DashboardPageProps) {
+  const tab = searchParams.tab as string | undefined
+
   return (
-    <ClientLayout>
-      <Dashboard />
-    </ClientLayout>
+    <AppLayout>
+      <DashboardReferralBanner />
+      <DashboardHome initialTab={tab || "overview"} />
+    </AppLayout>
   )
 }

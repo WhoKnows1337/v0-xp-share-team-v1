@@ -22,6 +22,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { toast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 import { DialogDescription } from "@/components/ui/dialog"
+import { ProfileReferralBanner } from "@/components/referral/profile-referral-banner"
 
 interface ProfileHeaderProps {
   user: User
@@ -187,6 +188,9 @@ export function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
             <div className="mt-4">
               <p className="text-sm">{user.bio}</p>
             </div>
+
+            {/* Referral Banner (nur für eigenes Profil) */}
+            {isOwner && <ProfileReferralBanner className="mt-4" />}
 
             <div className="mt-4 flex flex-wrap gap-4">
               <div>

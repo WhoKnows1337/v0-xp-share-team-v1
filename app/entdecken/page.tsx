@@ -1,11 +1,10 @@
-import { Suspense } from "react"
-import { EntdeckenPageRedesigned } from "@/components/entdecken/entdecken-page-redesigned"
-import Loading from "@/app/loading"
+import AppLayout from "../app-layout"
+import { EntdeckenPage } from "@/components/entdecken/entdecken-page"
 
-export default function EntdeckenPage() {
+export default function EntdeckenPageRoute() {
   return (
-    <Suspense fallback={<Loading />}>
-      <EntdeckenPageRedesigned />
-    </Suspense>
+    <AppLayout>
+      <EntdeckenPage />
+    </AppLayout>
   )
 }
