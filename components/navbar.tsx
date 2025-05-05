@@ -32,7 +32,6 @@ import {
 } from "lucide-react"
 import { getCurrentUser } from "@/lib/mock-users"
 import { getTotalUnreadMessages } from "@/lib/mock-messages"
-import { mockUsers } from "@/lib/mock-users"
 import { Benachrichtigungen } from "@/components/nachrichten/benachrichtigungen"
 import Image from "next/image"
 
@@ -87,24 +86,14 @@ export function Navbar() {
     }
   }
 
+  // Verwende Link-Komponente statt router.push für die Navigation
   const handleProfileClick = (username: string) => {
-    // Überprüfen, ob der Benutzer existiert
-    const user = mockUsers.find((u) => u.username.toLowerCase() === username.toLowerCase())
-    if (user) {
-      router.push(`/profil/${encodeURIComponent(user.username)}`)
-    } else {
-      console.error("Benutzer nicht gefunden:", username)
-      // Fallback auf den ersten verfügbaren Benutzer
-      if (mockUsers.length > 0) {
-        router.push(`/profil/${encodeURIComponent(mockUsers[0].username)}`)
-      } else {
-        alert("Keine Benutzer verfügbar. Bitte überprüfen Sie die Mock-Daten.")
-      }
-    }
+    // Wir verwenden keine direkte Navigation mehr, sondern lassen das durch den Link-Klick erledigen
+    console.log("Profil anzeigen für:", username)
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="fixed top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
         {/* Linke Seite - Logo */}
         <div className="flex items-center">
@@ -183,45 +172,68 @@ export function Navbar() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleProfileClick(currentUsername)}>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profil</span>
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href={`/profil/${encodeURIComponent(currentUsername)}`}
+                      className="flex items-center cursor-pointer"
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profil</span>
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push("/dashboard")}>
-                    <Home className="mr-2 h-4 w-4" />
-                    <span>Dashboard</span>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard" className="flex items-center cursor-pointer">
+                      <Home className="mr-2 h-4 w-4" />
+                      <span>Dashboard</span>
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push("/entdecken")}>
-                    <Compass className="mr-2 h-4 w-4" />
-                    <span>Entdecken</span>
+                  <DropdownMenuItem asChild>
+                    <Link href="/entdecken" className="flex items-center cursor-pointer">
+                      <Compass className="mr-2 h-4 w-4" />
+                      <span>Entdecken</span>
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push("/xp-buch")}>
-                    <Book className="mr-2 h-4 w-4" />
-                    <span>XP-Buch</span>
+                  <DropdownMenuItem asChild>
+                    <Link href="/xp-buch" className="flex items-center cursor-pointer">
+                      <Book className="mr-2 h-4 w-4" />
+                      <span>XP-Buch</span>
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push("/channels")}>
-                    <Hash className="mr-2 h-4 w-4" />
-                    <span>Channels</span>
+                  <DropdownMenuItem asChild>
+                    <Link href="/channels" className="flex items-center cursor-pointer">
+                      <Hash className="mr-2 h-4 w-4" />
+                      <span>Channels</span>
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push("/insights")}>
-                    <TrendingUp className="mr-2 h-4 w-4" />
-                    <span>Insights</span>
+                  <DropdownMenuItem asChild>
+                    <Link href="/insights" className="flex items-center cursor-pointer">
+                      <TrendingUp className="mr-2 h-4 w-4" />
+                      <span>Insights</span>
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push("/referrals")}>
-                    <PartyPopper className="mr-2 h-4 w-4" />
-                    <span>Freunde einladen</span>
+                  <DropdownMenuItem asChild>
+                    <Link href="/referrals" className="flex items-center cursor-pointer">
+                      <PartyPopper className="mr-2 h-4 w-4" />
+                      <span>Freunde einladen</span>
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push("/pricing")}>
-                    <Crown className="mr-2 h-4 w-4" />
-                    <span>Premium & Preise</span>
+                  <DropdownMenuItem asChild>
+                    <Link href="/pricing" className="flex items-center cursor-pointer">
+                      <Crown className="mr-2 h-4 w-4" />
+                      <span>Premium & Preise</span>
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push("/settings/subscription")}>
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Abo verwalten</span>
+                  <DropdownMenuItem asChild>
+                    <Link href="/settings/subscription" className="flex items-center cursor-pointer">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Abo verwalten</span>
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push("/einstellungen")}>
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Einstellungen</span>
+                  <DropdownMenuItem asChild>
+                    <Link href="/einstellungen" className="flex items-center cursor-pointer">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Einstellungen</span>
+                    </Link>
                   </DropdownMenuItem>
 
                   {/* Admin-Punkte immer anzeigen, da isAdmin jetzt sofort gesetzt wird */}
@@ -229,21 +241,27 @@ export function Navbar() {
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuLabel>Administration</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => router.push("/admin")}>
-                        <Settings className="mr-2 h-4 w-4" />
-                        <span>Admin Dashboard</span>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin" className="flex items-center cursor-pointer">
+                          <Settings className="mr-2 h-4 w-4" />
+                          <span>Admin Dashboard</span>
+                        </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => router.push("/admin/tracking")}>
-                        <BarChart2 className="mr-2 h-4 w-4" />
-                        <span>Tracking & Metriken</span>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin/tracking" className="flex items-center cursor-pointer">
+                          <BarChart2 className="mr-2 h-4 w-4" />
+                          <span>Tracking & Metriken</span>
+                        </Link>
                       </DropdownMenuItem>
                     </>
                   )}
 
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => router.push("/")}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Abmelden</span>
+                  <DropdownMenuItem asChild>
+                    <Link href="/" className="flex items-center cursor-pointer">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Abmelden</span>
+                    </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

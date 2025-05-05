@@ -1,9 +1,7 @@
 "use client"
 
 import type React from "react"
-
 import { usePathname } from "next/navigation"
-import { Navbar } from "@/components/navbar"
 import { DashboardLayout } from "@/components/layouts/dashboard-layout"
 
 interface AppLayoutProps {
@@ -15,15 +13,10 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const isHomePage = pathname === "/"
   const isJoinPage = pathname?.startsWith("/join")
 
-  // Keine Navigation auf der Startseite oder Join-Seite
+  // Keine Sidebar auf der Startseite oder Join-Seite
   if (isHomePage || isJoinPage) {
     return <>{children}</>
   }
 
-  return (
-    <>
-      <Navbar />
-      <DashboardLayout>{children}</DashboardLayout>
-    </>
-  )
+  return <DashboardLayout>{children}</DashboardLayout>
 }

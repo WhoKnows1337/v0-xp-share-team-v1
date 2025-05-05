@@ -52,11 +52,11 @@ export function ProfilHeader({ benutzer, isCurrentUser }: ProfilHeaderProps) {
   }
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden">
+    <div className="bg-background rounded-lg shadow-md overflow-hidden">
       {/* Banner */}
       <div className="h-32 bg-gradient-to-r from-blue-400 to-purple-500"></div>
 
-      <div className="p-6">
+      <div className="p-6 bg-background">
         <div className="flex flex-col md:flex-row gap-6">
           {/* Avatar */}
           <div className="flex-shrink-0">

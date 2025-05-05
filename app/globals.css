@@ -45,6 +45,18 @@
   }
 }
 
+@layer utilities {
+  .content-container {
+    padding-top: 4rem; /* 64px für die Navbar-Höhe */
+  }
+}
+
+/* Stelle sicher, dass der Body keinen Overflow hat */
+body {
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
 @keyframes heartbeat {
   0% {
     transform: scale(1);

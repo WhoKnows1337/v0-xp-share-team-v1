@@ -1,3 +1,5 @@
+"use client"
+
 import { Loader2 } from "lucide-react"
 
 interface LoadingProps {
@@ -12,3 +14,6 @@ export function Loading({ message = "Wird geladen..." }: LoadingProps) {
     </div>
   )
 }
+
+// Add default export to maintain compatibility with existing imports
+export default Loading
