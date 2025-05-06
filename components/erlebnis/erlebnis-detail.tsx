@@ -96,36 +96,36 @@ export function ErlebnisDetail({ id, erlebnis }: ErlebnisDetailProps) {
         Zurück
       </Button>
 
-      {/* Hero-Bereich mit Titelbild */}
-      <div className="relative w-full h-[400px] mb-6 rounded-lg overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10"></div>
-        <Image
-          src={mainImage || "/placeholder.svg"}
-          alt={erlebnis.titel}
-          fill
-          className="object-cover"
-          onError={(e) => {
-            // Fallback für fehlerhafte Bilder
-            ;(e.target as HTMLImageElement).src = "/diverse-experiences.png"
-          }}
-        />
-        <div className="absolute bottom-0 left-0 p-6 z-20 w-full">
-          <h1 className="text-3xl font-bold text-white mb-2">{erlebnis.titel}</h1>
-          <div className="flex items-center text-white/80">
-            <User className="h-4 w-4 mr-2" />
-            <span>
-              {typeof erlebnis.autor === "string"
-                ? erlebnis.autor
-                : erlebnis.autor?.name || erlebnis.autor?.username || "Anonym"}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Zweispaltiges Layout direkt nach dem Hero-Bereich */}
+      {/* Zweispaltiges Layout direkt nach dem Zurück-Button */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Hauptinhalt - 2/3 der Breite */}
         <div className="md:col-span-2">
+          {/* Hero-Bereich mit Titelbild - jetzt innerhalb der linken Spalte */}
+          <div className="relative w-full h-[400px] mb-6 rounded-lg overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10"></div>
+            <Image
+              src={mainImage || "/placeholder.svg"}
+              alt={erlebnis.titel}
+              fill
+              className="object-cover"
+              onError={(e) => {
+                // Fallback für fehlerhafte Bilder
+                ;(e.target as HTMLImageElement).src = "/diverse-experiences.png"
+              }}
+            />
+            <div className="absolute bottom-0 left-0 p-6 z-20 w-full">
+              <h1 className="text-3xl font-bold text-white mb-2">{erlebnis.titel}</h1>
+              <div className="flex items-center text-white/80">
+                <User className="h-4 w-4 mr-2" />
+                <span>
+                  {typeof erlebnis.autor === "string"
+                    ? erlebnis.autor
+                    : erlebnis.autor?.name || erlebnis.autor?.username || "Anonym"}
+                </span>
+              </div>
+            </div>
+          </div>
+
           {/* Aktionsleiste */}
           <div className="flex justify-between items-center py-4 border-b border-gray-200 dark:border-gray-800 mb-6">
             <div className="flex items-center space-x-6">
@@ -369,16 +369,8 @@ export function ErlebnisDetail({ id, erlebnis }: ErlebnisDetailProps) {
           </div>
         </div>
 
-        {/* Rechte Seitenleiste - 1/3 der Breite - jetzt über die gesamte Höhe */}
+        {/* Rechte Seitenleiste - 1/3 der Breite - jetzt über die gesamte Höhe und beginnt ganz oben */}
         <div className="md:col-span-1 space-y-6">
-          {/* Titel für die rechte Spalte */}
-          <div className="bg-gradient-to-r from-purple-500 to-blue-500 text-white p-4 rounded-lg shadow-md">
-            <h2 className="text-xl font-bold">KI-Analyse & Einsichten</h2>
-            <p className="text-sm opacity-90 mt-1">
-              Automatisch generierte Erkenntnisse und Muster basierend auf diesem Erlebnis
-            </p>
-          </div>
-
           {/* KI-Analyse */}
           <KIAnalyse erlebnis={erlebnis} />
 
