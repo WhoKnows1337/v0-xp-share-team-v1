@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import type { ErlebnisData } from "../erlebnis-wizard"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertCircle, Mic, Video } from "lucide-react"
+import { AlertCircle, Mic, Video, Info } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { VoiceRecorder } from "@/components/voice-recorder"
 import { VideoRecorder } from "@/components/video-recorder"
@@ -23,26 +23,38 @@ export function BeschreibungSchritt({ data, updateData }: BeschreibungSchrittPro
   const [touched, setTouched] = useState(false)
   const [showMediaRecorder, setShowMediaRecorder] = useState(false)
   const [activeTab, setActiveTab] = useState<"audio" | "video">("audio")
+  const [charCount, setCharCount] = useState(data.beschreibung.length)
+  const [isValid, setIsValid] = useState(data.beschreibung.length >= 50)
 
-  const validateDescription = (description: string) => {
+  const validateDescription = (description: string): string => {
     if (description.trim().length === 0) {
       return "Bitte beschreibe dein Erlebnis."
     }
     if (description.trim().length < 50) {
       return "Die Beschreibung sollte mindestens 50 Zeichen lang sein."
     }
+    if (description.trim().length > 10000) {
+      return "Die Beschreibung darf maximal 10.000 Zeichen lang sein."
+    }
     return ""
   }
 
   useEffect(() => {
     if (touched) {
-      setError(validateDescription(data.beschreibung))
+      const validationError = validateDescription(data.beschreibung)
+      setError(validationError)
+      setIsValid(!validationError)
     }
+    setCharCount(data.beschreibung.length)
   }, [data.beschreibung, touched])
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    updateData({ beschreibung: e.target.value })
-    if (!touched) setTouched(true)
+    const newValue = e.target.value
+    updateData({ beschreibung: newValue })
+
+    if (!touched && newValue.length > 0) {
+      setTouched(true)
+    }
   }
 
   const handleTranscriptionComplete = (text: string) => {
@@ -93,6 +105,32 @@ export function BeschreibungSchritt({ data, updateData }: BeschreibungSchrittPro
     }
   }
 
+  // Berechne die Qualität der Beschreibung basierend auf der Länge und Schlüsselwörtern
+  const getDescriptionQuality = (): { quality: "basic" | "good" | "excellent"; message: string } => {
+    const text = data.beschreibung.toLowerCase()
+    const wordCount = text.split(/\s+/).filter((word) => word.length > 0).length
+
+    if (wordCount < 30) {
+      return {
+        quality: "basic",
+        message: "Grundlegende Beschreibung. Füge mehr Details hinzu, um dein Erlebnis besser zu vermitteln.",
+      }
+    } else if (wordCount < 100) {
+      return {
+        quality: "good",
+        message: "Gute Beschreibung. Überlege, ob du noch emotionale oder sensorische Details hinzufügen möchtest.",
+      }
+    } else {
+      return {
+        quality: "excellent",
+        message:
+          "Ausgezeichnete Beschreibung! Deine detaillierte Schilderung wird anderen helfen, dein Erlebnis nachzuvollziehen.",
+      }
+    }
+  }
+
+  const descriptionQuality = getDescriptionQuality()
+
   return (
     <div className="space-y-4">
       <div>
@@ -105,7 +143,13 @@ export function BeschreibungSchritt({ data, updateData }: BeschreibungSchrittPro
 
       <div className="space-y-2">
         <div className="flex justify-between items-center">
-          <Label htmlFor="beschreibung">Beschreibung</Label>
+          <Label htmlFor="beschreibung" className="flex items-center">
+            Beschreibung
+            <span className="text-red-400 ml-1" aria-hidden="true">
+              *
+            </span>
+            <span className="sr-only">Pflichtfeld</span>
+          </Label>
           <div className="flex items-center space-x-2">
             <Button
               variant="ghost"
@@ -125,8 +169,10 @@ export function BeschreibungSchritt({ data, updateData }: BeschreibungSchrittPro
             value={data.beschreibung}
             onChange={handleChange}
             onBlur={() => setTouched(true)}
-            className="min-h-[200px] bg-white/5 border-white/20 text-white pr-24"
+            className={`min-h-[200px] bg-white/5 border-white/20 text-white pr-24 ${error ? "border-red-500 focus:border-red-500" : ""}`}
             rows={10}
+            aria-invalid={!!error}
+            aria-describedby={error ? "beschreibung-error" : "beschreibung-hint"}
           />
 
           {/* Aufnahme-Buttons innerhalb des Textfeldes */}
@@ -161,72 +207,101 @@ export function BeschreibungSchritt({ data, updateData }: BeschreibungSchrittPro
           </div>
         </div>
 
-        {/* Automatisch erkannte Kategorie anzeigen, wenn Beschreibung länger als 50 Zeichen ist */}
-        {data.beschreibung.length >= 50 && (
-          <div className="mt-4 p-4 bg-green-900/20 border border-green-700/30 rounded-md animate-fadeIn">
-            <h4 className="text-green-400 font-medium flex items-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 mr-2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              Automatisch erkannte Kategorie
-            </h4>
-            <div className="mt-2 flex items-center">
-              <span className="text-white font-medium">Erkannt:</span>
-              <span className="ml-2 text-green-400 font-medium">{getErkannteKategorie()}</span>
-            </div>
-            <p className="mt-2 text-sm text-green-300/80">
-              Diese Kategorie wurde basierend auf deiner Beschreibung automatisch erkannt. Du kannst sie im
-              Kategorie-Schritt anpassen.
-            </p>
-          </div>
-        )}
-
-        {showMediaRecorder && (
-          <div className="mt-2 p-3 bg-slate-800/50 border border-slate-700/50 rounded-md">
-            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "audio" | "video")}>
-              <TabsList className="bg-slate-700 mb-4">
-                <TabsTrigger value="audio" className="data-[state=active]:bg-primary data-[state=active]:text-white">
-                  <Mic className="h-4 w-4 mr-2" />
-                  Sprachaufnahme
-                </TabsTrigger>
-                <TabsTrigger value="video" className="data-[state=active]:bg-primary data-[state=active]:text-white">
-                  <Video className="h-4 w-4 mr-2" />
-                  Videoaufnahme
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="audio">
-                <VoiceRecorder onTranscriptionComplete={handleTranscriptionComplete} />
-              </TabsContent>
-
-              <TabsContent value="video">
-                <VideoRecorder onRecordingComplete={handleVideoRecordingComplete} />
-              </TabsContent>
-            </Tabs>
-          </div>
-        )}
-
         <div className="flex justify-between text-sm">
-          <span className={error ? "text-red-400" : "text-gray-400"}>{data.beschreibung.length} Zeichen</span>
+          <span
+            id="beschreibung-hint"
+            className={`${
+              charCount === 0
+                ? "text-gray-400"
+                : charCount < 50
+                  ? "text-red-400"
+                  : charCount > 9000
+                    ? "text-amber-400"
+                    : "text-green-400"
+            }`}
+          >
+            {charCount} Zeichen
+          </span>
           <span className="text-gray-400">
-            {data.beschreibung.length < 50 ? "Mindestens 50 Zeichen erforderlich" : ""}
+            {charCount < 50 ? `Noch ${50 - charCount} Zeichen bis zum Minimum` : ""}
           </span>
         </div>
+
+        {/* Qualitätsindikator für die Beschreibung */}
+        {data.beschreibung.length > 0 && (
+          <div
+            className={`mt-2 p-2 rounded-md text-sm flex items-start ${
+              descriptionQuality.quality === "basic"
+                ? "bg-amber-900/20 border border-amber-800/30 text-amber-300"
+                : descriptionQuality.quality === "good"
+                  ? "bg-blue-900/20 border border-blue-800/30 text-blue-300"
+                  : "bg-green-900/20 border border-green-800/30 text-green-300"
+            }`}
+          >
+            <Info className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
+            <span>{descriptionQuality.message}</span>
+          </div>
+        )}
       </div>
 
+      {/* Automatisch erkannte Kategorie anzeigen, wenn Beschreibung länger als 50 Zeichen ist */}
+      {data.beschreibung.length >= 50 && (
+        <div className="mt-4 p-4 bg-green-900/20 border border-green-700/30 rounded-md animate-fadeIn">
+          <h4 className="text-green-400 font-medium flex items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            Automatisch erkannte Kategorie
+          </h4>
+          <div className="mt-2 flex items-center">
+            <span className="text-white font-medium">Erkannt:</span>
+            <span className="ml-2 text-green-400 font-medium">{getErkannteKategorie()}</span>
+          </div>
+          <p className="mt-2 text-sm text-green-300/80">
+            Diese Kategorie wurde basierend auf deiner Beschreibung automatisch erkannt. Du kannst sie im
+            Kategorie-Schritt anpassen.
+          </p>
+        </div>
+      )}
+
+      {showMediaRecorder && (
+        <div className="mt-2 p-3 bg-slate-800/50 border border-slate-700/50 rounded-md">
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "audio" | "video")}>
+            <TabsList className="bg-slate-700 mb-4">
+              <TabsTrigger value="audio" className="data-[state=active]:bg-primary data-[state=active]:text-white">
+                <Mic className="h-4 w-4 mr-2" />
+                Sprachaufnahme
+              </TabsTrigger>
+              <TabsTrigger value="video" className="data-[state=active]:bg-primary data-[state=active]:text-white">
+                <Video className="h-4 w-4 mr-2" />
+                Videoaufnahme
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="audio">
+              <VoiceRecorder onTranscriptionComplete={handleTranscriptionComplete} />
+            </TabsContent>
+
+            <TabsContent value="video">
+              <VideoRecorder onRecordingComplete={handleVideoRecordingComplete} />
+            </TabsContent>
+          </Tabs>
+        </div>
+      )}
+
       {error && touched && (
-        <Alert variant="destructive" className="bg-red-900/50 border-red-800 text-white">
+        <Alert variant="destructive" className="bg-red-900/50 border-red-800 text-white" id="beschreibung-error">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>{error}</AlertDescription>
         </Alert>

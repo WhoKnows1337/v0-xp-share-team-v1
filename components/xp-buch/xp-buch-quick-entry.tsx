@@ -15,9 +15,10 @@ import { getCurrentUser } from "@/lib/mock-users"
 import { useToast } from "@/hooks/use-toast"
 import { MoodSelector } from "./mood-selector"
 import { TagVorschlage } from "./tag-vorschlage"
-import { Lightbulb, Check, Loader2, WifiOff } from "lucide-react"
+import { Lightbulb, Check, Loader2, WifiOff, AlertCircle } from "lucide-react"
 import type { MoodType } from "@/types/xp-eintrag"
 import { useOnlineStatus } from "@/hooks/use-online-status"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 // Journaling-Prompts für den Fragegenerator
 const journalingPrompts = [
@@ -55,7 +56,48 @@ export function XPBuchQuickEntry() {
   const [currentPrompt, setCurrentPrompt] = useState<string | null>(null)
   const [saveSuccess, setSaveSuccess] = useState(false)
 
+  // Validierungsstatus
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [touched, setTouched] = useState<Record<string, boolean>>({
+    title: false,
+    content: false,
+  })
+
   const currentUser = getCurrentUser()
+
+  // Validierungsfunktionen
+  const validateTitle = (title: string): string => {
+    if (!title.trim()) return "Bitte gib einen Titel ein"
+    if (title.length > 100) return "Der Titel darf maximal 100 Zeichen lang sein"
+    return ""
+  }
+
+  const validateContent = (content: string): string => {
+    if (!content.trim()) return "Bitte beschreibe dein Erlebnis"
+    if (content.length > 5000) return "Die Beschreibung darf maximal 5000 Zeichen lang sein"
+    return ""
+  }
+
+  // Validiere bei Änderungen, wenn das Feld berührt wurde
+  useEffect(() => {
+    const newErrors: Record<string, string> = {}
+
+    if (touched.title) {
+      const titleError = validateTitle(title)
+      if (titleError) newErrors.title = titleError
+    }
+
+    if (touched.content) {
+      const contentError = validateContent(content)
+      if (contentError) newErrors.content = contentError
+    }
+
+    setErrors(newErrors)
+  }, [title, content, touched])
+
+  const handleBlur = (field: string) => {
+    setTouched((prev) => ({ ...prev, [field]: true }))
+  }
 
   // Auto-Save Funktion
   useEffect(() => {
@@ -109,13 +151,32 @@ export function XPBuchQuickEntry() {
     }
   }, [title, content, selectedTags, selectedMoods, isPrivate])
 
+  const validateForm = (): boolean => {
+    const titleError = validateTitle(title)
+    const contentError = validateContent(content)
+
+    const newErrors = {
+      ...(titleError ? { title: titleError } : {}),
+      ...(contentError ? { content: contentError } : {}),
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!title.trim() || !content.trim()) {
+    // Markiere alle Felder als berührt
+    setTouched({
+      title: true,
+      content: true,
+    })
+
+    if (!validateForm()) {
       toast({
         title: "Fehler",
-        description: "Bitte fülle Titel und Beschreibung aus.",
+        description: "Bitte fülle alle erforderlichen Felder korrekt aus.",
         variant: "destructive",
         duration: 3000,
       })
@@ -175,6 +236,8 @@ export function XPBuchQuickEntry() {
       setIsDraft(false)
       setIsSubmitting(false)
       setCurrentPrompt(null)
+      setTouched({ title: false, content: false })
+      setErrors({})
     }, 1000)
   }
 
@@ -209,17 +272,33 @@ export function XPBuchQuickEntry() {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="title">Titel</Label>
+            <Label htmlFor="title" className="flex items-center">
+              Titel
+              <span className="text-red-500 ml-1">*</span>
+            </Label>
             <Input
               id="title"
               placeholder="Was ist passiert? (z.B. 'Unerwartete Begegnung im Park')"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              onBlur={() => handleBlur("title")}
               required
-              aria-invalid={isSubmitting && !title.trim() ? "true" : undefined}
-              className={isSubmitting && !title.trim() ? "border-red-500" : ""}
+              aria-invalid={!!(errors.title && touched.title)}
+              aria-describedby={errors.title && touched.title ? "title-error" : undefined}
+              className={errors.title && touched.title ? "border-red-500" : ""}
             />
-            {isSubmitting && !title.trim() && <p className="text-sm text-red-500 mt-1">Bitte gib einen Titel ein.</p>}
+            {errors.title && touched.title && (
+              <p id="title-error" className="text-sm text-red-500 mt-1">
+                {errors.title}
+              </p>
+            )}
+            <div className="flex justify-end">
+              <span
+                className={`text-xs ${title.length > 80 ? (title.length > 100 ? "text-red-500" : "text-amber-500") : "text-gray-500"}`}
+              >
+                {title.length}/100
+              </span>
+            </div>
           </div>
 
           {currentPrompt && (
@@ -238,20 +317,34 @@ export function XPBuchQuickEntry() {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="content">Beschreibung</Label>
+            <Label htmlFor="content" className="flex items-center">
+              Beschreibung
+              <span className="text-red-500 ml-1">*</span>
+            </Label>
             <Textarea
               id="content"
               placeholder="Schreibe hier deine Erfahrung... (z.B. 'Heute habe ich beim Spaziergang im Park eine interessante Begegnung gehabt...')"
               rows={4}
               value={content}
               onChange={(e) => setContent(e.target.value)}
+              onBlur={() => handleBlur("content")}
               required
-              aria-invalid={isSubmitting && !content.trim() ? "true" : undefined}
-              className={isSubmitting && !content.trim() ? "border-red-500" : ""}
+              aria-invalid={!!(errors.content && touched.content)}
+              aria-describedby={errors.content && touched.content ? "content-error" : undefined}
+              className={errors.content && touched.content ? "border-red-500" : ""}
             />
-            {isSubmitting && !content.trim() && (
-              <p className="text-sm text-red-500 mt-1">Bitte beschreibe dein Erlebnis.</p>
+            {errors.content && touched.content && (
+              <p id="content-error" className="text-sm text-red-500 mt-1">
+                {errors.content}
+              </p>
             )}
+            <div className="flex justify-end">
+              <span
+                className={`text-xs ${content.length > 4000 ? (content.length > 5000 ? "text-red-500" : "text-amber-500") : "text-gray-500"}`}
+              >
+                {content.length}/5000
+              </span>
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -275,6 +368,13 @@ export function XPBuchQuickEntry() {
               <Label htmlFor="draft">Als Entwurf speichern</Label>
             </div>
           </div>
+
+          {Object.keys(errors).length > 0 && (touched.title || touched.content) && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>Bitte korrigiere die markierten Felder, bevor du fortfährst.</AlertDescription>
+            </Alert>
+          )}
         </CardContent>
 
         <CardFooter className="flex justify-between">
