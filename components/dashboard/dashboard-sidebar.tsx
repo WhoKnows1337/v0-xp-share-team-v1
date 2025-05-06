@@ -52,6 +52,7 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
     }
   }, [currentUser])
 
+  // Füge den Nexus-Link zwischen "Entdecken" und "Nachrichten" ein
   const navItems = [
     {
       id: "home",
@@ -73,6 +74,15 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
       icon: Compass,
       tab: "entdecken",
       href: "/entdecken",
+    },
+    {
+      id: "nexus",
+      name: "Nexus",
+      icon: Compass,
+      tab: "nexus",
+      href: "/nexus",
+      // Spezielle Styling für Nexus
+      customStyle: "text-cyan-400",
     },
     {
       id: "messages",
@@ -184,7 +194,7 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
                 )
               }
 
-              // Normales Menüelement
+              // Aktualisiere den Link-Rendering-Code, um das benutzerdefinierte Styling zu berücksichtigen
               return (
                 <Link
                   key={item.id}
@@ -193,12 +203,16 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
                   className={cn(
                     "flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
                     activeTab === item.tab ? "bg-accent" : "transparent",
+                    item.customStyle && item.id === "nexus" ? "hover:text-cyan-400" : "",
                   )}
                   aria-current={activeTab === item.tab ? "page" : undefined}
                 >
                   <span className="flex items-center">
-                    <item.icon className="mr-2 h-4 w-4" aria-hidden="true" />
-                    {item.name}
+                    <item.icon
+                      className={cn("mr-2 h-4 w-4", item.id === "nexus" ? "text-cyan-400" : "")}
+                      aria-hidden="true"
+                    />
+                    <span className={item.id === "nexus" ? "text-cyan-400" : ""}>{item.name}</span>
                   </span>
                   {item.badge && item.badge > 0 && (
                     <span className="ml-auto bg-primary text-primary-foreground text-xs rounded-full px-2 py-0.5">
