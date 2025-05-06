@@ -11,6 +11,9 @@ import { XPAssistantProvider } from "@/components/xp-assistant-provider"
 import { Toaster } from "@/components/ui/toaster"
 import NavWrapper from "./nav-wrapper"
 
+// Importiere die MonacoEnvironmentSetup-Komponente
+import { MonacoEnvironmentSetup } from "@/components/monaco-environment"
+
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
@@ -36,6 +39,8 @@ export default function RootLayout({
               <SidebarProvider>
                 <ErlebnisWizardProvider>
                   <XPAssistantProvider>
+                    {/* Füge die MonacoEnvironmentSetup-Komponente hier ein */}
+                    <MonacoEnvironmentSetup />
                     <NavWrapper>{children}</NavWrapper>
                     <Toaster />
                   </XPAssistantProvider>
