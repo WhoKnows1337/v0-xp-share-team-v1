@@ -13,6 +13,7 @@ import { findUserByUsername } from "@/lib/user-utils"
 import { toast } from "@/components/ui/use-toast"
 import { EinblickeTrends } from "./einblicke-trends"
 import { ErlebnisWizardProvider } from "@/components/erlebnis-wizard-modal"
+import { Loading } from "@/components/loading"
 
 type DashboardTab =
   | "home"
@@ -33,6 +34,15 @@ function DashboardContent({ initialTab = "home", username }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<DashboardTab>(initialTab)
   const [activeProfile, setActiveProfile] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Simuliere Ladezeit für bessere UX
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [])
 
   // Wenn ein Benutzername übergeben wird, laden wir das Profil
   useEffect(() => {
@@ -57,6 +67,10 @@ function DashboardContent({ initialTab = "home", username }: DashboardProps) {
     setActiveProfile(null)
     setError(null)
     setActiveTab("home")
+  }
+
+  if (isLoading) {
+    return <Loading message="Dashboard wird geladen..." />
   }
 
   return (

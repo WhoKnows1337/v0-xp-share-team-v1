@@ -20,7 +20,7 @@ export function DashboardHeader({ activeTab, onTabChange }: DashboardHeaderProps
   const router = useRouter()
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">
+    <header className="hidden">
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetTrigger asChild>
           <Button variant="outline" size="icon" className="shrink-0 md:hidden">

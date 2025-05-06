@@ -23,7 +23,6 @@ import { getCurrentUser } from "@/lib/mock-users"
 import { getTotalUnreadMessages } from "@/lib/mock-messages"
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import Image from "next/image"
 
 interface DashboardSidebarProps {
   activeTab: string
@@ -182,13 +181,6 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
 
   return (
     <div className={cn("h-full flex flex-col justify-between overflow-hidden", className)}>
-      {/* Logo hinzufügen */}
-      <div className="p-4 border-b">
-        <Link href="/dashboard" className="flex items-center justify-center">
-          <Image src="/xp-share_logo.png" alt="XP Share Logo" width={40} height={40} className="w-auto h-10" />
-        </Link>
-      </div>
-
       <div className="flex-1 overflow-y-auto py-2">
         <div className="px-3">
           <div className="space-y-1">
