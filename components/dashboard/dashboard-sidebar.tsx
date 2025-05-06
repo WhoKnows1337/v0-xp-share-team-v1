@@ -171,6 +171,14 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
       isAdmin: true,
       href: "/admin/tracking",
     },
+    {
+      id: "admin-doku",
+      name: "Dokumentation",
+      icon: Book,
+      tab: "admin-doku",
+      isAdmin: true,
+      href: "/admin/doku",
+    },
   ]
 
   return (
@@ -194,12 +202,33 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
                 )
               }
 
+              // Füge einen Kommentar hinzu, der erklärt, was beim Klick passiert
               // Aktualisiere den Link-Rendering-Code, um das benutzerdefinierte Styling zu berücksichtigen
               return (
                 <Link
                   key={item.id}
                   href={item.href}
-                  onClick={() => onTabChange(item.tab)}
+                  onClick={(e) => {
+                    // Spezielle Behandlung für den Dokumentations-Link
+                    if (item.id === "admin-doku") {
+                      // Setze den aktiven Tab
+                      onTabChange(item.tab)
+
+                      // Aktiviere Vollbildmodus für die Dokumentation
+                      document.body.classList.add("doku-fullscreen")
+
+                      // Wenn wir eine spezielle Route verwenden wollen statt der normalen
+                      // e.preventDefault();
+                      // window.location.href = "/admin/doku/fullscreen";
+                    } else {
+                      // Normales Verhalten für andere Links:
+                      // Setze den aktiven Tab und navigiere zur entsprechenden Seite
+                      onTabChange(item.tab)
+
+                      // Entferne den Vollbildmodus, falls er aktiv ist
+                      document.body.classList.remove("doku-fullscreen")
+                    }
+                  }}
                   className={cn(
                     "flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
                     activeTab === item.tab ? "bg-accent" : "transparent",

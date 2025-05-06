@@ -157,3 +157,18 @@ body {
     padding-left: 0;
   }
 }
+
+/* Fullscreen-Modus für die Dokumentation */
+body.doku-fullscreen .container {
+  max-width: 100% !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+
+body.doku-fullscreen .md\:grid-cols-\[250px_1fr\] {
+  grid-template-columns: 1fr !important;
+}
+
+body.doku-fullscreen .admin-sidebar {
+  display: none !important;
+}
