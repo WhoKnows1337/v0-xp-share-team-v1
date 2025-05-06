@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 
+// Erweitere die Props-Schnittstelle
 interface NexusInsightsProps {
   filters: string[]
+  advancedFilters?: any
 }
 
-export function NexusInsights({ filters }: NexusInsightsProps) {
+export function NexusInsights({ filters, advancedFilters }: NexusInsightsProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [activeTab, setActiveTab] = useState("stats")
 
@@ -105,6 +107,18 @@ export function NexusInsights({ filters }: NexusInsightsProps) {
                   Die Analyse zeigt eine signifikante Häufung von luziden Traumerlebnissen in urbanen Gebieten Japans,
                   besonders in Tokyo. Diese Erlebnisse korrelieren mit erhöhter Mondaktivität und treten vermehrt
                   während der Vollmondphase auf.
+                  {advancedFilters?.intensity && (
+                    <span className="block mt-2">
+                      Bei Erlebnissen mit einer Intensität von {advancedFilters.intensity}/10 oder höher ist eine
+                      verstärkte neuronale Aktivität im präfrontalen Kortex messbar.
+                    </span>
+                  )}
+                  {advancedFilters?.mood && (
+                    <span className="block mt-2">
+                      Erlebnisse mit der Stimmung "{advancedFilters.mood}" zeigen eine auffällige Korrelation mit
+                      geomagnestischen Anomalien in den entsprechenden Regionen.
+                    </span>
+                  )}
                 </p>
                 <div className="mt-auto">
                   <Button className="w-full">Deep Insight (20 Mana)</Button>

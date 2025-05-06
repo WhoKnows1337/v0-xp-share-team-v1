@@ -7,6 +7,8 @@ import { NexusMap } from "./nexus-map"
 import { NexusTimeline } from "./nexus-timeline"
 import { NexusResults } from "./nexus-results"
 import { NexusInsights } from "./nexus-insights"
+import { useToast } from "@/components/ui/use-toast"
+import { useMediaQuery } from "@/hooks/use-media-query"
 
 export function NexusPage() {
   const [isLoading, setIsLoading] = useState(true)
@@ -17,6 +19,21 @@ export function NexusPage() {
     new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 Tage zurück
     new Date(),
   ])
+  const [advancedFilters, setAdvancedFilters] = useState<any>({})
+  const [sortOption, setSortOption] = useState<"relevanz" | "datum" | "popularitaet">("relevanz")
+  const [savedSearches, setSavedSearches] = useState<any[]>([])
+  const [sidebarVisible, setSidebarVisible] = useState(true)
+  const { toast } = useToast()
+  const isMobile = useMediaQuery("(max-width: 768px)")
+
+  // Automatisch die Sidebar ausblenden auf mobilen Geräten
+  useEffect(() => {
+    if (isMobile) {
+      setSidebarVisible(false)
+    } else {
+      setSidebarVisible(true)
+    }
+  }, [isMobile])
 
   // Simuliere Ladezeit
   useEffect(() => {
@@ -27,9 +44,30 @@ export function NexusPage() {
   }, [])
 
   const handleSearch = (query: string) => {
+    // Wenn es ein Operator ist, füge ihn zum letzten Filter hinzu
+    if (query === "AND" || query === "OR" || query === "NOT") {
+      if (activeFilters.length > 0) {
+        const lastFilterIndex = activeFilters.length - 1
+        const updatedFilters = [...activeFilters]
+        updatedFilters[lastFilterIndex] = `${updatedFilters[lastFilterIndex]} ${query}`
+        setActiveFilters(updatedFilters)
+      } else {
+        // Wenn noch kein Filter existiert, füge den Operator als ersten Filter hinzu
+        setActiveFilters([query])
+      }
+      return
+    }
+
+    // Normale Suche
     setSearchQuery(query)
     if (query && !activeFilters.includes(query)) {
       setActiveFilters([...activeFilters, query])
+
+      // Zeige Toast-Benachrichtigung für neue Suche
+      toast({
+        title: "Suche hinzugefügt",
+        description: `"${query}" wurde zu deinen aktiven Filtern hinzugefügt.`,
+      })
     }
   }
 
@@ -41,6 +79,30 @@ export function NexusPage() {
     setTimeRange(range)
   }
 
+  const handleApplyAdvancedFilters = (filters: any) => {
+    setAdvancedFilters(filters)
+    toast({
+      title: "Filter angewendet",
+      description: `${Object.keys(filters).filter((key) => filters[key]).length} Filter aktiv`,
+    })
+  }
+
+  const handleSaveSearch = (search: any) => {
+    setSavedSearches([...savedSearches, search])
+    toast({
+      title: "Suche gespeichert",
+      description: `"${search.name}" wurde zu deinen gespeicherten Suchen hinzugefügt.`,
+    })
+  }
+
+  const handleSortChange = (option: "relevanz" | "datum" | "popularitaet") => {
+    setSortOption(option)
+  }
+
+  const toggleSidebar = () => {
+    setSidebarVisible(!sidebarVisible)
+  }
+
   return (
     <div className="flex flex-col h-screen bg-[#0C0F1A] text-[#E4E8FF]">
       {/* Top Bar */}
@@ -49,16 +111,22 @@ export function NexusPage() {
         onSearch={handleSearch}
         activeFilters={activeFilters}
         onRemoveFilter={handleRemoveFilter}
+        onToggleSidebar={toggleSidebar}
+        sidebarVisible={sidebarVisible}
       />
 
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <NexusSidebar
-          activeFilters={activeFilters}
-          onAddFilter={(filter) => setActiveFilters([...activeFilters, filter])}
-          onRemoveFilter={handleRemoveFilter}
-        />
+        {sidebarVisible && (
+          <NexusSidebar
+            activeFilters={activeFilters}
+            onAddFilter={(filter) => setActiveFilters([...activeFilters, filter])}
+            onRemoveFilter={handleRemoveFilter}
+            onApplyAdvancedFilters={handleApplyAdvancedFilters}
+            onSaveSearch={handleSaveSearch}
+          />
+        )}
 
         {/* Main Canvas */}
         <div className="flex-1 flex flex-col overflow-hidden">
@@ -69,6 +137,7 @@ export function NexusPage() {
               onModeChange={setActiveMapMode}
               filters={activeFilters}
               timeRange={timeRange}
+              advancedFilters={advancedFilters}
             />
           </div>
 
@@ -77,8 +146,14 @@ export function NexusPage() {
 
           {/* Results and Insights */}
           <div className="h-1/2 flex flex-col overflow-hidden">
-            <NexusInsights filters={activeFilters} />
-            <NexusResults filters={activeFilters} timeRange={timeRange} />
+            <NexusInsights filters={activeFilters} advancedFilters={advancedFilters} />
+            <NexusResults
+              filters={activeFilters}
+              timeRange={timeRange}
+              advancedFilters={advancedFilters}
+              sortOption={sortOption}
+              onSortChange={handleSortChange}
+            />
           </div>
         </div>
       </div>

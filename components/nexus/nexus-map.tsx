@@ -9,9 +9,10 @@ interface NexusMapProps {
   onModeChange: (mode: "pins" | "heatmap" | "radar" | "graph") => void
   filters: string[]
   timeRange: [Date, Date]
+  advancedFilters?: any
 }
 
-export function NexusMap({ mode, onModeChange, filters, timeRange }: NexusMapProps) {
+export function NexusMap({ mode, onModeChange, filters, timeRange, advancedFilters }: NexusMapProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
 
@@ -78,7 +79,36 @@ export function NexusMap({ mode, onModeChange, filters, timeRange }: NexusMapPro
         drawGraph(ctx, canvas.width, canvas.height)
         break
     }
-  }, [mode, dimensions, filters, timeRange])
+  }, [mode, dimensions, filters, timeRange, advancedFilters])
+
+  // Füge eine Funktion hinzu, um die Punkte basierend auf den erweiterten Filtern zu filtern
+  const applyAdvancedFilters = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+    if (!advancedFilters || Object.keys(advancedFilters).length === 0) return
+
+    // Hier könnten wir die Visualisierung basierend auf den erweiterten Filtern anpassen
+    // Zum Beispiel könnten wir die Größe oder Farbe der Punkte basierend auf der Intensität ändern
+
+    if (advancedFilters.intensity) {
+      // Zeichne einen Hinweis für den Intensitätsfilter
+      ctx.fillStyle = "rgba(255, 255, 255, 0.7)"
+      ctx.font = "12px Arial"
+      ctx.fillText(`Intensitätsfilter: ${advancedFilters.intensity}/10`, 10, 20)
+    }
+
+    if (advancedFilters.mood) {
+      // Zeichne einen Hinweis für den Stimmungsfilter
+      ctx.fillStyle = "rgba(255, 255, 255, 0.7)"
+      ctx.font = "12px Arial"
+      ctx.fillText(`Stimmungsfilter: ${advancedFilters.mood}`, 10, 40)
+    }
+
+    if (advancedFilters.verifiedOnly) {
+      // Zeichne einen Hinweis für den Verifizierungsfilter
+      ctx.fillStyle = "rgba(255, 255, 255, 0.7)"
+      ctx.font = "12px Arial"
+      ctx.fillText("Nur verifizierte Einträge", 10, 60)
+    }
+  }
 
   // Funktion zum Zeichnen von Pins
   const drawPins = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
@@ -103,6 +133,9 @@ export function NexusMap({ mode, onModeChange, filters, timeRange }: NexusMapPro
       ctx.fill()
       ctx.globalAlpha = 1.0
     }
+
+    // Wende erweiterte Filter an
+    applyAdvancedFilters(ctx, width, height)
   }
 
   // Funktion zum Zeichnen einer Heatmap
@@ -131,6 +164,9 @@ export function NexusMap({ mode, onModeChange, filters, timeRange }: NexusMapPro
       ctx.arc(x, y, radius, 0, Math.PI * 2)
       ctx.fill()
     }
+
+    // Wende erweiterte Filter an
+    applyAdvancedFilters(ctx, width, height)
   }
 
   // Funktion zum Zeichnen eines Radars
@@ -194,6 +230,9 @@ export function NexusMap({ mode, onModeChange, filters, timeRange }: NexusMapPro
       ctx.fill()
       ctx.globalAlpha = 1.0
     }
+
+    // Wende erweiterte Filter an
+    applyAdvancedFilters(ctx, width, height)
   }
 
   // Funktion zum Zeichnen eines Graphen
@@ -245,6 +284,9 @@ export function NexusMap({ mode, onModeChange, filters, timeRange }: NexusMapPro
       ctx.fill()
       ctx.globalAlpha = 1.0
     }
+
+    // Wende erweiterte Filter an
+    applyAdvancedFilters(ctx, width, height)
   }
 
   // Animationsschleife für kontinuierliche Updates
