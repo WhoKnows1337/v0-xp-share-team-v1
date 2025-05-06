@@ -81,6 +81,7 @@ export function NexusSidebar({
   const [newSearchName, setNewSearchName] = useState("")
   const [showSavedSearches, setShowSavedSearches] = useState(false)
   const [activeAccordion, setActiveAccordion] = useState<string | undefined>("basics")
+  const [newAgentDialogOpen, setNewAgentDialogOpen] = useState(false)
 
   const handleAiPromptSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -111,6 +112,7 @@ export function NexusSidebar({
       setAgents([...agents, newAgent])
       setNewAgentName("")
       setNewAgentQuery("")
+      setNewAgentSchedule("Täglich")
     }
   }
 
@@ -215,7 +217,7 @@ export function NexusSidebar({
 
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => {}} disabled={activeFilters.length === 0}>
                   <Save className="h-4 w-4 mr-1" />
                   Speichern
                 </Button>
@@ -252,7 +254,9 @@ export function NexusSidebar({
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={saveSearch}>Speichern</Button>
+                  <Button onClick={saveSearch} disabled={!newSearchName || activeFilters.length === 0}>
+                    Speichern
+                  </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -438,9 +442,9 @@ export function NexusSidebar({
               Agenten
             </h3>
 
-            <Dialog>
+            <Dialog open={newAgentDialogOpen} onOpenChange={setNewAgentDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 px-2">
+                <Button variant="outline" size="sm" className="h-8 px-2" onClick={() => setNewAgentDialogOpen(true)}>
                   <Plus className="h-4 w-4" />
                   <span className="ml-1">Neu</span>
                 </Button>
@@ -483,7 +487,14 @@ export function NexusSidebar({
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={createNewAgent}>Agent erstellen</Button>
+                  <Button
+                    onClick={() => {
+                      createNewAgent()
+                      setNewAgentDialogOpen(false)
+                    }}
+                  >
+                    Agent erstellen
+                  </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>

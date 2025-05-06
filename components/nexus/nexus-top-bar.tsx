@@ -3,12 +3,10 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Search, X, Menu, User, Bell, Settings } from "lucide-react"
+import { Search, X, Menu } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 interface NexusTopBarProps {
   searchQuery: string
@@ -37,12 +35,16 @@ export function NexusTopBar({
   }
 
   return (
-    <div className="h-16 border-b border-gray-800 bg-gray-900 flex items-center justify-between px-4">
-      <div className="flex items-center">
+    <div className="h-16 border-b border-gray-800 bg-gray-900 flex items-center px-4">
+      {/* Linke Seite mit Sidebar-Toggle */}
+      <div className="w-1/4 flex items-center justify-start">
         <Button variant="ghost" size="icon" className="mr-2 md:hidden" onClick={onToggleSidebar}>
           <Menu className="h-5 w-5" />
         </Button>
+      </div>
 
+      {/* Zentrierte Suchleiste */}
+      <div className="w-2/4 flex items-center justify-center">
         <form onSubmit={handleSubmit} className="relative w-full max-w-md">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <Input
@@ -55,9 +57,10 @@ export function NexusTopBar({
         </form>
       </div>
 
-      <div className="flex items-center space-x-2">
+      {/* Rechte Seite mit Filtern */}
+      <div className="w-1/4 flex items-center justify-end">
         {activeFilters.length > 0 && (
-          <div className="hidden md:flex items-center space-x-2 mr-2">
+          <div className="flex items-center space-x-2">
             <Badge variant="outline" className="bg-gray-800">
               {activeFilters.length} Filter aktiv
             </Badge>
@@ -67,32 +70,6 @@ export function NexusTopBar({
             </Button>
           </div>
         )}
-
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-cyan-400 rounded-full"></span>
-        </Button>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src="/contemplative-woman.png" alt="Benutzer" />
-                <AvatarFallback>MK</AvatarFallback>
-              </Avatar>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>
-              <User className="h-4 w-4 mr-2" />
-              Profil
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Settings className="h-4 w-4 mr-2" />
-              Einstellungen
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
     </div>
   )
