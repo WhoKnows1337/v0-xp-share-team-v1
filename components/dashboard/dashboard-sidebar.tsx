@@ -3,12 +3,10 @@
 import { cn } from "@/lib/utils"
 import {
   Home,
-  Activity,
   Compass,
   User,
   TrendingUp,
   LogOut,
-  FileText,
   Hash,
   Settings,
   Book,
@@ -97,20 +95,6 @@ export function DashboardSidebar({ activeTab, onTabChange, className }: Dashboar
       icon: Users,
       tab: "community",
       href: "/community",
-    },
-    {
-      id: "my-experiences",
-      name: "Meine Erlebnisse",
-      icon: FileText,
-      tab: "meine-erlebnisse",
-      href: "/dashboard?tab=meine-erlebnisse",
-    },
-    {
-      id: "activities",
-      name: "Aktivitäten",
-      icon: Activity,
-      tab: "aktivitäten",
-      href: "/dashboard?tab=aktivitäten",
     },
     {
       id: "channels",
