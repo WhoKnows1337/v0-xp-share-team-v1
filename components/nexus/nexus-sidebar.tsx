@@ -15,8 +15,6 @@ import { Slider } from "@/components/ui/slider"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Checkbox } from "@/components/ui/checkbox"
-import { NexusAgentDialog } from "./nexus-agent-dialog"
-import { useToast } from "@/components/ui/use-toast"
 
 interface NexusSidebarProps {
   activeFilters: string[]
@@ -83,8 +81,6 @@ export function NexusSidebar({
   const [newSearchName, setNewSearchName] = useState("")
   const [showSavedSearches, setShowSavedSearches] = useState(false)
   const [activeAccordion, setActiveAccordion] = useState<string | undefined>("basics")
-  const [agentDialogOpen, setAgentDialogOpen] = useState(false)
-  const { toast } = useToast()
 
   const handleAiPromptSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -129,10 +125,6 @@ export function NexusSidebar({
       }
       setSavedSearches([...savedSearches, newSearch])
       setNewSearchName("")
-      toast({
-        title: "Suche gespeichert",
-        description: `Die Suche "${newSearchName}" wurde erfolgreich gespeichert.`,
-      })
       if (onSaveSearch) {
         onSaveSearch(newSearch)
       }
@@ -167,14 +159,6 @@ export function NexusSidebar({
 
     // Füge dann die gespeicherten Filter hinzu
     search.filters.forEach((filter) => onAddFilter(filter))
-  }
-
-  const handleSaveAgent = (agent: any) => {
-    setAgents([...agents, agent])
-    toast({
-      title: "Agent erstellt",
-      description: `Der Agent "${agent.name}" wurde erfolgreich erstellt und ist jetzt aktiv.`,
-    })
   }
 
   return (
@@ -268,9 +252,7 @@ export function NexusSidebar({
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={saveSearch} disabled={!newSearchName}>
-                    Speichern
-                  </Button>
+                  <Button onClick={saveSearch}>Speichern</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -456,11 +438,55 @@ export function NexusSidebar({
               Agenten
             </h3>
 
-            <NexusAgentDialog open={agentDialogOpen} onOpenChange={setAgentDialogOpen} onSave={handleSaveAgent} />
-            <Button variant="outline" size="sm" className="h-8 px-2" onClick={() => setAgentDialogOpen(true)}>
-              <Plus className="h-4 w-4" />
-              <span className="ml-1">Neu</span>
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 px-2">
+                  <Plus className="h-4 w-4" />
+                  <span className="ml-1">Neu</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Neuen Agenten erstellen</DialogTitle>
+                </DialogHeader>
+                <div className="py-4 space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="agent-name">Name</Label>
+                    <Input
+                      id="agent-name"
+                      value={newAgentName}
+                      onChange={(e) => setNewAgentName(e.target.value)}
+                      placeholder="z.B. Traum-Monitor"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="agent-query">Suchabfrage</Label>
+                    <Input
+                      id="agent-query"
+                      value={newAgentQuery}
+                      onChange={(e) => setNewAgentQuery(e.target.value)}
+                      placeholder="z.B. luzide träume berlin"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="agent-schedule">Zeitplan</Label>
+                    <Select value={newAgentSchedule} onValueChange={setNewAgentSchedule}>
+                      <SelectTrigger id="agent-schedule" className="bg-gray-900 border-gray-700">
+                        <SelectValue placeholder="Zeitplan wählen..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Stündlich">Stündlich</SelectItem>
+                        <SelectItem value="Täglich">Täglich</SelectItem>
+                        <SelectItem value="Wöchentlich">Wöchentlich</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button onClick={createNewAgent}>Agent erstellen</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
 
           <div className="space-y-2">

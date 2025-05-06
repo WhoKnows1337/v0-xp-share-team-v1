@@ -44,30 +44,9 @@ export function NexusPage() {
   }, [])
 
   const handleSearch = (query: string) => {
-    // Wenn es ein Operator ist, füge ihn zum letzten Filter hinzu
-    if (query === "AND" || query === "OR" || query === "NOT") {
-      if (activeFilters.length > 0) {
-        const lastFilterIndex = activeFilters.length - 1
-        const updatedFilters = [...activeFilters]
-        updatedFilters[lastFilterIndex] = `${updatedFilters[lastFilterIndex]} ${query}`
-        setActiveFilters(updatedFilters)
-      } else {
-        // Wenn noch kein Filter existiert, füge den Operator als ersten Filter hinzu
-        setActiveFilters([query])
-      }
-      return
-    }
-
-    // Normale Suche
     setSearchQuery(query)
     if (query && !activeFilters.includes(query)) {
       setActiveFilters([...activeFilters, query])
-
-      // Zeige Toast-Benachrichtigung für neue Suche
-      toast({
-        title: "Suche hinzugefügt",
-        description: `"${query}" wurde zu deinen aktiven Filtern hinzugefügt.`,
-      })
     }
   }
 
