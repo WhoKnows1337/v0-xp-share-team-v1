@@ -18,6 +18,7 @@ import { useOnlineStatus } from "@/hooks/use-online-status"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { WhiteboardImage } from "./whiteboard/whiteboard"
 import { AehnlicheFindenButton } from "./wizard/aehnliche-finden-button"
+import { EmotionenSchritt } from "./wizard/emotionen-schritt"
 
 // Scrollbar-Stile für Firefox
 const scrollbarStyles = `
@@ -37,6 +38,7 @@ export type MediaComment = {
   timestamp: number
 }
 
+// Füge 'emotionen' zur ErlebnisData-Schnittstelle hinzu
 export type ErlebnisData = {
   titel: string
   kategorie: string
@@ -46,6 +48,7 @@ export type ErlebnisData = {
   ort: string
   tags: string[]
   kiTags: string[]
+  emotionen: string[] // Neue Eigenschaft für Emotionen
   medien: File[]
   whiteboardImages?: WhiteboardImage[]
   mediaComments?: MediaComment[] // Neue Eigenschaft für Medienkommentare
@@ -55,7 +58,7 @@ export type ErlebnisData = {
   autoErkannteKategorie?: string // Neue Eigenschaft für automatisch erkannte Kategorie
 }
 
-// Sinnvolle Standardwerte für alle Felder
+// Aktualisiere die initialData mit leeren Emotionen
 const initialData: ErlebnisData = {
   titel: "",
   kategorie: "automatisch", // Automatisch erkennen als Standard
@@ -65,6 +68,7 @@ const initialData: ErlebnisData = {
   ort: "",
   tags: [],
   kiTags: [],
+  emotionen: [], // Initialisiere leeres Array für Emotionen
   medien: [],
   whiteboardImages: [],
   mediaComments: [], // Initialisiere leeres Array für Kommentare
@@ -141,10 +145,11 @@ export function ErlebnisWizard({ onComplete }: ErlebnisWizardProps) {
     return () => clearInterval(autoSaveInterval)
   }, [data])
 
-  // Aktualisierte Schritte mit kombiniertem Datum-Ort-Schritt
+  // Aktualisierte Schritte mit Emotionen-Schritt nach Beschreibung
   const schritte = [
     { name: "Titel", component: TitelSchritt },
     { name: "Beschreibung", component: BeschreibungSchritt },
+    { name: "Emotionen", component: EmotionenSchritt },
     { name: "Kategorie", component: KategorieSchritt },
     { name: "Datum & Ort", component: DatumOrtSchritt },
     { name: "Tags", component: TagsSchritt },

@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import type { ErlebnisData } from "../erlebnis-wizard"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertCircle, Check } from "lucide-react"
+import { AlertCircle } from "lucide-react"
 
 interface TitelSchrittProps {
   data: ErlebnisData
@@ -17,10 +17,8 @@ interface TitelSchrittProps {
 export function TitelSchritt({ data, updateData }: TitelSchrittProps) {
   const [error, setError] = useState("")
   const [touched, setTouched] = useState(false)
-  const [isValid, setIsValid] = useState(false)
-  const [titleStrength, setTitleStrength] = useState<"weak" | "medium" | "strong" | null>(null)
 
-  const validateTitle = (title: string): string => {
+  const validateTitle = (title: string) => {
     if (title.trim().length === 0) {
       return "Bitte gib einen Titel ein."
     }
@@ -33,44 +31,15 @@ export function TitelSchritt({ data, updateData }: TitelSchrittProps) {
     return ""
   }
 
-  // Bewerte die Stärke des Titels
-  const evaluateTitleStrength = (title: string): "weak" | "medium" | "strong" | null => {
-    if (title.trim().length < 5) return null
-
-    // Einfache Bewertung basierend auf Länge und Wortanzahl
-    const words = title.trim().split(/\s+/).length
-
-    if (title.length < 15 || words < 2) return "weak"
-    if (title.length < 30 || words < 4) return "medium"
-    return "strong"
-  }
-
   useEffect(() => {
     if (touched) {
-      const validationError = validateTitle(data.titel)
-      setError(validationError)
-      setIsValid(!validationError)
+      setError(validateTitle(data.titel))
     }
-
-    setTitleStrength(evaluateTitleStrength(data.titel))
   }, [data.titel, touched])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     updateData({ titel: e.target.value })
     if (!touched) setTouched(true)
-  }
-
-  const getTitleStrengthMessage = (): string => {
-    switch (titleStrength) {
-      case "weak":
-        return "Einfacher Titel. Versuche, ihn beschreibender zu gestalten."
-      case "medium":
-        return "Guter Titel. Er gibt einen Einblick in dein Erlebnis."
-      case "strong":
-        return "Ausgezeichneter Titel! Er ist beschreibend und ansprechend."
-      default:
-        return ""
-    }
   }
 
   return (
@@ -103,22 +72,6 @@ export function TitelSchritt({ data, updateData }: TitelSchrittProps) {
           <span className={error ? "text-red-400" : "text-gray-400"} id="titel-hint">
             {data.titel.length}/100 Zeichen
           </span>
-
-          {titleStrength && !error && (
-            <span
-              className={`
-              ${
-                titleStrength === "weak"
-                  ? "text-amber-400"
-                  : titleStrength === "medium"
-                    ? "text-blue-400"
-                    : "text-green-400"
-              }
-            `}
-            >
-              {titleStrength === "weak" ? "Einfach" : titleStrength === "medium" ? "Gut" : "Ausgezeichnet"}
-            </span>
-          )}
         </div>
       </div>
 
@@ -127,21 +80,6 @@ export function TitelSchritt({ data, updateData }: TitelSchrittProps) {
           <AlertCircle className="h-4 w-4" />
           <AlertDescription id="titel-error">{error}</AlertDescription>
         </Alert>
-      )}
-
-      {titleStrength && !error && (
-        <div
-          className={`p-3 rounded-md text-sm flex items-start ${
-            titleStrength === "weak"
-              ? "bg-amber-900/20 border border-amber-800/30 text-amber-300"
-              : titleStrength === "medium"
-                ? "bg-blue-900/20 border border-blue-800/30 text-blue-300"
-                : "bg-green-900/20 border border-green-800/30 text-green-300"
-          }`}
-        >
-          <Check className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
-          <span>{getTitleStrengthMessage()}</span>
-        </div>
       )}
 
       <div className="bg-blue-900/30 p-4 rounded-md border border-blue-800/50 mt-6" role="note">

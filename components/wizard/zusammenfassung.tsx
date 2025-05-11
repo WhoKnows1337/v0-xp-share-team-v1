@@ -189,6 +189,23 @@ export function Zusammenfassung({ data }: ZusammenfassungProps) {
           </div>
         )}
 
+        {/* Emotionen */}
+        {data.emotionen.length > 0 && (
+          <div className="p-4 border-b border-white/10">
+            <div className="flex items-center mb-2">
+              <Tag className="h-4 w-4 mr-2 text-gray-400" />
+              <h3 className="font-medium">Emotionen</h3>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {data.emotionen.map((emotion) => (
+                <Badge key={emotion} variant="secondary" className="bg-primary/20 border-primary/30">
+                  {emotion}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+
         {data.medien.length > 0 && (
           <div className="p-4 border-b border-white/10">
             <div className="flex items-center mb-2">
