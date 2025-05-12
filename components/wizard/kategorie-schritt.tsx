@@ -649,7 +649,7 @@ export function KategorieSchritt({ data, updateData }: KategorieSchrittProps) {
                     "flex items-start p-4 bg-white/5 border border-white/20 rounded-lg cursor-pointer transition-all hover:bg-white/10",
                     isSelected && "border-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]",
                     isAutomatisch && isSelected && "border-amber-500/70 shadow-[0_0_5px_rgba(245,158,11,0.3)]",
-                    "min-h-[120px]", // Einheitliche Mindesthöhe für alle Boxen
+                    "min-h-[140px]", // Einheitliche Mindesthöhe für alle Boxen
                   )}
                   ref={index === 0 ? firstOptionRef : null}
                   tabIndex={0}
