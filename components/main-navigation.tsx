@@ -46,7 +46,7 @@ export function MainNavigation() {
     },
     {
       name: "Einstellungen",
-      href: "/einstellungen",
+      href: "/settings",
       icon: Settings,
     },
   ]

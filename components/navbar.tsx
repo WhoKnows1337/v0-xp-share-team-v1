@@ -79,6 +79,17 @@ export function Navbar() {
     }
   }
 
+  const handleLogout = async () => {
+    try {
+      // Hier würde normalerweise die Logout-Logik stehen
+      console.log("Benutzer abgemeldet")
+      // Weiterleitung zur Startseite
+      window.location.href = "/"
+    } catch (error) {
+      console.error("Fehler beim Abmelden:", error)
+    }
+  }
+
   return (
     <header className="fixed top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
@@ -172,13 +183,13 @@ export function Navbar() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/entdecken" className="flex items-center cursor-pointer">
+                    <Link href="/explore" className="flex items-center cursor-pointer">
                       <Compass className="mr-2 h-4 w-4" />
                       <span>Entdecken</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/xp-buch" className="flex items-center cursor-pointer">
+                    <Link href="/xp-book" className="flex items-center cursor-pointer">
                       <Book className="mr-2 h-4 w-4" />
                       <span>XP-Buch</span>
                     </Link>
@@ -214,7 +225,7 @@ export function Navbar() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/einstellungen" className="flex items-center cursor-pointer">
+                    <Link href="/settings" className="flex items-center cursor-pointer">
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Einstellungen</span>
                     </Link>
@@ -240,11 +251,9 @@ export function Navbar() {
                   )}
 
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/" className="flex items-center cursor-pointer">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Abmelden</span>
-                    </Link>
+                  <DropdownMenuItem className="flex items-center cursor-pointer" onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Abmelden</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
