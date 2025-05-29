@@ -216,11 +216,8 @@ function getMockDataList(table: string) {
   return mockDataLists[table] || []
 }
 
-// Hilfsfunktion für Server Components
-export async function createServerSupabaseClient() {
-  "use server"
-  return getSupabaseAdmin()
-}
+// Hilfsfunktion für Server Components - jetzt aus separater Datei
+export { createServerSupabaseClient } from "./server/supabase-server"
 
 // Re-export createClient für externe Verwendung
 export { createClient } from "@supabase/supabase-js"
