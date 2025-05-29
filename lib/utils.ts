@@ -5,10 +5,15 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export const formatDate = (date: Date): string => {
-  const day = String(date.getDate()).padStart(2, "0")
-  const month = String(date.getMonth() + 1).padStart(2, "0") // Months are 0-indexed
-  const year = date.getFullYear()
+export function formatDate(date: Date | string, options: Intl.DateTimeFormatOptions = {}): string {
+  const defaultOptions: Intl.DateTimeFormatOptions = {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    ...options,
+  }
 
-  return `${day}.${month}.${year}`
+  const dateObj = typeof date === "string" ? new Date(date) : date
+
+  return new Intl.DateTimeFormat("de-DE", defaultOptions).format(dateObj)
 }
