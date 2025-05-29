@@ -1,6 +1,6 @@
 "use server"
 
-import { createServerSupabaseClient } from "@/lib/server/supabase-server"
+import { createServerSupabaseClient } from "@/lib/supabase-client"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 

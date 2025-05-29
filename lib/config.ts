@@ -1,21 +1,31 @@
 // Konfiguration für die Anwendung
 export const config = {
-  // Wenn true, werden Mock-Daten verwendet, sonst Supabase
-  useMockData: process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true" || process.env.NODE_ENV === "development",
+  // Immer Mock-Daten verwenden für Next.js
+  useMockData: true,
 
-  // API-Basis-URL
-  apiBaseUrl: process.env.NEXT_PUBLIC_API_URL || "",
-
-  // Supabase-Konfiguration
+  // Supabase-Konfiguration (wird bei Mock-Daten nicht verwendet)
   supabase: {
     url: process.env.NEXT_PUBLIC_SUPABASE_URL || "",
     anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
   },
 
+  // App-Konfiguration
+  app: {
+    name: "XP Share",
+    version: "1.0.0",
+    description: "Teile deine Erlebnisse und entdecke neue Perspektiven",
+  },
+
   // Feature-Flags
   features: {
-    enableRealtime: true,
-    enableOfflineSupport: true,
-    enableAIFeatures: true,
+    aiFeatures: true,
+    realtime: true,
+    notifications: true,
+    gamification: true,
+  },
+
+  // API-Konfiguration
+  api: {
+    baseUrl: process.env.NEXT_PUBLIC_API_URL || "",
   },
 }

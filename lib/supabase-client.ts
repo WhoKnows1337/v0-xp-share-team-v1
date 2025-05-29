@@ -95,6 +95,41 @@ export const getSupabaseAdmin = () => {
   })
 }
 
+// Server-only Funktionen - direkt hier definiert
+export async function createServerSupabaseClient() {
+  return getSupabaseAdmin()
+}
+
+export async function getServerSession() {
+  const supabase = await createServerSupabaseClient()
+  const {
+    data: { session },
+    error,
+  } = await supabase.auth.getSession()
+
+  if (error) {
+    console.error("Fehler beim Abrufen der Server-Session:", error)
+    return null
+  }
+
+  return session
+}
+
+export async function getServerUser() {
+  const supabase = await createServerSupabaseClient()
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
+
+  if (error) {
+    console.error("Fehler beim Abrufen des Server-Users:", error)
+    return null
+  }
+
+  return user
+}
+
 // Mock-Daten
 const mockUser = {
   id: "mock-user-id",
@@ -215,9 +250,6 @@ function getMockDataList(table: string) {
 
   return mockDataLists[table] || []
 }
-
-// Hilfsfunktion für Server Components - jetzt aus separater Datei
-export { createServerSupabaseClient } from "./server/supabase-server"
 
 // Re-export createClient für externe Verwendung
 export { createClient } from "@supabase/supabase-js"

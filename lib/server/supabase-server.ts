@@ -1,38 +1,72 @@
-"use server"
+import { createServerClient, type CookieOptions } from "@supabase/ssr"
+import { cookies } from "next/headers"
 
-import { getSupabaseAdmin } from "../supabase-client"
+export function createServerSupabaseClient() {
+  const cookieStore = cookies()
 
-// Server-only Supabase Client
-export async function createServerSupabaseClient() {
-  return getSupabaseAdmin()
+  return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+    cookies: {
+      get(name: string) {
+        return cookieStore.get(name)?.value
+      },
+      set(name: string, value: string, options: CookieOptions) {
+        try {
+          cookieStore.set({ name, value, ...options })
+        } catch (error) {
+          // The `set` method was called from a Server Component.
+          // This can be ignored if you have middleware refreshing
+          // user sessions.
+        }
+      },
+      remove(name: string, options: CookieOptions) {
+        try {
+          cookieStore.set({ name, value: "", ...options })
+        } catch (error) {
+          // The `delete` method was called from a Server Component.
+          // This can be ignored if you have middleware refreshing
+          // user sessions.
+        }
+      },
+    },
+  })
 }
 
-export async function getServerSession() {
-  const supabase = await createServerSupabaseClient()
-  const {
-    data: { session },
-    error,
-  } = await supabase.auth.getSession()
-
-  if (error) {
-    console.error("Fehler beim Abrufen der Server-Session:", error)
-    return null
-  }
-
-  return session
+// Alternative für Admin-Operationen mit Service Role Key
+export function createAdminSupabaseClient() {
+  return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+    cookies: {
+      get() {
+        return undefined
+      },
+      set() {},
+      remove() {},
+    },
+  })
 }
 
-export async function getServerUser() {
-  const supabase = await createServerSupabaseClient()
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser()
+// Für authentifizierte Server-Operationen
+export function createAuthenticatedSupabaseClient() {
+  const cookieStore = cookies()
 
-  if (error) {
-    console.error("Fehler beim Abrufen des Server-Users:", error)
-    return null
-  }
-
-  return user
+  return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+    cookies: {
+      get(name: string) {
+        return cookieStore.get(name)?.value
+      },
+      set(name: string, value: string, options: CookieOptions) {
+        try {
+          cookieStore.set({ name, value, ...options })
+        } catch (error) {
+          // Ignore errors in Server Components
+        }
+      },
+      remove(name: string, options: CookieOptions) {
+        try {
+          cookieStore.set({ name, value: "", ...options })
+        } catch (error) {
+          // Ignore errors in Server Components
+        }
+      },
+    },
+  })
 }

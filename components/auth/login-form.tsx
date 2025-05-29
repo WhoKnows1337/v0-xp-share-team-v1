@@ -43,8 +43,7 @@ export function LoginForm() {
       router.push("/dashboard")
       router.refresh()
     } catch (error: any) {
-      console.error("Login error:", error)
-      setError(error.message || "Bei der Anmeldung ist ein Fehler aufgetreten")
+      setError(error?.message || "Bei der Anmeldung ist ein Fehler aufgetreten")
     } finally {
       setIsLoading(false)
     }

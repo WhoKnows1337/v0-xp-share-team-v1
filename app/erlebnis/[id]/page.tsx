@@ -1,3 +1,4 @@
+import { ErlebnisDetail } from "@/components/erlebnis/erlebnis-detail"
 import { useExperience } from "@/hooks/use-experiences"
 
 export default function ErlebnisDetailPage({ params }: { params: { id: string } }) {

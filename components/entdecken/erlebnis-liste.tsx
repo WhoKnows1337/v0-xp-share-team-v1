@@ -12,7 +12,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { ErlebnisKarte } from "./erlebnis-karte"
 
 interface ErlebnisListeProps {
-  erlebnisse: any[] // Verwenden Sie any[] für Flexibilität mit verschiedenen Datenstrukturen
+  erlebnisse: any[]
   ansicht?: "karten" | "kompakt"
   onLoadMore?: () => void
   isLoading?: boolean
@@ -29,7 +29,7 @@ interface ErlebnisListeProps {
 }
 
 export function ErlebnisListe({
-  erlebnisse = [], // Provide default empty array to prevent undefined errors
+  erlebnisse = [],
   ansicht,
   onLoadMore,
   isLoading,
@@ -46,8 +46,11 @@ export function ErlebnisListe({
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [isFilterOpen, setIsFilterOpen] = useState(false)
 
+  // Sichere Verarbeitung der Erlebnisse
+  const safeErlebnisse = Array.isArray(erlebnisse) ? erlebnisse : []
+
   // Debug-Ausgabe
-  console.log("ErlebnisListe - erlebnisse:", erlebnisse)
+  console.log("ErlebnisListe - erlebnisse:", safeErlebnisse)
   console.log("ErlebnisListe - ansicht:", ansicht)
 
   // Funktion zum Navigieren zur Detailseite
@@ -117,7 +120,7 @@ export function ErlebnisListe({
     )
   }
 
-  if (!erlebnisse || erlebnisse.length === 0) {
+  if (!safeErlebnisse || safeErlebnisse.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <div className="mb-8 relative w-48 h-48">
@@ -200,70 +203,86 @@ export function ErlebnisListe({
         >
           {viewMode === "grid" ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {erlebnisse.map((erlebnis) => (
-                <ErlebnisKarte
-                  key={erlebnis.id}
-                  erlebnis={erlebnis}
-                  // Add default props to prevent errors
-                  id={erlebnis.id || ""}
-                  titel={erlebnis.titel || ""}
-                  beschreibung={erlebnis.beschreibung || erlebnis.kurzfassung || ""}
-                  kategorie={
-                    typeof erlebnis.kategorie === "string" ? erlebnis.kategorie : erlebnis.kategorie?.name || ""
-                  }
-                  unterkategorie={erlebnis.unterkategorie}
-                  datum={erlebnis.datum ? new Date(erlebnis.datum) : undefined}
-                  ort={typeof erlebnis.ort === "string" ? erlebnis.ort : erlebnis.ort?.name}
-                  autor={
-                    typeof erlebnis.autor === "string"
-                      ? { id: erlebnis.autor, name: erlebnis.autor, avatar: undefined }
-                      : {
-                          id: erlebnis.autor?.id || "unknown",
-                          name: erlebnis.autor?.name || "Unbekannt",
-                          avatar: erlebnis.autor?.avatar,
-                        }
-                  }
-                  kommentare={erlebnis.kommentare || erlebnis.statistik?.kommentare || 0}
-                  lesezeichen={false}
-                  tags={erlebnis.tags || []}
-                  bild={erlebnis.medien?.[0]?.url}
-                  kiZusammenfassung={erlebnis.kiZusammenfassung}
-                />
-              ))}
+              {safeErlebnisse.map((erlebnis) => {
+                try {
+                  return (
+                    <ErlebnisKarte
+                      key={erlebnis.id || Math.random()}
+                      erlebnis={erlebnis}
+                      id={erlebnis.id || ""}
+                      titel={erlebnis.titel || erlebnis.title || ""}
+                      beschreibung={erlebnis.beschreibung || erlebnis.description || erlebnis.kurzfassung || ""}
+                      kategorie={
+                        typeof erlebnis.kategorie === "string" ? erlebnis.kategorie : erlebnis.kategorie?.name || ""
+                      }
+                      unterkategorie={erlebnis.unterkategorie}
+                      datum={
+                        erlebnis.datum ? new Date(erlebnis.datum) : erlebnis.date ? new Date(erlebnis.date) : undefined
+                      }
+                      ort={typeof erlebnis.ort === "string" ? erlebnis.ort : erlebnis.ort?.name || erlebnis.location}
+                      autor={
+                        typeof erlebnis.autor === "string"
+                          ? { id: erlebnis.autor, name: erlebnis.autor, avatar: undefined }
+                          : {
+                              id: erlebnis.autor?.id || erlebnis.author_id || "unknown",
+                              name: erlebnis.autor?.name || erlebnis.author?.name || "Unbekannt",
+                              avatar: erlebnis.autor?.avatar || erlebnis.author?.avatar,
+                            }
+                      }
+                      kommentare={erlebnis.kommentare || erlebnis.comments_count || erlebnis.statistik?.kommentare || 0}
+                      lesezeichen={false}
+                      tags={Array.isArray(erlebnis.tags) ? erlebnis.tags : []}
+                      bild={erlebnis.medien?.[0]?.url || erlebnis.image_url}
+                      kiZusammenfassung={erlebnis.kiZusammenfassung || erlebnis.ai_summary}
+                    />
+                  )
+                } catch (error) {
+                  console.error("Fehler beim Rendern der Erlebnis-Karte:", error)
+                  return null
+                }
+              })}
             </div>
           ) : (
             <div className="space-y-4">
-              {erlebnisse.map((erlebnis) => (
-                <ErlebnisKarte
-                  key={erlebnis.id}
-                  erlebnis={erlebnis}
-                  compact
-                  // Add default props to prevent errors
-                  id={erlebnis.id || ""}
-                  titel={erlebnis.titel || ""}
-                  beschreibung={erlebnis.beschreibung || erlebnis.kurzfassung || ""}
-                  kategorie={
-                    typeof erlebnis.kategorie === "string" ? erlebnis.kategorie : erlebnis.kategorie?.name || ""
-                  }
-                  unterkategorie={erlebnis.unterkategorie}
-                  datum={erlebnis.datum ? new Date(erlebnis.datum) : undefined}
-                  ort={typeof erlebnis.ort === "string" ? erlebnis.ort : erlebnis.ort?.name}
-                  autor={
-                    typeof erlebnis.autor === "string"
-                      ? { id: erlebnis.autor, name: erlebnis.autor, avatar: undefined }
-                      : {
-                          id: erlebnis.autor?.id || "unknown",
-                          name: erlebnis.autor?.name || "Unbekannt",
-                          avatar: erlebnis.autor?.avatar,
-                        }
-                  }
-                  kommentare={erlebnis.kommentare || erlebnis.statistik?.kommentare || 0}
-                  lesezeichen={false}
-                  tags={erlebnis.tags || []}
-                  bild={erlebnis.medien?.[0]?.url}
-                  kiZusammenfassung={erlebnis.kiZusammenfassung}
-                />
-              ))}
+              {safeErlebnisse.map((erlebnis) => {
+                try {
+                  return (
+                    <ErlebnisKarte
+                      key={erlebnis.id || Math.random()}
+                      erlebnis={erlebnis}
+                      compact
+                      id={erlebnis.id || ""}
+                      titel={erlebnis.titel || erlebnis.title || ""}
+                      beschreibung={erlebnis.beschreibung || erlebnis.description || erlebnis.kurzfassung || ""}
+                      kategorie={
+                        typeof erlebnis.kategorie === "string" ? erlebnis.kategorie : erlebnis.kategorie?.name || ""
+                      }
+                      unterkategorie={erlebnis.unterkategorie}
+                      datum={
+                        erlebnis.datum ? new Date(erlebnis.datum) : erlebnis.date ? new Date(erlebnis.date) : undefined
+                      }
+                      ort={typeof erlebnis.ort === "string" ? erlebnis.ort : erlebnis.ort?.name || erlebnis.location}
+                      autor={
+                        typeof erlebnis.autor === "string"
+                          ? { id: erlebnis.autor, name: erlebnis.autor, avatar: undefined }
+                          : {
+                              id: erlebnis.autor?.id || erlebnis.author_id || "unknown",
+                              name: erlebnis.autor?.name || erlebnis.author?.name || "Unbekannt",
+                              avatar: erlebnis.autor?.avatar || erlebnis.author?.avatar,
+                            }
+                      }
+                      kommentare={erlebnis.kommentare || erlebnis.comments_count || erlebnis.statistik?.kommentare || 0}
+                      lesezeichen={false}
+                      tags={Array.isArray(erlebnis.tags) ? erlebnis.tags : []}
+                      bild={erlebnis.medien?.[0]?.url || erlebnis.image_url}
+                      kiZusammenfassung={erlebnis.kiZusammenfassung || erlebnis.ai_summary}
+                    />
+                  )
+                } catch (error) {
+                  console.error("Fehler beim Rendern der Erlebnis-Karte:", error)
+                  return null
+                }
+              })}
             </div>
           )}
         </motion.div>
