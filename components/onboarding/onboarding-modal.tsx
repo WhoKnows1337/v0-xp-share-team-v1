@@ -7,9 +7,16 @@ import { useLocalStorage } from "@/hooks/use-local-storage"
 
 export function OnboardingModal() {
   const [isOpen, setIsOpen] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useLocalStorage("hasCompletedOnboarding", false)
 
   useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isMounted) return
+
     // Zeige das Onboarding nur an, wenn es noch nicht abgeschlossen wurde
     if (!hasCompletedOnboarding) {
       // Verzögere das Öffnen des Modals um 1 Sekunde, damit die Seite zuerst geladen wird
@@ -19,11 +26,15 @@ export function OnboardingModal() {
 
       return () => clearTimeout(timer)
     }
-  }, [hasCompletedOnboarding])
+  }, [hasCompletedOnboarding, isMounted])
 
   const handleComplete = () => {
     setHasCompletedOnboarding(true)
     setIsOpen(false)
+  }
+
+  if (!isMounted) {
+    return null
   }
 
   return (
