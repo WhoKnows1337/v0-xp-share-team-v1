@@ -1,197 +1,186 @@
-import { createClient } from "@supabase/supabase-js"
-import type { User, Session } from "@supabase/supabase-js"
+import { getSupabaseClient } from "./supabase-client"
+import type { User as AuthUser, Session as AuthSession, SignUpWithPasswordCredentials } from "@supabase/supabase-js"
+import { config } from "./config"
+import { getMockUserById, addMockUser, updateMockUser } from "./mock-users" // Assuming mock user utilities
 
-// Typen für die Authentifizierung
-export type AuthUser = User
-export type AuthSession = Session
-
-// Typen für die Benutzerprofile
+// This should match the structure of your 'users' table in Supabase / mock data
 export interface UserProfile {
   id: string
   username: string
-  full_name?: string
+  display_name?: string
   avatar_url?: string
   bio?: string
-  website?: string
-  email: string
-  created_at: string
-  updated_at: string
-  last_seen_at?: string
-  experience_points: number
-  level: number
-  is_premium: boolean
-  preferences?: UserPreferences
+  email?: string // Usually from auth.users, but can be on profile
+  experience_points?: number
+  level?: number
+  is_premium?: boolean
+  is_admin?: boolean
+  created_at?: string
+  updated_at?: string
+  preferences?: any // Define more strictly if possible
+  // Add other fields from your 'users' table
 }
 
-export interface UserPreferences {
-  theme: "light" | "dark" | "system"
-  email_notifications: boolean
-  push_notifications: boolean
-  language: string
-  privacy_level: "public" | "friends" | "private"
-}
-
-// Erstelle einen Supabase-Client für die Authentifizierung
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
-// Singleton-Pattern für den Client
-let supabaseInstance: ReturnType<typeof createClient> | null = null
-
-export const getSupabaseAuthClient = () => {
-  if (!supabaseInstance) {
-    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-      },
-    })
-  }
-  return supabaseInstance
-}
-
-// Authentifizierungsfunktionen
-export async function signUp(email: string, password: string, username: string) {
-  const supabase = getSupabaseAuthClient()
-
-  // Registriere den Benutzer
-  const { data: authData, error: authError } = await supabase.auth.signUp({
-    email,
-    password,
-  })
-
-  if (authError) throw authError
-
-  // Erstelle das Benutzerprofil
-  if (authData.user) {
-    const { error: profileError } = await supabase.from("profiles").insert({
-      id: authData.user.id,
-      username,
-      email,
-      full_name: "",
-      experience_points: 0,
-      level: 1,
-      is_premium: false,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      preferences: {
-        theme: "system",
-        email_notifications: true,
-        push_notifications: true,
-        language: "de",
-        privacy_level: "public",
-      },
-    })
-
-    if (profileError) throw profileError
-  }
-
-  return authData
-}
-
-export async function signIn(email: string, password: string) {
-  const supabase = getSupabaseAuthClient()
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
-
-  if (error) throw error
-  return data
-}
-
-export async function signOut() {
-  const supabase = getSupabaseAuthClient()
-  const { error } = await supabase.auth.signOut()
-  if (error) throw error
-}
-
-export async function resetPassword(email: string) {
-  const supabase = getSupabaseAuthClient()
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/reset-password`,
-  })
-
-  if (error) throw error
-}
-
-export async function updatePassword(password: string) {
-  const supabase = getSupabaseAuthClient()
-  const { error } = await supabase.auth.updateUser({
-    password,
-  })
-
-  if (error) throw error
-}
-
-export async function getCurrentUser() {
-  const supabase = getSupabaseAuthClient()
-  const { data, error } = await supabase.auth.getUser()
-
-  if (error) throw error
-  return data.user
-}
-
-export async function getCurrentSession() {
-  const supabase = getSupabaseAuthClient()
+export async function getCurrentSession(): Promise<AuthSession | null> {
+  const supabase = getSupabaseClient()
   const { data, error } = await supabase.auth.getSession()
-
-  if (error) throw error
+  if (error) {
+    console.error("Error getting session:", error.message)
+    if (!config.useMockData) throw error
+    return null
+  }
   return data.session
 }
 
-export async function getUserProfile(userId: string): Promise<UserProfile> {
-  const supabase = getSupabaseAuthClient()
-  const { data, error } = await supabase.from("profiles").select("*").eq("id", userId).single()
+export async function getCurrentUser(): Promise<AuthUser | null> {
+  const supabase = getSupabaseClient()
+  const { data, error } = await supabase.auth.getUser()
+  if (error) {
+    console.error("Error getting user:", error.message)
+    if (!config.useMockData) throw error
+    return null
+  }
+  return data.user
+}
 
-  if (error) throw error
+export async function getUserProfile(userId: string): Promise<UserProfile | null> {
+  const supabase = getSupabaseClient()
+  // In Supabase, profiles are often in a separate 'profiles' or 'users' table.
+  // We've been using 'users' as the public table name.
+  const { data, error } = await supabase.from("users").select("*").eq("id", userId).single()
+
+  if (error) {
+    console.error("Error fetching user profile:", error.message)
+    // For mock data, if user not found, it's a valid scenario, not an error to throw
+    if (
+      !config.useMockData ||
+      (config.useMockData &&
+        error.code !== "PGRST116" &&
+        error.message !== "User not found" &&
+        error.message !== "Mock user not found")
+    ) {
+      // PGRST116 is "No rows found"
+      // "User not found" is a custom mock error
+      if (!config.useMockData) throw error
+    }
+    return null
+  }
   return data as UserProfile
 }
 
-export async function updateUserProfile(userId: string, updates: Partial<UserProfile>) {
-  const supabase = getSupabaseAuthClient()
-  const { data, error } = await supabase
-    .from("profiles")
-    .update({
-      ...updates,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", userId)
-    .select()
-    .single()
+export async function signUpUser(
+  email: string,
+  password: string,
+  username: string,
+): Promise<{ user: AuthUser | null; session: AuthSession | null; error?: any }> {
+  const supabase = getSupabaseClient()
 
-  if (error) throw error
-  return data as UserProfile
-}
+  const credentials: SignUpWithPasswordCredentials = { email, password, options: { data: { username } } }
+  const { data, error } = await supabase.auth.signUp(credentials)
 
-export async function updateUserPreferences(userId: string, preferences: Partial<UserPreferences>) {
-  const supabase = getSupabaseAuthClient()
-
-  // Zuerst holen wir das aktuelle Profil
-  const { data: currentProfile, error: fetchError } = await supabase
-    .from("profiles")
-    .select("preferences")
-    .eq("id", userId)
-    .single()
-
-  if (fetchError) throw fetchError
-
-  // Aktualisiere die Präferenzen
-  const updatedPreferences = {
-    ...(currentProfile.preferences || {}),
-    ...preferences,
+  if (error) {
+    console.error("Error signing up:", error.message)
+    if (!config.useMockData) throw error
+    return { user: null, session: null, error }
   }
 
+  // For mock data, we might need to manually create the profile entry
+  if (config.useMockData && data.user) {
+    const existingProfile = getMockUserById(data.user.id)
+    if (!existingProfile) {
+      const newUserProfile: UserProfile = {
+        id: data.user.id,
+        email: data.user.email!,
+        username: username,
+        display_name: username,
+        avatar_url: `/placeholder.svg?width=96&height=96&text=${username.substring(0, 2).toUpperCase()}`,
+        experience_points: 0,
+        level: 1,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }
+      addMockUser(newUserProfile) // Add to our mock user list
+    }
+  }
+  // In real Supabase, a trigger (handle_new_user) would create the public.users entry.
+
+  return { user: data.user, session: data.session, error: null }
+}
+
+export async function signInWithEmailPassword(
+  email: string,
+  password: string,
+): Promise<{ user: AuthUser | null; session: AuthSession | null; error?: any }> {
+  const supabase = getSupabaseClient()
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+  if (error) {
+    console.error("Error signing in:", error.message)
+    if (!config.useMockData) throw error
+    return { user: null, session: null, error }
+  }
+  return { user: data.user, session: data.session, error: null }
+}
+
+export async function signOutUser(): Promise<{ error?: any }> {
+  const supabase = getSupabaseClient()
+  const { error } = await supabase.auth.signOut()
+  if (error) {
+    console.error("Error signing out:", error.message)
+    if (!config.useMockData) throw error
+    return { error }
+  }
+  return { error: null }
+}
+
+export async function updateUserProfileDetails(
+  userId: string,
+  updates: Partial<UserProfile>,
+): Promise<UserProfile | null> {
+  const supabase = getSupabaseClient()
+  const { data, error } = await supabase.from("users").update(updates).eq("id", userId).select().single()
+
+  if (error) {
+    console.error("Error updating user profile:", error.message)
+    if (!config.useMockData) throw error
+    return null
+  }
+
+  if (config.useMockData && data) {
+    updateMockUser(data as UserProfile) // Update in our mock user list
+  }
+  return data as UserProfile
+}
+
+export async function updateUserPreferencesDetails(userId: string, preferences: any): Promise<UserProfile | null> {
+  // This assumes 'preferences' is a JSONB column on the 'users' table
+  // Or handle as a separate table if needed
+  const supabase = getSupabaseClient()
   const { data, error } = await supabase
-    .from("profiles")
-    .update({
-      preferences: updatedPreferences,
-      updated_at: new Date().toISOString(),
-    })
+    .from("users")
+    .update({ preferences } as any) // Cast to any if preferences is not directly on UserProfile type for Supabase client
     .eq("id", userId)
     .select()
     .single()
 
-  if (error) throw error
+  if (error) {
+    console.error("Error updating user preferences:", error.message)
+    if (!config.useMockData) throw error
+    return null
+  }
+
+  if (config.useMockData && data) {
+    updateMockUser(data as UserProfile) // Update in our mock user list
+  }
   return data as UserProfile
+}
+
+export async function updateUserPassword(newPassword: string): Promise<{ error?: any }> {
+  const supabase = getSupabaseClient()
+  const { error } = await supabase.auth.updateUser({ password: newPassword })
+  if (error) {
+    console.error("Error updating password:", error.message)
+    if (!config.useMockData) throw error
+    return { error }
+  }
+  return { error: null }
 }

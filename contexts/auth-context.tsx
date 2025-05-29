@@ -3,20 +3,22 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "@/hooks/use-toast"
+import type {
+  Session as AuthSession, // Renamed to avoid conflict
+  User as AuthUser, // Renamed to avoid conflict
+} from "@supabase/supabase-js"
 import {
-  type AuthSession,
-  type AuthUser,
-  type UserProfile,
+  type UserProfile, // This will be our detailed user profile type
   getCurrentSession,
   getCurrentUser,
   getUserProfile,
-  signIn,
-  signOut,
-  signUp,
-  updatePassword,
-  updateUserProfile,
-  updateUserPreferences,
-} from "@/lib/supabase-auth"
+  signInWithEmailPassword, // Renamed for clarity
+  signOutUser, // Renamed for clarity
+  signUpUser, // Renamed for clarity
+  updateUserPassword, // Renamed for clarity
+  updateUserProfileDetails, // Renamed for clarity
+  updateUserPreferencesDetails, // Renamed for clarity
+} from "@/lib/supabase-auth" // Assuming functions are named this way
 
 interface AuthContextType {
   user: AuthUser | null
@@ -28,7 +30,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>
-  updatePreferences: (preferences: any) => Promise<void>
+  updatePreferences: (preferences: any) => Promise<void> // Define 'any' more strictly if possible
   updatePassword: (password: string) => Promise<void>
 }
 
@@ -45,17 +47,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async function loadUserData() {
       try {
         setIsLoading(true)
-        const session = await getCurrentSession()
-        setSession(session)
+        const currentSession = await getCurrentSession()
+        setSession(currentSession)
 
-        if (session) {
-          const user = await getCurrentUser()
-          setUser(user)
+        if (currentSession) {
+          const currentUser = await getCurrentUser() // This gets the AuthUser
+          setUser(currentUser)
 
-          if (user) {
-            const profile = await getUserProfile(user.id)
-            setProfile(profile)
+          if (currentUser) {
+            const userProfileData = await getUserProfile(currentUser.id) // This gets UserProfile
+            setProfile(userProfileData)
+          } else {
+            setProfile(null) // No user, so no profile
           }
+        } else {
+          setUser(null)
+          setProfile(null)
         }
       } catch (error) {
         console.error("Fehler beim Laden der Benutzerdaten:", error)
@@ -75,12 +82,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const handleSignUp = async (email: string, password: string, username: string) => {
     try {
       setIsLoading(true)
-      await signUp(email, password, username)
+      const { user: signedUpUser, session: newSession } = await signUpUser(email, password, username)
+
+      setUser(signedUpUser)
+      setSession(newSession)
+      if (signedUpUser) {
+        const userProfileData = await getUserProfile(signedUpUser.id)
+        setProfile(userProfileData)
+      }
+
       toast({
         title: "Registrierung erfolgreich",
-        description: "Dein Konto wurde erfolgreich erstellt. Bitte überprüfe deine E-Mails für die Bestätigung.",
+        description:
+          "Dein Konto wurde erfolgreich erstellt. Bitte überprüfe deine E-Mails für die Bestätigung (falls nicht im Mock-Modus).",
       })
-      router.push("/login")
+      // router.push("/login") // Or directly to dashboard if auto-login
+      router.push("/dashboard")
     } catch (error: any) {
       console.error("Fehler bei der Registrierung:", error)
       toast({
@@ -96,13 +113,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const handleSignIn = async (email: string, password: string) => {
     try {
       setIsLoading(true)
-      const { session, user } = await signIn(email, password)
-      setSession(session)
-      setUser(user)
+      const { session: signedInSession, user: signedInUser } = await signInWithEmailPassword(email, password)
+      setSession(signedInSession)
+      setUser(signedInUser)
 
-      if (user) {
-        const profile = await getUserProfile(user.id)
-        setProfile(profile)
+      if (signedInUser) {
+        const userProfileData = await getUserProfile(signedInUser.id)
+        setProfile(userProfileData)
       }
 
       toast({
@@ -125,7 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const handleSignOut = async () => {
     try {
       setIsLoading(true)
-      await signOut()
+      await signOutUser()
       setUser(null)
       setProfile(null)
       setSession(null)
@@ -147,11 +164,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const handleUpdateProfile = async (updates: Partial<UserProfile>) => {
-    if (!user) return
+    if (!user || !profile) return // Need user.id for update, profile for optimistic update
 
     try {
       setIsLoading(true)
-      const updatedProfile = await updateUserProfile(user.id, updates)
+      const updatedProfile = await updateUserProfileDetails(user.id, updates)
       setProfile(updatedProfile)
       toast({
         title: "Profil aktualisiert",
@@ -170,12 +187,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const handleUpdatePreferences = async (preferences: any) => {
-    if (!user) return
+    if (!user || !profile) return
 
     try {
       setIsLoading(true)
-      const updatedProfile = await updateUserPreferences(user.id, preferences)
-      setProfile(updatedProfile)
+      // Assuming preferences are part of the UserProfile or a sub-object
+      const updatedProfile = await updateUserPreferencesDetails(user.id, preferences)
+      setProfile(updatedProfile) // Assuming this returns the full updated profile
       toast({
         title: "Einstellungen aktualisiert",
         description: "Deine Einstellungen wurden erfolgreich aktualisiert.",
@@ -192,10 +210,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const handleUpdatePassword = async (password: string) => {
+  const handleUpdatePassword = async (newPassword: string) => {
     try {
       setIsLoading(true)
-      await updatePassword(password)
+      await updateUserPassword(newPassword)
       toast({
         title: "Passwort aktualisiert",
         description: "Dein Passwort wurde erfolgreich aktualisiert.",
@@ -217,7 +235,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     profile,
     session,
     isLoading,
-    isAuthenticated: !!user,
+    isAuthenticated: !!user && !!session, // Check for session as well
     signUp: handleSignUp,
     signIn: handleSignIn,
     signOut: handleSignOut,

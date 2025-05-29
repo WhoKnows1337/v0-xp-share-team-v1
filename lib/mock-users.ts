@@ -1,33 +1,23 @@
-export type User = {
+// Helper utilities for managing mock users, to be used by supabase-auth.ts and supabase-client.ts (mock part)
+
+export interface User {
   id: string
   username: string
-  name?: string
-  vorname?: string
-  nachname?: string
-  email?: string
-  avatar?: string
+  display_name?: string
+  avatar_url?: string
   bio?: string
-  isVerifiziert?: boolean
-  registriertSeit?: string
-  website?: string
-  location?: string
-  erlebnisseCount?: number
-  kommentareCount?: number
-  statistiken?: {
-    erlebnisse: number
-    kommentare: number
-    erhalteneVotes: number
-    xpLevel: number
-    xpPunkte: number
-  }
-  achievements?: Achievement[]
-  badges?: Array<{
-    id: string
-    name: string
-    farbe: string
-  }>
-  lesezeichen?: string[]
-  entwuerfe?: any[]
+  email: string // email is essential
+  experience_points?: number
+  level?: number
+  is_premium?: boolean
+  is_admin?: boolean
+  created_at?: string
+  updated_at?: string
+  preferences?: any
+  // For profile page display
+  experiences_count?: number
+  followers_count?: number
+  following_count?: number
 }
 
 // Füge die Achievement-Typen hinzu
@@ -62,6 +52,65 @@ export interface Achievement {
   }
 }
 
+const mockUsersList: User[] = [
+  {
+    id: "mock-user-id-1",
+    username: "testuser1",
+    email: "test1@example.com",
+    display_name: "Test User Eins",
+    avatar_url: "/placeholder.svg?width=96&height=96&text=T1",
+    experience_points: 1250,
+    level: 5,
+    is_premium: false,
+    created_at: "2023-01-01T00:00:00Z",
+    updated_at: "2023-01-01T00:00:00Z",
+    bio: "Ein Testbenutzer, der gerne Dinge ausprobiert.",
+    experiences_count: 5,
+    followers_count: 10,
+    following_count: 2,
+  },
+  {
+    id: "mock-user-id-2",
+    username: "testuser2",
+    email: "test2@example.com",
+    display_name: "Test User Zwei",
+    avatar_url: "/placeholder.svg?width=96&height=96&text=T2",
+    experience_points: 2500,
+    level: 8,
+    is_premium: true,
+    created_at: "2023-01-02T00:00:00Z",
+    updated_at: "2023-01-02T00:00:00Z",
+    bio: "Ein weiterer Testbenutzer mit Premium-Status.",
+    experiences_count: 12,
+    followers_count: 55,
+    following_count: 23,
+  },
+  {
+    id: "mock-user-id-astral", // Used by AuthContext mockUser
+    username: "AstralExplorer",
+    display_name: "Astral Explorer",
+    avatar_url: "/placeholder.svg?width=96&height=96&text=AE",
+    bio: "Exploring the digital cosmos and sharing experiences. Loves lucid dreaming and meditation.",
+    email: "astral@example.com",
+    experience_points: 1500,
+    level: 6,
+    is_premium: true,
+    created_at: "2022-06-15T10:00:00Z",
+    updated_at: "2023-01-20T10:00:00Z",
+    experiences_count: 10,
+    followers_count: 120,
+    following_count: 75,
+    preferences: {
+      notifications: {
+        newFollower: true,
+        experienceComment: true,
+        experienceLike: false,
+      },
+      theme: "dark",
+    },
+  },
+]
+
 // Mock-Benutzer
 export const mockUsers: User[] = [
   {
@@ -76,6 +125,8 @@ export const mockUsers: User[] = [
     isVerifiziert: true,
     registriertSeit: "15.03.2022",
     statistiken: {
+      erlebnisseCount: 42,
+      kommentareCount: 128,
       erlebnisse: 42,
       kommentare: 128,
       erhalteneVotes: 756,
@@ -131,6 +182,8 @@ export const mockUsers: User[] = [
     isVerifiziert: true,
     registriertSeit: "03.05.2022",
     statistiken: {
+      erlebnisseCount: 28,
+      kommentareCount: 95,
       erlebnisse: 28,
       kommentare: 95,
       erhalteneVotes: 412,
@@ -167,6 +220,8 @@ export const mockUsers: User[] = [
     isVerifiziert: false,
     registriertSeit: "22.07.2022",
     statistiken: {
+      erlebnisseCount: 15,
+      kommentareCount: 47,
       erlebnisse: 15,
       kommentare: 47,
       erhalteneVotes: 183,
@@ -196,6 +251,8 @@ export const mockUsers: User[] = [
     isVerifiziert: false,
     registriertSeit: "14.09.2022",
     statistiken: {
+      erlebnisseCount: 8,
+      kommentareCount: 36,
       erlebnisse: 8,
       kommentare: 36,
       erhalteneVotes: 97,
@@ -217,6 +274,8 @@ export const mockUsers: User[] = [
     isVerifiziert: true,
     registriertSeit: "02.11.2022",
     statistiken: {
+      erlebnisseCount: 19,
+      kommentareCount: 72,
       erlebnisse: 19,
       kommentare: 72,
       erhalteneVotes: 245,
@@ -246,6 +305,8 @@ export const mockUsers: User[] = [
     isVerifiziert: false,
     registriertSeit: "18.04.2023",
     statistiken: {
+      erlebnisseCount: 12,
+      kommentareCount: 34,
       erlebnisse: 12,
       kommentare: 34,
       erhalteneVotes: 156,
@@ -275,6 +336,8 @@ export const mockUsers: User[] = [
     isVerifiziert: true,
     registriertSeit: "10.07.2022",
     statistiken: {
+      erlebnisseCount: 27,
+      kommentareCount: 93,
       erlebnisse: 27,
       kommentare: 93,
       erhalteneVotes: 342,
@@ -312,6 +375,8 @@ export const mockUsers: User[] = [
     isVerifiziert: true,
     registriertSeit: "05.06.2022",
     statistiken: {
+      erlebnisseCount: 24,
+      kommentareCount: 87,
       erlebnisse: 24,
       kommentare: 87,
       erhalteneVotes: 320,
@@ -348,6 +413,8 @@ export const mockUsers: User[] = [
     isVerifiziert: true,
     registriertSeit: "12.08.2022",
     statistiken: {
+      erlebnisseCount: 31,
+      kommentareCount: 104,
       erlebnisse: 31,
       kommentare: 104,
       erhalteneVotes: 478,
@@ -384,6 +451,8 @@ export const mockUsers: User[] = [
     isVerifiziert: false,
     registriertSeit: "23.10.2022",
     statistiken: {
+      erlebnisseCount: 16,
+      kommentareCount: 58,
       erlebnisse: 16,
       kommentare: 58,
       erhalteneVotes: 210,
@@ -413,6 +482,8 @@ export const mockUsers: User[] = [
     isVerifiziert: true,
     registriertSeit: "17.09.2022",
     statistiken: {
+      erlebnisseCount: 22,
+      kommentareCount: 76,
       erlebnisse: 22,
       kommentare: 76,
       erhalteneVotes: 289,
@@ -443,6 +514,8 @@ export const mockUsers: User[] = [
     isVerifiziert: true,
     registriertSeit: "05.03.2022",
     statistiken: {
+      erlebnisseCount: 34,
+      kommentareCount: 112,
       erlebnisse: 34,
       kommentare: 112,
       erhalteneVotes: 423,
@@ -480,6 +553,8 @@ export const mockUsers: User[] = [
     isVerifiziert: false,
     registriertSeit: "12.04.2022",
     statistiken: {
+      erlebnisseCount: 19,
+      kommentareCount: 67,
       erlebnisse: 19,
       kommentare: 67,
       erhalteneVotes: 231,
@@ -509,6 +584,8 @@ export const mockUsers: User[] = [
     isVerifiziert: true,
     registriertSeit: "28.02.2022",
     statistiken: {
+      erlebnisseCount: 41,
+      kommentareCount: 124,
       erlebnisse: 41,
       kommentare: 124,
       erhalteneVotes: 567,
@@ -547,6 +624,8 @@ export const mockUsers: User[] = [
     isVerifiziert: true,
     registriertSeit: "02.02.2022",
     statistiken: {
+      erlebnisseCount: 67,
+      kommentareCount: 218,
       erlebnisse: 67,
       kommentare: 218,
       erhalteneVotes: 932,
@@ -581,6 +660,8 @@ export const mockUsers: User[] = [
     isVerifiziert: true,
     registriertSeit: "10.01.2022",
     statistiken: {
+      erlebnisseCount: 29,
+      kommentareCount: 87,
       erlebnisse: 29,
       kommentare: 87,
       erhalteneVotes: 345,
@@ -619,6 +700,8 @@ export const mockUsers: User[] = [
     isVerifiziert: false,
     registriertSeit: "01.01.2023",
     statistiken: {
+      erlebnisseCount: 5,
+      kommentareCount: 10,
       erlebnisse: 5,
       kommentare: 10,
       erhalteneVotes: 20,
@@ -656,6 +739,35 @@ export const mockUsers: User[] = [
   },
 ]
 
+export function getMockDataList(tableName: string): User[] | any[] {
+  if (tableName === "users") {
+    return [...mockUsersList] // Return a copy
+  }
+  // Add other tables if needed
+  return []
+}
+
+export function getMockUserById(id: string): User | undefined {
+  return mockUsersList.find((user) => user.id === id)
+}
+
+export function getMockUserByUsername(username: string): User | undefined {
+  return mockUsersList.find((user) => user.username === username)
+}
+
+export function addMockUser(user: User): void {
+  if (!mockUsersList.find((u) => u.id === user.id)) {
+    mockUsersList.push(user)
+  }
+}
+
+export function updateMockUser(updatedUser: User): void {
+  const index = mockUsersList.findIndex((user) => user.id === updatedUser.id)
+  if (index !== -1) {
+    mockUsersList[index] = { ...mockUsersList[index], ...updatedUser }
+  }
+}
+
 // Hilfsfunktion, um einen Benutzer anhand des Benutzernamens zu finden
 export function findUserByUsername(username: string): User | undefined {
   if (!username) return undefined
@@ -671,6 +783,18 @@ export function findUserByUsername(username: string): User | undefined {
 // Hilfsfunktion, um einen Benutzer anhand des Benutzernamens zu finden
 export function getUserByUsername(username: string): User | undefined {
   return mockUsers.find((user) => user.username === username)
+}
+
+// This is the user that the mock Supabase client's auth.getUser() will return by default
+export const defaultMockAuthUser = {
+  id: "mock-user-id-astral",
+  email: "astral@example.com",
+  // Supabase AuthUser has more fields, but these are often the most used
+  app_metadata: { provider: "email" },
+  user_metadata: { username: "AstralExplorer" }, // often display_name or full_name here
+  aud: "authenticated",
+  created_at: new Date().toISOString(),
+  // Add other fields as needed by your app from Supabase.User type
 }
 
 // Hilfsfunktion, um den aktuellen Benutzer zu erhalten (für Simulationszwecke)
