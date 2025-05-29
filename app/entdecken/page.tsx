@@ -1,5 +1,5 @@
-import { EntdeckenPageUpdated } from "@/components/entdecken/entdecken-page-updated"
+import { EntdeckenPageClient } from "./client"
 
 export default function EntdeckenPage() {
-  return <EntdeckenPageUpdated />
+  return <EntdeckenPageClient />
 }

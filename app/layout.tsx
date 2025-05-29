@@ -8,6 +8,7 @@ import { SubscriptionProvider } from "@/contexts/subscription-context"
 import { SidebarProvider } from "@/contexts/sidebar-context"
 import { ErlebnisWizardProvider } from "@/components/erlebnis-wizard-modal"
 import { XPAssistantProvider } from "@/components/xp-assistant-provider"
+import { XPBuchProvider } from "@/contexts/xp-buch-context"
 import { Toaster } from "@/components/ui/toaster"
 import NavWrapper from "./nav-wrapper"
 import { AuthProvider } from "@/contexts/auth-context"
@@ -39,14 +40,16 @@ export default function RootLayout({
             <SubscriptionProvider>
               <ProfileProvider>
                 <SidebarProvider>
-                  <ErlebnisWizardProvider>
-                    <XPAssistantProvider>
-                      {/* Füge die MonacoEnvironmentSetup-Komponente hier ein */}
-                      <MonacoEnvironmentSetup />
-                      <NavWrapper>{children}</NavWrapper>
-                      <Toaster />
-                    </XPAssistantProvider>
-                  </ErlebnisWizardProvider>
+                  <XPBuchProvider>
+                    <ErlebnisWizardProvider>
+                      <XPAssistantProvider>
+                        {/* Füge die MonacoEnvironmentSetup-Komponente hier ein */}
+                        <MonacoEnvironmentSetup />
+                        <NavWrapper>{children}</NavWrapper>
+                        <Toaster />
+                      </XPAssistantProvider>
+                    </ErlebnisWizardProvider>
+                  </XPBuchProvider>
                 </SidebarProvider>
               </ProfileProvider>
             </SubscriptionProvider>
