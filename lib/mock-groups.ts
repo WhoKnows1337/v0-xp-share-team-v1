@@ -1,0 +1,308 @@
+import type { Group, GroupMember, GroupExperience, GroupInvitation, GroupDiscussion } from "@/types/group"
+
+// Mock-Gruppen
+export const mockGroups: Group[] = [
+  {
+    id: "g-001",
+    name: "Traumreisende",
+    description: "Eine Gruppe für Menschen, die ihre Klartraumerfahrungen teilen und diskutieren möchten.",
+    created_by: "u-001",
+    created_at: "2023-01-15T10:30:00Z",
+    updated_at: "2023-05-20T14:45:00Z",
+    avatar_url: "/abstract-geometric.png",
+    banner_url: "/abstract-experience.png",
+    is_private: false,
+    member_count: 128,
+    experience_count: 45,
+  },
+  {
+    id: "g-002",
+    name: "Außerkörperliche Erfahrungen",
+    description: "Teile und diskutiere deine außerkörperlichen Erfahrungen mit Gleichgesinnten.",
+    created_by: "u-002",
+    created_at: "2023-02-10T15:20:00Z",
+    updated_at: "2023-05-18T09:15:00Z",
+    avatar_url: "/ethereal-aquatic-dream.png",
+    banner_url: "/celestial-contemplation.png",
+    is_private: false,
+    member_count: 76,
+    experience_count: 32,
+  },
+  {
+    id: "g-003",
+    name: "Synchronizitäten im Alltag",
+    description: "Für alle, die bedeutungsvolle Zufälle und Synchronizitäten in ihrem Leben beobachten.",
+    created_by: "u-003",
+    created_at: "2023-03-05T11:45:00Z",
+    updated_at: "2023-05-15T16:30:00Z",
+    avatar_url: "/synchronicity-career.png",
+    is_private: false,
+    member_count: 94,
+    experience_count: 38,
+  },
+  {
+    id: "g-004",
+    name: "Spirituelle Transformationen",
+    description: "Ein geschützter Raum für tiefgreifende spirituelle Erfahrungen und persönliche Transformationen.",
+    created_by: "u-004",
+    created_at: "2023-03-20T09:10:00Z",
+    updated_at: "2023-05-19T13:25:00Z",
+    avatar_url: "/elemental-convergence.png",
+    banner_url: "/serene-meditation.png",
+    is_private: true,
+    member_count: 42,
+    experience_count: 27,
+  },
+  {
+    id: "g-005",
+    name: "Zeitreisende",
+    description: "Für Menschen mit Erfahrungen von Zeitanomalien, Déjà-vu und Zeitreiseträumen.",
+    created_by: "u-001",
+    created_at: "2023-04-12T14:50:00Z",
+    updated_at: "2023-05-17T10:40:00Z",
+    avatar_url: "/temporal-tourist.png",
+    is_private: false,
+    member_count: 63,
+    experience_count: 29,
+  },
+]
+
+// Mock-Gruppenmitglieder für die erste Gruppe
+export const mockGroupMembers: GroupMember[] = [
+  {
+    id: "gm-001",
+    group_id: "g-001",
+    user_id: "u-001",
+    role: "admin",
+    joined_at: "2023-01-15T10:30:00Z",
+    user: {
+      id: "u-001",
+      username: "traumwanderer",
+      display_name: "Traumwanderer",
+      avatar_url: "/dream-traveler.png",
+    },
+  },
+  {
+    id: "gm-002",
+    group_id: "g-001",
+    user_id: "u-002",
+    role: "moderator",
+    joined_at: "2023-01-16T14:20:00Z",
+    user: {
+      id: "u-002",
+      username: "klartraumer",
+      display_name: "Klarträumer",
+      avatar_url: "/philosophical-wanderer.png",
+    },
+  },
+  {
+    id: "gm-003",
+    group_id: "g-001",
+    user_id: "u-003",
+    role: "member",
+    joined_at: "2023-01-18T09:45:00Z",
+    user: {
+      id: "u-003",
+      username: "traumreisende",
+      display_name: "Traumreisende",
+      avatar_url: "/peaceful-meditation-guide.png",
+    },
+  },
+  {
+    id: "gm-004",
+    group_id: "g-001",
+    user_id: "u-004",
+    role: "member",
+    joined_at: "2023-01-20T16:30:00Z",
+    user: {
+      id: "u-004",
+      username: "waldentdecker",
+      display_name: "Waldentdecker",
+      avatar_url: "/forest-explorer.png",
+    },
+  },
+  {
+    id: "gm-005",
+    group_id: "g-001",
+    user_id: "u-005",
+    role: "member",
+    joined_at: "2023-01-25T11:15:00Z",
+    user: {
+      id: "u-005",
+      username: "sternensegler",
+      display_name: "Sternensegler",
+      avatar_url: "/serene-spirit.png",
+    },
+  },
+]
+
+// Mock-Gruppenerlebnisse für die erste Gruppe
+export const mockGroupExperiences: GroupExperience[] = [
+  {
+    id: "ge-001",
+    group_id: "g-001",
+    experience_id: "e-001",
+    shared_by: "u-001",
+    shared_at: "2023-01-20T15:30:00Z",
+    experience: {
+      id: "e-001",
+      title: "Flug über eine Kristallstadt",
+      summary: "In diesem Klartraum flog ich über eine Stadt aus Kristall, die im Sonnenlicht funkelte.",
+      created_at: "2023-01-18T10:15:00Z",
+      user_id: "u-001",
+      image_url: "/abstract-geometric-shapes.png",
+      category: "Klartraum",
+      location: "Traumwelt",
+    },
+    user: {
+      id: "u-001",
+      username: "traumwanderer",
+      display_name: "Traumwanderer",
+      avatar_url: "/dream-traveler.png",
+    },
+  },
+  {
+    id: "ge-002",
+    group_id: "g-001",
+    experience_id: "e-002",
+    shared_by: "u-002",
+    shared_at: "2023-02-05T09:45:00Z",
+    experience: {
+      id: "e-002",
+      title: "Begegnung mit meinem höheren Selbst",
+      summary: "In diesem Traum traf ich eine Version von mir selbst, die alle Antworten zu kennen schien.",
+      created_at: "2023-02-03T14:20:00Z",
+      user_id: "u-002",
+      image_url: "/blue-being-wondering.png",
+      category: "Spirituelles Erlebnis",
+    },
+    user: {
+      id: "u-002",
+      username: "klartraumer",
+      display_name: "Klarträumer",
+      avatar_url: "/philosophical-wanderer.png",
+    },
+  },
+  {
+    id: "ge-003",
+    group_id: "g-001",
+    experience_id: "e-003",
+    shared_by: "u-003",
+    shared_at: "2023-02-15T16:30:00Z",
+    experience: {
+      id: "e-003",
+      title: "Schweben über dem Ozean",
+      summary: "Ich schwebte über einem endlosen Ozean und konnte die Wellen mit meinen Gedanken kontrollieren.",
+      created_at: "2023-02-14T11:10:00Z",
+      user_id: "u-003",
+      image_url: "/lucid-dream-ocean.png",
+      category: "Klartraum",
+      location: "Ozean",
+    },
+    user: {
+      id: "u-003",
+      username: "traumreisende",
+      display_name: "Traumreisende",
+      avatar_url: "/peaceful-meditation-guide.png",
+    },
+  },
+]
+
+// Mock-Gruppeneinladungen
+export const mockGroupInvitations: GroupInvitation[] = [
+  {
+    id: "gi-001",
+    group_id: "g-001",
+    invited_by: "u-001",
+    invited_user_id: "u-006",
+    status: "pending",
+    created_at: "2023-05-18T14:30:00Z",
+    expires_at: "2023-06-18T14:30:00Z",
+    group: {
+      id: "g-001",
+      name: "Traumreisende",
+      avatar_url: "/abstract-geometric.png",
+    },
+    inviter: {
+      id: "u-001",
+      username: "traumwanderer",
+      display_name: "Traumwanderer",
+      avatar_url: "/dream-traveler.png",
+    },
+  },
+  {
+    id: "gi-002",
+    group_id: "g-004",
+    invited_by: "u-004",
+    invited_user_id: "u-001",
+    status: "pending",
+    created_at: "2023-05-19T10:15:00Z",
+    expires_at: "2023-06-19T10:15:00Z",
+    group: {
+      id: "g-004",
+      name: "Spirituelle Transformationen",
+      avatar_url: "/elemental-convergence.png",
+    },
+    inviter: {
+      id: "u-004",
+      username: "waldentdecker",
+      display_name: "Waldentdecker",
+      avatar_url: "/forest-explorer.png",
+    },
+  },
+]
+
+// Mock-Gruppendiskussionen für die erste Gruppe
+export const mockGroupDiscussions: GroupDiscussion[] = [
+  {
+    id: "gd-001",
+    group_id: "g-001",
+    title: "Techniken zum Klarträumen",
+    content:
+      "Welche Techniken verwendet ihr, um bewusste Träume zu induzieren? Ich habe gute Erfahrungen mit der WILD-Technik gemacht, aber bin offen für neue Ansätze.",
+    created_by: "u-001",
+    created_at: "2023-04-10T15:30:00Z",
+    updated_at: "2023-04-10T15:30:00Z",
+    comment_count: 12,
+    user: {
+      id: "u-001",
+      username: "traumwanderer",
+      display_name: "Traumwanderer",
+      avatar_url: "/dream-traveler.png",
+    },
+  },
+  {
+    id: "gd-002",
+    group_id: "g-001",
+    title: "Gemeinsames Träumen - Eure Erfahrungen",
+    content:
+      "Hat jemand von euch Erfahrungen mit gemeinsamem Träumen gemacht? Ich versuche seit einiger Zeit, mit einem Freund im Traum zu kommunizieren.",
+    created_by: "u-002",
+    created_at: "2023-04-15T09:45:00Z",
+    updated_at: "2023-04-15T09:45:00Z",
+    comment_count: 8,
+    user: {
+      id: "u-002",
+      username: "klartraumer",
+      display_name: "Klarträumer",
+      avatar_url: "/philosophical-wanderer.png",
+    },
+  },
+  {
+    id: "gd-003",
+    group_id: "g-001",
+    title: "Traumsymbole und ihre Bedeutung",
+    content:
+      "Lasst uns über wiederkehrende Symbole in unseren Träumen sprechen. Ich sehe oft eine Treppe, die ins Nichts führt. Was könnte das bedeuten?",
+    created_by: "u-003",
+    created_at: "2023-04-20T14:20:00Z",
+    updated_at: "2023-04-20T14:20:00Z",
+    comment_count: 15,
+    user: {
+      id: "u-003",
+      username: "traumreisende",
+      display_name: "Traumreisende",
+      avatar_url: "/peaceful-meditation-guide.png",
+    },
+  },
+]
