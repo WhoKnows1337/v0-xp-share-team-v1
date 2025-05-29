@@ -5,17 +5,76 @@ import type { Database } from "@/types/supabase-types"
 // Singleton-Pattern für den Supabase-Client
 let supabaseInstance: ReturnType<typeof createClient<Database>> | null = null
 
+// Mock-Daten Typen
+interface User {
+  id: string
+  username: string
+  email: string
+  display_name: string
+  avatar_url: string
+  experience_points: number
+  level: number
+  is_premium: boolean
+  created_at: string
+  updated_at: string
+}
+
+// Mock-Auth Objekt
+const mockAuth = {
+  getUser: () => ({ data: { user: mockUser }, error: null }),
+  getSession: () => ({ data: { session: { user: mockUser } }, error: null }),
+  signUp: () => ({ data: { user: mockUser }, error: null }),
+  signInWithPassword: () => ({ data: { user: mockUser }, error: null }),
+  signOut: () => ({ error: null }),
+}
+
 // Mock-Supabase-Client für Entwicklung und Tests
 export const createMockClient = () => {
   return {
     from: (table: string) => ({
       select: (columns?: string) => ({
-        eq: (column: string, value: any) => ({
-          single: () => Promise.resolve({ data: getMockData(table, value), error: null }),
-          order: () => ({
-            limit: () => Promise.resolve({ data: getMockDataList(table), error: null }),
-          }),
-        }),
+        eq: (column: string, value: any) => {
+          if (table === "users" && column === "username") {
+            // Changed from "profiles"
+            const users = getMockDataList(table) as User[]
+            const user = users.find((u) => u.username === value)
+            return {
+              single: () =>
+                Promise.resolve({
+                  data: user || null,
+                  error: user ? null : { message: "User not found", code: "PGRST116" },
+                }),
+              // Add other chainable methods if needed, or ensure 'single' is what's used
+            }
+          }
+          // Original eq logic for ID-based fetching
+          return {
+            single: () => Promise.resolve({ data: getMockData(table, value), error: null }),
+            order: () => ({
+              limit: () => Promise.resolve({ data: getMockDataList(table), error: null }),
+            }),
+          }
+        },
+        // ... other methods like order, limit etc.
+        // Ensure a generic .single() is available if no .eq is called
+        single: () => {
+          // This might be called if query is supabase.from("users").select().eq("id", user.id).single()
+          if (table === "users") {
+            // Assuming current user fetch
+            const {
+              data: { user: authUser },
+            } = mockAuth.getUser()
+            if (authUser) {
+              const users = getMockDataList(table) as User[]
+              const user = users.find((u) => u.id === authUser.id)
+              return Promise.resolve({ data: user || null, error: null })
+            }
+          }
+          return Promise.resolve({
+            data: null,
+            error: { message: "Cannot fetch single without ID for this mock table", code: "MOCKERR" },
+          })
+        },
         order: () => ({
           limit: () => Promise.resolve({ data: getMockDataList(table), error: null }),
         }),
@@ -132,8 +191,9 @@ export async function getServerUser() {
 
 // Mock-Daten
 const mockUser = {
-  id: "mock-user-id",
-  email: "test@example.com",
+  id: "mock-user-id-astral", // Make it unique if needed
+  email: "astral@example.com",
+  // Add other fields if your auth.getUser() mock returns more
 }
 
 // Hilfsfunktionen für Mock-Daten
@@ -202,6 +262,23 @@ function getMockDataList(table: string) {
         is_premium: true,
         created_at: "2023-01-02T00:00:00Z",
         updated_at: "2023-01-02T00:00:00Z",
+      },
+      {
+        id: "mock-user-id-astral",
+        username: "AstralExplorer",
+        display_name: "Astral Explorer",
+        avatar_url: "/placeholder.svg?width=96&height=96&text=AE",
+        bio: "Exploring the digital cosmos.",
+        email: "astral@example.com",
+        experience_points: 1500,
+        level: 6,
+        is_premium: true,
+        created_at: "2022-06-15T10:00:00Z",
+        updated_at: "2023-01-20T10:00:00Z",
+        // Mock counts
+        experiences_count: 10,
+        followers_count: 120,
+        following_count: 75,
       },
     ],
     experiences: [
