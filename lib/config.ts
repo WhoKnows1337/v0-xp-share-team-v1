@@ -1,7 +1,7 @@
 // Konfiguration für die Anwendung
 export const config = {
   // Immer Mock-Daten verwenden für Next.js
-  useMockData: true,
+  useMockData: false, // <<< HIER ÄNDERN
 
   // Supabase-Konfiguration (wird bei Mock-Daten nicht verwendet)
   supabase: {
