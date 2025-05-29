@@ -10,6 +10,7 @@ import { ErlebnisWizardProvider } from "@/components/erlebnis-wizard-modal"
 import { XPAssistantProvider } from "@/components/xp-assistant-provider"
 import { Toaster } from "@/components/ui/toaster"
 import NavWrapper from "./nav-wrapper"
+import { AuthProvider } from "@/contexts/auth-context"
 
 // Importiere die MonacoEnvironmentSetup-Komponente
 import { MonacoEnvironmentSetup } from "@/components/monaco-environment"
@@ -22,7 +23,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "XP Share - Teile deine Erlebnisse",
   description: "Eine Plattform zum Teilen und Entdecken von Erlebnissen",
-    generator: 'v0.dev'
+  generator: "v0.dev",
 }
 
 export default function RootLayout({
@@ -34,20 +35,22 @@ export default function RootLayout({
     <html lang="de" className={inter.className}>
       <body>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <SubscriptionProvider>
-            <ProfileProvider>
-              <SidebarProvider>
-                <ErlebnisWizardProvider>
-                  <XPAssistantProvider>
-                    {/* Füge die MonacoEnvironmentSetup-Komponente hier ein */}
-                    <MonacoEnvironmentSetup />
-                    <NavWrapper>{children}</NavWrapper>
-                    <Toaster />
-                  </XPAssistantProvider>
-                </ErlebnisWizardProvider>
-              </SidebarProvider>
-            </ProfileProvider>
-          </SubscriptionProvider>
+          <AuthProvider>
+            <SubscriptionProvider>
+              <ProfileProvider>
+                <SidebarProvider>
+                  <ErlebnisWizardProvider>
+                    <XPAssistantProvider>
+                      {/* Füge die MonacoEnvironmentSetup-Komponente hier ein */}
+                      <MonacoEnvironmentSetup />
+                      <NavWrapper>{children}</NavWrapper>
+                      <Toaster />
+                    </XPAssistantProvider>
+                  </ErlebnisWizardProvider>
+                </SidebarProvider>
+              </ProfileProvider>
+            </SubscriptionProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

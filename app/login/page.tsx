@@ -1,22 +1,28 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { useAuth } from "@/contexts/auth-context"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { EyeIcon, EyeOffIcon, Loader2 } from "lucide-react"
+import { toast } from "@/hooks/use-toast"
 
 export default function LoginPage() {
-  const { signIn, isLoading } = useAuth()
+  const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string } = {}
@@ -46,11 +52,31 @@ export default function LoginPage() {
       return
     }
 
+    setIsLoading(true)
+
     try {
-      await signIn(email, password)
+      // Simuliere Login-Prozess
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      toast({
+        title: "Anmeldung erfolgreich",
+        description: "Du wirst zum Dashboard weitergeleitet.",
+      })
+
+      router.push("/dashboard")
     } catch (error) {
-      // Fehler wird bereits im Auth-Kontext behandelt
+      toast({
+        title: "Anmeldung fehlgeschlagen",
+        description: "Bitte überprüfe deine Anmeldedaten.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
     }
+  }
+
+  if (!isMounted) {
+    return null
   }
 
   return (

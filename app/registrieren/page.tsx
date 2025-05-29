@@ -1,78 +1,74 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { useAuth } from "@/contexts/auth-context"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { EyeIcon, EyeOffIcon, Loader2 } from "lucide-react"
+import { toast } from "@/hooks/use-toast"
 
 export default function RegisterPage() {
-  const { signUp, isLoading } = useAuth()
-  const [username, setUsername] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
+  const router = useRouter()
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    acceptTerms: false,
+  })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [acceptTerms, setAcceptTerms] = useState(false)
-  const [errors, setErrors] = useState<{
-    username?: string
-    email?: string
-    password?: string
-    confirmPassword?: string
-    acceptTerms?: string
-  }>({})
+  const [isLoading, setIsLoading] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const validateForm = () => {
-    const newErrors: {
-      username?: string
-      email?: string
-      password?: string
-      confirmPassword?: string
-      acceptTerms?: string
-    } = {}
+    const newErrors: Record<string, string> = {}
     let isValid = true
 
-    if (!username) {
+    if (!formData.username) {
       newErrors.username = "Benutzername ist erforderlich"
       isValid = false
-    } else if (username.length < 3) {
+    } else if (formData.username.length < 3) {
       newErrors.username = "Benutzername muss mindestens 3 Zeichen lang sein"
       isValid = false
     }
 
-    if (!email) {
+    if (!formData.email) {
       newErrors.email = "E-Mail ist erforderlich"
       isValid = false
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Ungültige E-Mail-Adresse"
       isValid = false
     }
 
-    if (!password) {
+    if (!formData.password) {
       newErrors.password = "Passwort ist erforderlich"
       isValid = false
-    } else if (password.length < 8) {
+    } else if (formData.password.length < 8) {
       newErrors.password = "Passwort muss mindestens 8 Zeichen lang sein"
       isValid = false
     }
 
-    if (!confirmPassword) {
-      newErrors.confirmPassword = "Passwort bestätigen ist erforderlich"
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = "Passwort-Bestätigung ist erforderlich"
       isValid = false
-    } else if (password !== confirmPassword) {
+    } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwörter stimmen nicht überein"
       isValid = false
     }
 
-    if (!acceptTerms) {
-      newErrors.acceptTerms = "Du musst die Nutzungsbedingungen akzeptieren"
+    if (!formData.acceptTerms) {
+      newErrors.acceptTerms = "Du musst den Nutzungsbedingungen zustimmen"
       isValid = false
     }
 
@@ -87,11 +83,38 @@ export default function RegisterPage() {
       return
     }
 
+    setIsLoading(true)
+
     try {
-      await signUp(email, password, username)
+      // Simuliere Registrierungsprozess
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+
+      toast({
+        title: "Registrierung erfolgreich",
+        description: "Dein Konto wurde erstellt. Du kannst dich jetzt anmelden.",
+      })
+
+      router.push("/login")
     } catch (error) {
-      // Fehler wird bereits im Auth-Kontext behandelt
+      toast({
+        title: "Registrierung fehlgeschlagen",
+        description: "Bei der Registrierung ist ein Fehler aufgetreten.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
     }
+  }
+
+  const handleInputChange = (field: string, value: string | boolean) => {
+    setFormData((prev) => ({ ...prev, [field]: value }))
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }))
+    }
+  }
+
+  if (!isMounted) {
+    return null
   }
 
   return (
@@ -99,7 +122,7 @@ export default function RegisterPage() {
       <Card className="mx-auto w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Registrieren</CardTitle>
-          <CardDescription>Erstelle ein Konto, um XP-Share zu nutzen</CardDescription>
+          <CardDescription>Erstelle dein XP-Share Konto</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
@@ -107,25 +130,28 @@ export default function RegisterPage() {
               <Label htmlFor="username">Benutzername</Label>
               <Input
                 id="username"
-                placeholder="dein_benutzername"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                type="text"
+                placeholder="deinbenutzername"
+                value={formData.username}
+                onChange={(e) => handleInputChange("username", e.target.value)}
                 disabled={isLoading}
               />
               {errors.username && <p className="text-sm text-destructive">{errors.username}</p>}
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="email">E-Mail</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="deine@email.de"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={formData.email}
+                onChange={(e) => handleInputChange("email", e.target.value)}
                 disabled={isLoading}
               />
               {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="password">Passwort</Label>
               <div className="relative">
@@ -133,8 +159,8 @@ export default function RegisterPage() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={formData.password}
+                  onChange={(e) => handleInputChange("password", e.target.value)}
                   disabled={isLoading}
                 />
                 <Button
@@ -150,11 +176,11 @@ export default function RegisterPage() {
                   ) : (
                     <EyeIcon className="h-4 w-4 text-muted-foreground" />
                   )}
-                  <span className="sr-only">{showPassword ? "Passwort verbergen" : "Passwort anzeigen"}</span>
                 </Button>
               </div>
               {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Passwort bestätigen</Label>
               <div className="relative">
@@ -162,8 +188,8 @@ export default function RegisterPage() {
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  value={formData.confirmPassword}
+                  onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                   disabled={isLoading}
                 />
                 <Button
@@ -179,32 +205,30 @@ export default function RegisterPage() {
                   ) : (
                     <EyeIcon className="h-4 w-4 text-muted-foreground" />
                   )}
-                  <span className="sr-only">{showConfirmPassword ? "Passwort verbergen" : "Passwort anzeigen"}</span>
                 </Button>
               </div>
               {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="acceptTerms"
-                  checked={acceptTerms}
-                  onCheckedChange={(checked) => setAcceptTerms(checked as boolean)}
-                  disabled={isLoading}
-                />
-                <Label htmlFor="acceptTerms" className="text-sm">
-                  Ich akzeptiere die{" "}
-                  <Link href="/nutzungsbedingungen" className="text-primary hover:underline">
-                    Nutzungsbedingungen
-                  </Link>{" "}
-                  und{" "}
-                  <Link href="/datenschutz" className="text-primary hover:underline">
-                    Datenschutzrichtlinien
-                  </Link>
-                </Label>
-              </div>
-              {errors.acceptTerms && <p className="text-sm text-destructive">{errors.acceptTerms}</p>}
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="acceptTerms"
+                checked={formData.acceptTerms}
+                onCheckedChange={(checked) => handleInputChange("acceptTerms", checked as boolean)}
+                disabled={isLoading}
+              />
+              <Label htmlFor="acceptTerms" className="text-sm">
+                Ich akzeptiere die{" "}
+                <Link href="/nutzungsbedingungen" className="text-primary hover:underline">
+                  Nutzungsbedingungen
+                </Link>{" "}
+                und{" "}
+                <Link href="/datenschutz" className="text-primary hover:underline">
+                  Datenschutzerklärung
+                </Link>
+              </Label>
             </div>
+            {errors.acceptTerms && <p className="text-sm text-destructive">{errors.acceptTerms}</p>}
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full" disabled={isLoading}>

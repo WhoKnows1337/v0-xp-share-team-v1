@@ -1,55 +1,60 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2 } from "lucide-react"
+import { ArrowLeft, Loader2, Mail } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
-import { resetPassword } from "@/lib/supabase-auth"
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState("")
+  const [isMounted, setIsMounted] = useState(false)
 
-  const validateForm = () => {
-    if (!email) {
-      setError("E-Mail ist erforderlich")
-      return false
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      setError("Ungültige E-Mail-Adresse")
-      return false
-    }
-    setError(null)
-    return true
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  const validateEmail = (email: string) => {
+    return /\S+@\S+\.\S+/.test(email)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!validateForm()) {
+    if (!email) {
+      setError("E-Mail ist erforderlich")
       return
     }
 
+    if (!validateEmail(email)) {
+      setError("Ungültige E-Mail-Adresse")
+      return
+    }
+
+    setIsLoading(true)
+    setError("")
+
     try {
-      setIsLoading(true)
-      await resetPassword(email)
+      // Simuliere API-Aufruf
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+
       setIsSubmitted(true)
       toast({
-        title: "Link gesendet",
-        description: "Ein Link zum Zurücksetzen deines Passworts wurde an deine E-Mail-Adresse gesendet.",
+        title: "E-Mail gesendet",
+        description:
+          "Falls ein Konto mit dieser E-Mail existiert, haben wir dir einen Link zum Zurücksetzen des Passworts gesendet.",
       })
-    } catch (error: any) {
-      console.error("Fehler beim Zurücksetzen des Passworts:", error)
+    } catch (error) {
       toast({
         title: "Fehler",
-        description: error.message || "Beim Zurücksetzen deines Passworts ist ein Fehler aufgetreten.",
+        description: "Beim Senden der E-Mail ist ein Fehler aufgetreten.",
         variant: "destructive",
       })
     } finally {
@@ -57,59 +62,91 @@ export default function ForgotPasswordPage() {
     }
   }
 
+  if (!isMounted) {
+    return null
+  }
+
+  if (isSubmitted) {
+    return (
+      <div className="container flex h-screen items-center justify-center">
+        <Card className="mx-auto w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
+              <Mail className="h-6 w-6 text-green-600 dark:text-green-400" />
+            </div>
+            <CardTitle className="text-2xl font-bold">E-Mail gesendet</CardTitle>
+            <CardDescription>
+              Wir haben dir einen Link zum Zurücksetzen deines Passworts an <strong>{email}</strong> gesendet.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-sm text-muted-foreground">
+              Überprüfe dein E-Mail-Postfach und folge den Anweisungen in der E-Mail.
+            </p>
+          </CardContent>
+          <CardFooter className="flex flex-col space-y-4">
+            <Button asChild className="w-full">
+              <Link href="/login">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Zurück zur Anmeldung
+              </Link>
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsSubmitted(false)
+                setEmail("")
+              }}
+              className="w-full"
+            >
+              Andere E-Mail verwenden
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div className="container flex h-screen items-center justify-center">
       <Card className="mx-auto w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Passwort vergessen</CardTitle>
+          <CardTitle className="text-2xl font-bold">Passwort vergessen?</CardTitle>
           <CardDescription>
-            Gib deine E-Mail-Adresse ein, um einen Link zum Zurücksetzen deines Passworts zu erhalten
+            Gib deine E-Mail-Adresse ein und wir senden dir einen Link zum Zurücksetzen deines Passworts.
           </CardDescription>
         </CardHeader>
-        {isSubmitted ? (
+        <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
-            <div className="rounded-md bg-primary/10 p-4 text-center">
-              <p className="text-sm text-primary">
-                Ein Link zum Zurücksetzen deines Passworts wurde an <strong>{email}</strong> gesendet. Bitte überprüfe
-                deine E-Mails und folge den Anweisungen.
-              </p>
+            <div className="space-y-2">
+              <Label htmlFor="email">E-Mail</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="deine@email.de"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value)
+                  setError("")
+                }}
+                disabled={isLoading}
+              />
+              {error && <p className="text-sm text-destructive">{error}</p>}
             </div>
-            <p className="text-center text-sm text-muted-foreground">
-              Keine E-Mail erhalten?{" "}
-              <Button variant="link" className="p-0 text-primary" onClick={handleSubmit} disabled={isLoading}>
-                Erneut senden
-              </Button>
-            </p>
           </CardContent>
-        ) : (
-          <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">E-Mail</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="deine@email.de"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isLoading}
-                />
-                {error && <p className="text-sm text-destructive">{error}</p>}
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col space-y-4">
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Link senden
-              </Button>
-              <p className="text-center text-sm text-muted-foreground">
-                <Link href="/login" className="text-primary hover:underline">
-                  Zurück zur Anmeldung
-                </Link>
-              </p>
-            </CardFooter>
-          </form>
-        )}
+          <CardFooter className="flex flex-col space-y-4">
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Link senden
+            </Button>
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/login">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Zurück zur Anmeldung
+              </Link>
+            </Button>
+          </CardFooter>
+        </form>
       </Card>
     </div>
   )
