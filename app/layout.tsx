@@ -3,14 +3,14 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { AuthProvider } from "@/contexts/auth-context" // Import AuthProvider
-import { Toaster } from "@/components/ui/toaster" // Import Toaster
+import { AuthProvider } from "@/contexts/auth-context"
+import { Toaster } from "@/components/ui/toaster"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "XP Share",
-  description: "Teile deine außergewöhnlichen Erlebnisse",
+  title: "XP Share - Teile deine außergewöhnlichen Erlebnisse",
+  description: "Eine Plattform für mystische Erfahrungen, Träume und spirituelle Erlebnisse",
     generator: 'v0.dev'
 }
 
@@ -22,12 +22,10 @@ export default function RootLayout({
   return (
     <html lang="de" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
           <AuthProvider>
-            {" "}
-            {/* Wrap children with AuthProvider */}
             {children}
-            <Toaster /> {/* Add Toaster for notifications */}
+            <Toaster />
           </AuthProvider>
         </ThemeProvider>
       </body>
